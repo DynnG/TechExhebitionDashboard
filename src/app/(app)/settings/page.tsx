@@ -1,24 +1,13 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { Settings, Shield, User, Bot, Key, Save } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
+import { Settings, Shield, User } from "lucide-react";
 
 export default function SettingsPage() {
   const { data: session } = useSession();
   const userRole = (session?.user as any)?.role || "INTERN";
   const userName = session?.user?.name || "User";
   const userEmail = session?.user?.email || "user@lifewood.com";
-
-  const [aiProvider, setAiProvider] = useState("openai");
-  const [aiModel, setAiModel] = useState("gpt-4o-mini");
-  const [apiKey, setApiKey] = useState("sk-********************");
-
-  const handleSaveAI = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast.success("AI Scraper provider settings saved!");
-  };
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto font-manrope">
@@ -32,7 +21,7 @@ export default function SettingsPage() {
             </h2>
           </div>
           <p className="text-xs text-[#666666] mt-0.5">
-            Manage user roles, AI scraper integrations, and platform credentials
+            Manage user profiles, environment integrations, and platform credentials
           </p>
         </div>
       </div>
@@ -63,68 +52,6 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
-
-      {/* AI Provider Config */}
-      {(userRole === "ADMIN" || userRole === "SUPERVISOR") && (
-        <form onSubmit={handleSaveAI} className="bg-white p-6 rounded-xl border border-[#D8D2C8] shadow-xs space-y-5">
-          <div className="flex items-center gap-2 border-b border-[#D8D2C8] pb-3">
-            <Bot className="w-5 h-5 text-[#046241]" />
-            <h3 className="text-base font-bold text-[#133020]">AI Scraper & Classification Provider</h3>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-[#133020] uppercase tracking-wider mb-1">
-                AI Service Provider
-              </label>
-              <select
-                value={aiProvider}
-                onChange={(e) => setAiProvider(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-[#D8D2C8] text-xs text-[#133020] bg-white font-semibold"
-              >
-                <option value="openai">OpenAI API (Recommended)</option>
-                <option value="anthropic">Anthropic Claude API</option>
-                <option value="google">Google Gemini API</option>
-                <option value="local">Local Ollama Model</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-[#133020] uppercase tracking-wider mb-1">
-                Model Identifier
-              </label>
-              <input
-                type="text"
-                value={aiModel}
-                onChange={(e) => setAiModel(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-[#D8D2C8] text-xs text-[#133020] bg-white font-semibold"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-[#133020] uppercase tracking-wider mb-1">
-                API Key
-              </label>
-              <input
-                type="password"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-[#D8D2C8] text-xs text-[#133020] bg-white font-semibold"
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-end pt-2">
-            <button
-              type="submit"
-              className="flex items-center gap-1.5 px-5 py-2.5 bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] font-bold text-xs rounded-lg transition shadow-sm"
-            >
-              <Save className="w-4 h-4" />
-              <span>Save AI Configuration</span>
-            </button>
-          </div>
-        </form>
-      )}
 
       {/* Role Access Matrix */}
       <div className="bg-white p-6 rounded-xl border border-[#D8D2C8] shadow-xs space-y-4">

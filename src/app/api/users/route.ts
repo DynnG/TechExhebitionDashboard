@@ -2,14 +2,13 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import bcrypt from "bcryptjs";
 
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-    const userRole = (session?.user as any)?.role;
-
-    if (userRole !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized access: Admin permissions required." }, { status: 403 });
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized access." }, { status: 401 });
     }
 
     const users = await db.user.findMany({
@@ -45,16 +44,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing required fields (name, email, password)." }, { status: 400 });
     }
 
-    const existingUser = await db.user.findUnique({ where: { email } });
+    const normalizedEmail = email.toLowerCase().trim();
+    const existingUser = await db.user.findUnique({ where: { email: normalizedEmail } });
     if (existingUser) {
       return NextResponse.json({ error: "User with this email already exists." }, { status: 400 });
     }
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const newUser = await db.user.create({
       data: {
         name,
-        email,
-        passwordHash: password, // Note: plain string for seed compatibility or hashed
+        email: normalizedEmail,
+        passwordHash: hashedPassword,
         role: role || "INTERN",
       },
       select: {

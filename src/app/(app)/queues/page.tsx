@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ListTodo, CheckCircle, XCircle, Clock, ShieldAlert, ExternalLink, Loader2 } from "lucide-react";
+import { FitScoreBadge } from "@/components/events/fit-score-badge";
+import { PriorityIndicator } from "@/components/events/priority-indicator";
+import { ListTodo, CheckCircle, XCircle, Clock, ShieldAlert, ExternalLink, Loader2, Globe } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { useLocaleStore } from "@/stores/locale-store";
@@ -19,7 +21,7 @@ export default function QueuesPage() {
   const fetchQueues = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/queues");
+      const res = await fetch("/api/queues?status=PENDING");
       const data = await res.json();
       if (res.ok) {
         setItems(data.queueItems || []);
@@ -82,7 +84,7 @@ export default function QueuesPage() {
       </div>
 
       {/* Tabs Switcher */}
-      <div className="flex border-b border-[#D8D2C8] gap-4">
+      <div className="flex border-b border-[#D8D2C8] gap-6">
         <button
           onClick={() => setActiveTab("FOR_REVIEW")}
           className={`pb-3 text-xs font-bold transition border-b-2 flex items-center gap-2 ${
@@ -91,7 +93,7 @@ export default function QueuesPage() {
               : "border-transparent text-[#666666] hover:text-[#133020]"
           }`}
         >
-          <span>For Review (Ambiguous Fit / Pending Publish)</span>
+          <span>For Review (Scraped & Intern Submissions)</span>
           <span className="px-2 py-0.5 rounded-full bg-[#133020] text-white text-[10px]">
             {items.filter((i) => i.type === "FOR_REVIEW" && i.status === "PENDING").length}
           </span>
@@ -135,12 +137,12 @@ export default function QueuesPage() {
           {filteredItems.map((item) => (
             <div
               key={item.id}
-              className="bg-white p-5 rounded-xl border border-[#D8D2C8] shadow-xs flex items-start justify-between gap-4"
+              className="bg-white p-6 rounded-2xl border border-[#D8D2C8] shadow-xs flex flex-col md:flex-row items-start justify-between gap-6 hover:shadow-md transition"
             >
-              <div className="space-y-2 max-w-2xl">
-                <div className="flex items-center gap-2">
+              <div className="space-y-3 flex-1">
+                <div className="flex items-center gap-3 flex-wrap">
                   <span
-                    className={`px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                    className={`px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                       item.status === "PENDING"
                         ? "bg-[#FFB347] text-[#133020]"
                         : item.status === "APPROVED"
@@ -150,38 +152,67 @@ export default function QueuesPage() {
                   >
                     {item.status}
                   </span>
+
                   <span className="text-xs text-[#666666]">
-                    Submitted by: <strong>{item.submittedBy?.name || "Intern"}</strong> ({item.submittedBy?.role})
+                    Submitted by: <strong className="text-[#133020]">{item.submittedBy?.name || "Intern"}</strong> ({item.submittedBy?.role})
                   </span>
+
+                  {item.event?.fitScore && (
+                    <FitScoreBadge score={item.event.fitScore} />
+                  )}
+
+                  {item.event?.priorityLevel && (
+                    <PriorityIndicator priority={item.event.priorityLevel} />
+                  )}
                 </div>
 
-                <Link
-                  href={`/events/${item.event?.id}`}
-                  className="font-bold text-sm text-[#133020] hover:text-[#046241] flex items-center gap-1.5"
-                >
-                  <span>Event #{item.event?.eventNumber} — {item.event?.eventName}</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </Link>
+                <div className="space-y-1">
+                  <Link
+                    href={`/events/${item.event?.id}`}
+                    className="font-bold text-base text-[#133020] hover:text-[#046241] flex items-center gap-2"
+                  >
+                    <span>Record #{item.event?.eventNumber} — {item.event?.eventName}</span>
+                    <ExternalLink className="w-4 h-4 text-[#046241]" />
+                  </Link>
 
-                <p className="text-xs text-[#133020] bg-[#F9F7F7] p-3 rounded-lg border border-[#D8D2C8]">
-                  <strong>Reason for submission:</strong> {item.reason}
-                </p>
+                  <p className="text-xs text-[#666666]">
+                    📍 {item.event?.city}, {item.event?.country} • 🗓️ {item.event?.dates} • Organizer: {item.event?.organizer}
+                  </p>
+                </div>
+
+                <div className="text-xs text-[#133020] bg-[#F9F7F7] p-3.5 rounded-xl border border-[#D8D2C8] space-y-1">
+                  <span className="font-bold text-[#046241] block uppercase tracking-wider text-[10px]">
+                    Submission Rationale & Source:
+                  </span>
+                  <p>{item.reason}</p>
+                  {item.event?.officialWebsite && (
+                    <a
+                      href={item.event.officialWebsite}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 font-bold text-[#046241] hover:underline pt-1"
+                    >
+                      <Globe className="w-3.5 h-3.5" />
+                      <span>Inspect Official Scraped Site ↗</span>
+                    </a>
+                  )}
+                </div>
               </div>
 
-              {/* Actions for Supervisor / Admin */}
+              {/* Governance Actions for Supervisor / Admin */}
               {item.status === "PENDING" && (userRole === "ADMIN" || userRole === "SUPERVISOR") && (
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex flex-row md:flex-col items-center gap-2 shrink-0 self-center">
                   <button
                     onClick={() => handleAction(item.id, "APPROVE")}
-                    className="flex items-center gap-1 px-4 py-2 bg-[#046241] hover:bg-[#133020] text-white font-bold text-xs rounded-lg transition"
+                    className="flex items-center justify-center gap-1.5 px-5 py-2.5 bg-[#046241] hover:bg-[#133020] text-white font-bold text-xs rounded-xl transition shadow-sm w-full"
                   >
-                    <CheckCircle className="w-4 h-4" />
+                    <CheckCircle className="w-4 h-4 text-[#FFB347]" />
                     <span>Approve & Publish</span>
                   </button>
 
                   <button
                     onClick={() => handleAction(item.id, "REJECT")}
-                    className="flex items-center gap-1 px-3 py-2 bg-[#B91C1C]/10 text-[#B91C1C] hover:bg-[#B91C1C]/20 font-bold text-xs rounded-lg transition"
+                    className="flex items-center justify-center gap-1.5 px-4 py-2 bg-[#B91C1C]/10 text-[#B91C1C] hover:bg-[#B91C1C]/20 font-bold text-xs rounded-xl transition w-full"
                   >
                     <XCircle className="w-4 h-4" />
                     <span>Reject</span>

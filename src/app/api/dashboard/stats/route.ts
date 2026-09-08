@@ -7,12 +7,15 @@ export async function GET() {
       where: { status: "PUBLISHED" },
     });
 
-    const events2027 = await db.event.count({
+    // Dynamic Forward Pipeline Count (events starting from current year onward)
+    const now = new Date();
+    const currentYear = now.getFullYear();
+
+    const forwardPipelineCount = await db.event.count({
       where: {
         status: "PUBLISHED",
         startDate: {
-          gte: new Date("2027-01-01"),
-          lte: new Date("2027-12-31"),
+          gte: new Date(`${currentYear}-01-01`),
         },
       },
     });
@@ -43,21 +46,23 @@ export async function GET() {
     // Unique Regions
     const uniqueRegions = new Set(allEvents.map((e) => e.region)).size;
 
-    // Events by Month (2026 - 2027)
-    const monthCounts: Record<string, number> = {
-      "Apr 2026": 0,
-      "May 2026": 0,
-      "Jun 2026": 0,
-      "Jul 2026": 0,
-      "Aug 2026": 0,
-      "Sep 2026": 0,
-      "Oct 2026": 0,
-      "Nov 2026": 0,
-      "Dec 2026": 0,
-      "Jan 2027": 0,
-      "Feb 2027": 0,
-      "Mar 2027": 0,
-    };
+    // Dynamically generate rolling month counts (from current date onward dynamically)
+    const monthCounts: Record<string, number> = {};
+    const startDateCursor = new Date(currentYear, 0, 1);
+    
+    let maxDate = new Date(currentYear + 2, 11, 31);
+    allEvents.forEach((evt) => {
+      if (evt.startDate && new Date(evt.startDate) > maxDate) {
+        maxDate = new Date(evt.startDate);
+      }
+    });
+
+    const tempDate = new Date(startDateCursor);
+    while (tempDate <= maxDate) {
+      const key = tempDate.toLocaleString("en-US", { month: "short", year: "numeric" });
+      monthCounts[key] = 0;
+      tempDate.setMonth(tempDate.getMonth() + 1);
+    }
 
     allEvents.forEach((evt) => {
       if (evt.startDate) {
@@ -65,8 +70,6 @@ export async function GET() {
         const key = d.toLocaleString("en-US", { month: "short", year: "numeric" });
         if (key in monthCounts) {
           monthCounts[key]++;
-        } else {
-          monthCounts[key] = (monthCounts[key] || 0) + 1;
         }
       }
     });
@@ -120,13 +123,21 @@ export async function GET() {
       { name: "Fit 3 (Moderate Fit)", count: fitCounts.Fit3, color: "#708E7C" },
     ];
 
-    // Coverage gaps (months with < 5 events)
-    const gaps = eventsByMonth.filter((m) => m.count < 5);
+    // Coverage gaps (months with < 5 events, limited up to December 2027)
+    const dec2027End = new Date("2027-12-31T23:59:59");
+    const gaps = eventsByMonth.filter((m) => {
+      const parts = m.month.split(" ");
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const mIdx = monthNames.indexOf(parts[0]);
+      const year = parseInt(parts[1] || "2026", 10);
+      const mDate = new Date(year, mIdx, 1);
+      return m.count < 5 && mDate <= dec2027End;
+    });
 
     return NextResponse.json({
       stats: {
         totalEvents,
-        events2027,
+        events2027: forwardPipelineCount,
         avgFitScore,
         uniqueRegions,
       },

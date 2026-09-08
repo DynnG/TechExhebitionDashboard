@@ -5,7 +5,18 @@ import { db } from "@/lib/db";
 
 export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url);
+    const statusParam = searchParams.get("status") || "PENDING";
+
+    let statusFilter: any = { status: "PENDING" };
+    if (statusParam === "HISTORY") {
+      statusFilter = { status: { in: ["APPROVED", "REJECTED"] } };
+    } else if (statusParam === "ALL") {
+      statusFilter = {};
+    }
+
     const queueItems = await db.queueItem.findMany({
+      where: statusFilter,
       orderBy: { createdAt: "desc" },
       include: {
         event: true,

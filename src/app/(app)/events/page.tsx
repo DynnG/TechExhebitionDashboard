@@ -6,6 +6,7 @@ import { EventCard } from "@/components/events/event-card";
 import { EventTable } from "@/components/events/event-table";
 import { EventFilters } from "@/components/events/event-filters";
 import { EventForm } from "@/components/events/event-form";
+import { ModalPortal } from "@/components/shared/modal-portal";
 import { Skeleton } from "@/components/shared/skeleton";
 import { LayoutGrid, Table as TableIcon, Plus, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
@@ -234,36 +235,39 @@ export default function EventsPage() {
         </div>
       )}
       {/* Add Event Pop-up Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-[#F9F7F7] rounded-2xl max-w-4xl w-full border border-[#D8D2C8] shadow-2xl overflow-hidden my-8 max-h-[90vh] flex flex-col">
-            <div className="bg-[#133020] text-white p-4 px-6 flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-2">
-                <Plus className="w-5 h-5 text-[#FFB347]" />
-                <h3 className="font-bold text-base">
-                  {locale === "en" ? "Add New Exhibition Record" : "录入新展会记录"}
-                </h3>
-              </div>
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="p-1 rounded hover:bg-white/10 text-white/80 hover:text-white transition"
-              >
-                <X className="w-5 h-5" />
-              </button>
+      <ModalPortal isOpen={showAddModal} onClose={() => setShowAddModal(false)}>
+        <div className="bg-[#133020] text-white p-5 px-7 flex items-center justify-between shrink-0 shadow-sm border-b border-white/10">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-[#FFB347] text-[#133020] flex items-center justify-center font-bold shadow-xs">
+              <Plus className="w-5 h-5" />
             </div>
-
-            <div className="p-6 overflow-y-auto flex-1">
-              <EventForm
-                onSuccess={() => {
-                  setShowAddModal(false);
-                  fetchEvents();
-                }}
-                onCancel={() => setShowAddModal(false)}
-              />
+            <div>
+              <h3 className="font-bold text-base text-white">
+                {locale === "en" ? "Add New Exhibition Record" : "录入新展会记录"}
+              </h3>
+              <p className="text-[10px] text-[#F5EEDB]/70 uppercase tracking-wider">
+                Lifewood Intelligence Database
+              </p>
             </div>
           </div>
+          <button
+            onClick={() => setShowAddModal(false)}
+            className="p-2 rounded-xl bg-white/10 text-white/80 hover:text-white hover:bg-white/20 transform hover:rotate-90 transition duration-200"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
-      )}
+
+        <div className="p-6 sm:p-8 overflow-y-auto no-scrollbar">
+          <EventForm
+            onSuccess={() => {
+              setShowAddModal(false);
+              fetchEvents();
+            }}
+            onCancel={() => setShowAddModal(false)}
+          />
+        </div>
+      </ModalPortal>
     </div>
   );
 }

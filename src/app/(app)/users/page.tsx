@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import { ModalPortal } from "@/components/shared/modal-portal";
 import { Users, UserPlus, Shield, Trash2, Edit, Loader2, Check, X } from "lucide-react";
 import { toast } from "sonner";
 import { useLocaleStore } from "@/stores/locale-store";
@@ -123,18 +124,6 @@ export default function UsersPage() {
     }
   };
 
-  if (userRole !== "ADMIN") {
-    return (
-      <div className="py-20 text-center space-y-4">
-        <Shield className="w-16 h-16 text-[#B91C1C] mx-auto" />
-        <h3 className="text-xl font-bold text-[#133020]">Access Restricted</h3>
-        <p className="text-xs text-[#666666] max-w-md mx-auto">
-          User administration is restricted to System Administrators. Please contact your supervisor if you require access elevation.
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6 font-manrope">
       {/* Header Bar */}
@@ -151,13 +140,15 @@ export default function UsersPage() {
           </p>
         </div>
 
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-1.5 px-4 py-2 bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] font-bold text-xs rounded-lg transition shadow-sm"
-        >
-          <UserPlus className="w-4 h-4" />
-          <span>{locale === "en" ? "Create New User" : "创建新用户"}</span>
-        </button>
+        {userRole === "ADMIN" && (
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-1.5 px-4 py-2 bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] font-bold text-xs rounded-lg transition shadow-sm"
+          >
+            <UserPlus className="w-4 h-4" />
+            <span>{locale === "en" ? "Create New User" : "创建新用户"}</span>
+          </button>
+        )}
       </div>
 
       {/* Users Table */}
@@ -213,41 +204,45 @@ export default function UsersPage() {
                     {new Date(u.createdAt).toLocaleDateString()}
                   </td>
                   <td className="p-3.5 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      {editingUser?.id === u.id ? (
-                        <>
+                    {userRole === "ADMIN" ? (
+                      <div className="flex items-center justify-end gap-2">
+                        {editingUser?.id === u.id ? (
+                          <>
+                            <button
+                              onClick={() => handleUpdateRole(u.id, editingUser.role)}
+                              className="p-1 bg-[#046241] text-white rounded hover:bg-[#133020] transition"
+                              title="Save Role"
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => setEditingUser(null)}
+                              className="p-1 bg-gray-200 text-[#133020] rounded hover:bg-gray-300 transition"
+                              title="Cancel"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </>
+                        ) : (
                           <button
-                            onClick={() => handleUpdateRole(u.id, editingUser.role)}
-                            className="p-1 bg-[#046241] text-white rounded hover:bg-[#133020] transition"
-                            title="Save Role"
+                            onClick={() => setEditingUser(u)}
+                            className="p-1.5 text-[#046241] hover:bg-[#046241]/10 rounded-lg transition font-medium flex items-center gap-1"
                           >
-                            <Check className="w-3.5 h-3.5" />
+                            <Edit className="w-3.5 h-3.5" />
+                            <span>Role</span>
                           </button>
-                          <button
-                            onClick={() => setEditingUser(null)}
-                            className="p-1 bg-gray-200 text-[#133020] rounded hover:bg-gray-300 transition"
-                            title="Cancel"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        </>
-                      ) : (
-                        <button
-                          onClick={() => setEditingUser(u)}
-                          className="p-1.5 text-[#046241] hover:bg-[#046241]/10 rounded-lg transition font-medium flex items-center gap-1"
-                        >
-                          <Edit className="w-3.5 h-3.5" />
-                          <span>Role</span>
-                        </button>
-                      )}
+                        )}
 
-                      <button
-                        onClick={() => handleDeleteUser(u.id, u.name)}
-                        className="p-1.5 text-[#B91C1C] hover:bg-[#B91C1C]/10 rounded-lg transition font-medium flex items-center gap-1"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+                        <button
+                          onClick={() => handleDeleteUser(u.id, u.name)}
+                          className="p-1.5 text-[#B91C1C] hover:bg-[#B91C1C]/10 rounded-lg transition font-medium flex items-center gap-1"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-[11px] text-[#666666] italic">View Only</span>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -257,98 +252,96 @@ export default function UsersPage() {
       )}
 
       {/* Add User Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full border border-[#D8D2C8] shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-[#D8D2C8] pb-3">
-              <h3 className="text-base font-bold text-[#133020]">
-                {locale === "en" ? "Register New User Account" : "注册新用户账号"}
-              </h3>
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="text-[#666666] hover:text-[#133020] p-1"
-              >
-                <X className="w-4 h-4" />
-              </button>
+      <ModalPortal isOpen={showAddModal} onClose={() => setShowAddModal(false)}>
+        <div className="p-6 space-y-4">
+          <div className="flex items-center justify-between border-b border-[#D8D2C8] pb-3">
+            <h3 className="text-base font-bold text-[#133020]">
+              {locale === "en" ? "Register New User Account" : "注册新用户账号"}
+            </h3>
+            <button
+              onClick={() => setShowAddModal(false)}
+              className="text-[#666666] hover:text-[#133020] p-1"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <form onSubmit={handleCreateUser} className="space-y-3 text-xs">
+            <div>
+              <label className="block font-bold text-[#133020] uppercase tracking-wider mb-1">
+                Full Name
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. Alex Wong"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="w-full px-3 py-2 border border-[#D8D2C8] rounded-lg text-xs"
+              />
             </div>
 
-            <form onSubmit={handleCreateUser} className="space-y-3 text-xs">
-              <div>
-                <label className="block font-bold text-[#133020] uppercase tracking-wider mb-1">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Alex Wong"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-[#D8D2C8] rounded-lg text-xs"
-                />
-              </div>
+            <div>
+              <label className="block font-bold text-[#133020] uppercase tracking-wider mb-1">
+                Email Address
+              </label>
+              <input
+                type="email"
+                required
+                placeholder="alex@lifewood.com"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="w-full px-3 py-2 border border-[#D8D2C8] rounded-lg text-xs"
+              />
+            </div>
 
-              <div>
-                <label className="block font-bold text-[#133020] uppercase tracking-wider mb-1">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  required
-                  placeholder="alex@lifewood.com"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-3 py-2 border border-[#D8D2C8] rounded-lg text-xs"
-                />
-              </div>
+            <div>
+              <label className="block font-bold text-[#133020] uppercase tracking-wider mb-1">
+                Password
+              </label>
+              <input
+                type="password"
+                required
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className="w-full px-3 py-2 border border-[#D8D2C8] rounded-lg text-xs"
+              />
+            </div>
 
-              <div>
-                <label className="block font-bold text-[#133020] uppercase tracking-wider mb-1">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  required
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-3 py-2 border border-[#D8D2C8] rounded-lg text-xs"
-                />
-              </div>
+            <div>
+              <label className="block font-bold text-[#133020] uppercase tracking-wider mb-1">
+                System Role
+              </label>
+              <select
+                value={formData.role}
+                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                className="w-full px-3 py-2 border border-[#D8D2C8] rounded-lg text-xs bg-white font-semibold"
+              >
+                <option value="INTERN">INTERN (Submit & View Only)</option>
+                <option value="SUPERVISOR">SUPERVISOR (Approve & Manage)</option>
+                <option value="ADMIN">ADMIN (Full Control)</option>
+              </select>
+            </div>
 
-              <div>
-                <label className="block font-bold text-[#133020] uppercase tracking-wider mb-1">
-                  System Role
-                </label>
-                <select
-                  value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                  className="w-full px-3 py-2 border border-[#D8D2C8] rounded-lg text-xs bg-white font-semibold"
-                >
-                  <option value="INTERN">INTERN (Submit & View Only)</option>
-                  <option value="SUPERVISOR">SUPERVISOR (Approve & Manage)</option>
-                  <option value="ADMIN">ADMIN (Full Control)</option>
-                </select>
-              </div>
-
-              <div className="flex justify-end gap-2 pt-3">
-                <button
-                  type="button"
-                  onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 border border-[#D8D2C8] rounded-lg text-xs text-[#666666] font-semibold hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] font-bold text-xs rounded-lg transition"
-                >
-                  Create User
-                </button>
-              </div>
-            </form>
-          </div>
+            <div className="flex justify-end gap-2 pt-3">
+              <button
+                type="button"
+                onClick={() => setShowAddModal(false)}
+                className="px-4 py-2 border border-[#D8D2C8] rounded-lg text-xs text-[#666666] font-semibold hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] font-bold text-xs rounded-lg transition"
+              >
+                Create User
+              </button>
+            </div>
+          </form>
         </div>
-      )}
+      </ModalPortal>
     </div>
   );
 }

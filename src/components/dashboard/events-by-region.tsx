@@ -31,9 +31,9 @@ export function EventsByRegionChart({ data }: EventsByRegionProps) {
         Geographic distribution of strategic tech exhibitions
       </p>
 
-      <div className="h-64 w-full">
+      <div className="h-64 w-full [&_*:focus]:outline-none [&_path]:outline-none">
         <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
+          <PieChart style={{ outline: "none" }}>
             <Pie
               data={data}
               cx="50%"
@@ -43,11 +43,15 @@ export function EventsByRegionChart({ data }: EventsByRegionProps) {
               paddingAngle={4}
               dataKey="count"
               nameKey="region"
+              activeShape={false}
+              style={{ outline: "none" }}
             >
               {data.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={COLORS[index % COLORS.length]}
+                  style={{ outline: "none", cursor: "pointer" }}
+                  stroke="none"
                 />
               ))}
             </Pie>

@@ -10,6 +10,7 @@ import {
   Bot,
   FileSpreadsheet,
   ListTodo,
+  History,
   Users,
   Settings,
   LogOut,
@@ -54,15 +55,16 @@ export function Sidebar() {
       label: locale === "en" ? "Queues" : "审核队列",
       icon: ListTodo,
     },
-    ...(userRole === "ADMIN"
-      ? [
-          {
-            href: "/users",
-            label: locale === "en" ? "User Management" : "用户管理",
-            icon: Users,
-          },
-        ]
-      : []),
+    {
+      href: "/history",
+      label: locale === "en" ? "History" : "历史记录",
+      icon: History,
+    },
+    {
+      href: "/users",
+      label: locale === "en" ? "User Management" : "用户管理",
+      icon: Users,
+    },
     {
       href: "/settings",
       label: locale === "en" ? "Settings" : "设置",

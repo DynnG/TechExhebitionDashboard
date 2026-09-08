@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { REGIONS, BUSINESS_LINES, PARTICIPATION_OPTIONS } from "@/lib/constants/business-lines";
 import { DuplicateWarning } from "./duplicate-warning";
-import { Plus, Trash2, CheckCircle2, AlertCircle, Sparkles, Save, Info } from "lucide-react";
+import { Plus, Trash2, CheckCircle2, AlertCircle, Sparkles, Save, Info, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 
@@ -271,7 +271,7 @@ export function EventForm({ initialData, isEditing = false, onSuccess, onCancel 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 max-w-4xl mx-auto pb-12 font-manrope">
+    <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto font-manrope">
       {/* Duplicate Warning Bar */}
       <DuplicateWarning
         matches={duplicateMatches}
@@ -407,14 +407,15 @@ export function EventForm({ initialData, isEditing = false, onSuccess, onCancel 
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-xs font-bold text-[#133020] uppercase tracking-wider mb-1">
-              Full Street Address
+            <label className="block text-xs font-bold text-[#133020] uppercase tracking-wider mb-1 flex items-center gap-1">
+              <MapPin className="w-3.5 h-3.5 text-[#046241]" />
+              <span>Full Location & Map Address (Optional — Street, District, Postal Code)</span>
             </label>
             <textarea
               rows={2}
               value={formData.locationAddress}
               onChange={(e) => setFormData({ ...formData, locationAddress: e.target.value })}
-              placeholder="Street, District, Postal Code..."
+              placeholder="e.g. 1 Harbour Road, Wan Chai, Hong Kong (Used for Google Maps location links)"
               className="w-full px-3 py-2 rounded-lg border border-[#D8D2C8] bg-white text-xs text-[#133020] focus:border-[#046241]"
             />
           </div>

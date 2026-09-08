@@ -54,13 +54,24 @@ export async function POST(req: Request) {
         fitScore: body.fitScore || 4,
         keyNotes: "Scraped via AI Scraper Microservice",
         sourceLinks: JSON.stringify([body.officialWebsite || "https://"]),
-        status: "PUBLISHED",
+        status: "PENDING_REVIEW",
         source: "SCRAPED",
-        createdById: parseInt((session.user as any).id),
+        createdById: parseInt((session.user as any).id || "1", 10),
       },
     });
 
-    return NextResponse.json({ success: true, event: newEvent });
+    // Automatically transfer to Review Queue
+    await db.queueItem.create({
+      data: {
+        type: "FOR_REVIEW",
+        eventId: newEvent.id,
+        submittedById: parseInt((session.user as any).id || "1", 10),
+        reason: `Scraped website source: ${body.officialWebsite || "Extracted URL"} (AI Confidence: ${Math.round((body.confidence || 0.9) * 100)}%) - submitted for supervisor review & approval.`,
+        status: "PENDING",
+      },
+    });
+
+    return NextResponse.json({ success: true, event: newEvent, transferredToQueue: true });
   } catch (error: any) {
     return NextResponse.json(
       { error: "Failed to accept scraped event: " + error.message },

@@ -3,12 +3,22 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { runLiveWebCrawler } from "@/lib/scraper/live-crawler";
 import { liveScraperStore } from "@/lib/scraper/store";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userId = (session.user as any).id || "user";
+    const limitCheck = checkRateLimit(`scraper-run-${userId}`, 10, 60 * 60 * 1000); // 10 per hour
+    if (!limitCheck.success) {
+      return NextResponse.json(
+        { error: "Rate limit exceeded: Maximum 10 scraper triggers per hour." },
+        { status: 429 }
+      );
     }
 
     const body = await req.json();

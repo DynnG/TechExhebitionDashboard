@@ -161,9 +161,9 @@ export default function DashboardPage() {
         <CoverageGapsWidget gaps={gaps} />
       </div>
 
-      {/* Row 4 — Recently Added Events Table */}
-      <div className="bg-white p-6 rounded-xl border border-[#D8D2C8] shadow-xs">
-        <div className="flex items-center justify-between border-b border-[#D8D2C8] pb-4 mb-4">
+      {/* Row 4 — Recently Added Events Cards Grid */}
+      <div className="bg-white p-6 rounded-xl border border-[#D8D2C8] shadow-xs space-y-5">
+        <div className="flex items-center justify-between border-b border-[#D8D2C8] pb-4">
           <div>
             <h3 className="text-base font-bold text-[#133020]">
               {locale === "en" ? "Recently Added Exhibition Records" : "最新录入展会记录"}
@@ -182,29 +182,41 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        <div className="divide-y divide-[#D8D2C8]/60">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {recentEvents.map((evt: any) => (
-            <div
+            <Link
               key={evt.id}
-              className="py-3 flex items-center justify-between gap-4 hover:bg-[#F0F5F2] px-2 rounded-lg transition"
+              href={`/events/${evt.id}`}
+              className="bg-[#F9F7F7] p-5 rounded-2xl border border-[#D8D2C8] shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between group cursor-pointer"
             >
-              <div className="min-w-0">
-                <Link
-                  href={`/events/${evt.id}`}
-                  className="font-bold text-xs text-[#133020] hover:text-[#046241] truncate block"
-                >
-                  #{evt.eventNumber} — {evt.eventName}
-                </Link>
-                <span className="text-[11px] text-[#666666] block truncate">
-                  {evt.city}, {evt.country} • {evt.dates}
-                </span>
+              <div>
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#046241] bg-[#046241]/10 px-2.5 py-0.5 rounded-full">
+                    #{evt.eventNumber} • {evt.region}
+                  </span>
+                  <PriorityIndicator priority={evt.priorityLevel} />
+                </div>
+
+                <h4 className="font-bold text-sm text-[#133020] group-hover:text-[#046241] transition line-clamp-2 leading-snug mb-2">
+                  {evt.eventName}
+                </h4>
+
+                <p className="text-xs text-[#666666] mb-4 truncate">
+                  📍 {evt.city}, {evt.country} • 🗓️ {evt.dates}
+                </p>
               </div>
 
-              <div className="flex items-center gap-3 shrink-0">
-                <PriorityIndicator priority={evt.priorityLevel} />
-                <FitScoreBadge score={evt.fitScore} />
+              {/* ENLARGED HIGHLIGHTED FIT SCORE RATING BADGE */}
+              <div className="pt-3 border-t border-[#D8D2C8] flex items-center justify-between">
+                <span className="text-[11px] font-semibold text-[#666666]">Fit Score Rating</span>
+                <div className="flex items-center gap-2 bg-[#133020] text-white px-3 py-1.5 rounded-xl shadow-xs">
+                  <Award className="w-4 h-4 text-[#FFB347]" />
+                  <span className="text-sm font-black text-[#FFB347]">
+                    {evt.fitScore}.0 / 5.0
+                  </span>
+                </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

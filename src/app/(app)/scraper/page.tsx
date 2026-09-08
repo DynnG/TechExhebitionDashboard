@@ -81,7 +81,7 @@ export default function ScraperPage() {
       });
 
       if (res.ok) {
-        toast.success(`Accepted "${item.eventName}" into database!`);
+        toast.success(`"${item.eventName}" transferred to Review Queue for supervisor approval!`);
         setResults((prev) => prev.filter((r) => r.id !== item.id));
       } else {
         const data = await res.json();

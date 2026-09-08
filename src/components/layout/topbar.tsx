@@ -19,6 +19,7 @@ export function Topbar() {
     if (path.startsWith("/scraper")) return locale === "en" ? "AI Scraper Engine" : "AI 智能抓取引擎";
     if (path.startsWith("/reports")) return locale === "en" ? "Executive Reports" : "执行报告导出";
     if (path.startsWith("/queues")) return locale === "en" ? "Review Queues" : "审核与更正队列";
+    if (path.startsWith("/history")) return locale === "en" ? "Governance & Attendance History" : "审核与参展历史记录";
     if (path.startsWith("/users")) return locale === "en" ? "User Management" : "用户管理";
     if (path.startsWith("/settings")) return locale === "en" ? "System Settings" : "系统配置与权限";
     return locale === "en" ? "Dashboard" : "仪表板";
