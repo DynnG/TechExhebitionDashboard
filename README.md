@@ -1,7 +1,7 @@
-# ❖ Lifewood Tech Exhibition Intelligence Platform (Frontend Application)
+# ❖ Lifewood Tech Exhibition Intelligence Platform (Full-Stack Application)
 
 > **Version:** 1.0.0  
-> **Framework:** Next.js 14 (App Router) + TypeScript + Tailwind CSS  
+> **Platform:** Full-Stack Next.js 14 (App Router) + TypeScript + Tailwind CSS + Prisma ORM + NextAuth.js  
 > **Organization:** Lifewood Data Technology  
 
 ---
