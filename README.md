@@ -90,28 +90,23 @@ The platform equips executive decision-makers, business development leaders, and
 
 ## ⚡ Setup & Local Development Guide
 
-1. Navigate to the `frontend` directory:
-   ```bash
-   cd frontend
-   ```
-
-2. Install dependencies:
+1. Install dependencies:
    ```bash
    npm install
    ```
 
-3. Create your `.env.local` configuration file:
+2. Create your `.env.local` configuration file:
    ```bash
    cp .env.example .env.local
    ```
 
-4. Initialize the Prisma database and seed sample data:
+3. Initialize the Prisma database and seed sample data:
    ```bash
    npx prisma db push
    npx prisma db seed
    ```
 
-5. Launch the Next.js development server:
+4. Launch the Next.js development server:
    ```bash
    npm run dev
    ```
