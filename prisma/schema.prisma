@@ -1,0 +1,101 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ─── Core models ───
+
+model Event {
+  id                   Int       @id @default(autoincrement())
+  eventNumber          Int       @unique // Field 1: No.
+  region               String // Field 2
+  country              String // Field 3
+  city                 String // Field 4
+  eventName            String // Field 5
+  dates                String // Field 6 (formatted string)
+  startDate            DateTime? // Parsed for filtering/sorting
+  endDate              DateTime? // Parsed for filtering/sorting
+  venue                String // Field 7
+  locationAddress      String // Field 8
+  officialWebsite      String // Field 9
+  organizer            String // Field 10
+  eventCategory        String // Field 11
+  businessLines        String // Field 12 (JSON string array)
+  strategicFocus       String // Field 13
+  relevanceToLifewood  String // Field 14
+  targetAudience       String // Field 15
+  estimatedAttendees   String    @default("Not publicly disclosed") // Field 16
+  exhibitorOpportunity String    @default("Not publicly disclosed") // Field 17
+  boothCost            String    @default("Not publicly disclosed") // Field 18
+  registrationDeadline String    @default("Not publicly disclosed") // Field 19
+  contactEmail         String    @default("Not publicly disclosed") // Field 20
+  contactPerson        String    @default("Not publicly disclosed") // Field 21
+  socialMedia          String    @default("Not publicly disclosed") // Field 22
+  participationRec     String // Field 23
+  priorityLevel        String // Field 24
+  fitScore             Int // Field 25
+  keyNotes             String // Field 26
+  sourceLinks          String // Field 27 (JSON string array)
+
+  // Metadata
+  status      String   @default("PUBLISHED") // DRAFT, PENDING_REVIEW, PUBLISHED, ARCHIVED
+  source      String   @default("MANUAL") // MANUAL, SCRAPED, IMPORTED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdById Int?
+  createdBy   User?    @relation(fields: [createdById], references: [id])
+
+  // Relations
+  queueItems QueueItem[]
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         String   @default("INTERN") // ADMIN, SUPERVISOR, INTERN
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  events     Event[]
+  queueItems QueueItem[]
+}
+
+model QueueItem {
+  id            Int       @id @default(autoincrement())
+  type          String // FOR_REVIEW, CORRECTION
+  eventId       Int
+  event         Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  submittedById Int
+  submittedBy   User      @relation(fields: [submittedById], references: [id], onDelete: Cascade)
+  reason        String
+  status        String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  resolvedAt    DateTime?
+  createdAt     DateTime  @default(now())
+}
+
+model ScrapeRun {
+  id            Int       @id @default(autoincrement())
+  status        String // idle, running, completed, error
+  startedAt     DateTime
+  completedAt   DateTime?
+  eventsFound   Int       @default(0)
+  eventsAdded   Int       @default(0)
+  eventsSkipped Int       @default(0)
+  config        String // JSON string
+  errorLog      String?
+}
+
+model ScraperSchedule {
+  id        Int       @id @default(autoincrement())
+  enabled   Boolean   @default(false)
+  frequency String // daily, weekly, monthly
+  nextRunAt DateTime?
+  lastRunAt DateTime?
+  config    String // JSON string
+}
