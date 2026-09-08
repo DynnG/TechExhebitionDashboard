@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-paper: #F5EEDB;
+    --bg-white: #FFFFFF;
+    --bg-light: #F9F7F7;
+    --bg-dark: #133020;
+    --green-accent: #046241;
+    --accent: #FFB347;
+    --accent-soft: #FFC370;
+
+    --fit-5: #133020;
+    --fit-4: #046241;
+    --fit-3: #708E7C;
+
+    --priority-high: #C17110;
+    --priority-medium: #FFB347;
+    --priority-low: #9CAFA4;
+  }
+
+  body {
+    background-color: var(--bg-paper);
+    color: var(--bg-dark);
+    font-family: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(19, 48, 32, 0.05);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(19, 48, 32, 0.25);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(19, 48, 32, 0.45);
+}
+
+/* Hide scrollbars cleanly */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
