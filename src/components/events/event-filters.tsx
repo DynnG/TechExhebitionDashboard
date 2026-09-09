@@ -25,7 +25,7 @@ export function EventFilters({ filters, onChange, onClear }: EventFiltersProps) 
     filters.search !== "";
 
   return (
-    <div className="bg-[#F5EEDB] border-[1.5px] border-[#D8D2C8] rounded-[12px] p-4 sm:px-6 mb-6 shadow-[0_2px_16px_rgba(0,0,0,0.04)] font-manrope">
+    <div className="bg-white border border-[#E6E6E6] rounded-[12px] p-4 sm:px-6 mb-6 shadow-xs font-manrope">
       <div className="flex flex-wrap items-center justify-between gap-3">
         {/* Dropdown Filters with Section 6.9 Pill Chips */}
         <div className="flex flex-wrap items-center gap-2">
@@ -38,10 +38,10 @@ export function EventFilters({ filters, onChange, onClear }: EventFiltersProps) 
           <select
             value={filters.region}
             onChange={(e) => onChange("region", e.target.value)}
-            className={`px-3.5 py-1.5 rounded-full border-[1.5px] text-[12.5px] font-medium transition cursor-pointer focus:outline-none ${
+            className={`px-3.5 py-1.5 rounded-full border text-[12.5px] font-medium transition cursor-pointer focus:outline-none ${
               filters.region !== "ALL"
                 ? "bg-[#133020] border-[#133020] text-white"
-                : "bg-white border-[#D8D2C8] text-[#666666] hover:border-[#133020]/40"
+                : "bg-[#F9F7F7] border-[#E6E6E6] text-[#666666] hover:border-[#133020]/40"
             }`}
           >
             <option value="ALL">{locale === "en" ? "All regions" : "所有大区"}</option>
@@ -56,10 +56,10 @@ export function EventFilters({ filters, onChange, onClear }: EventFiltersProps) 
           <select
             value={filters.businessLine}
             onChange={(e) => onChange("businessLine", e.target.value)}
-            className={`px-3.5 py-1.5 rounded-full border-[1.5px] text-[12.5px] font-medium transition cursor-pointer focus:outline-none ${
+            className={`px-3.5 py-1.5 rounded-full border text-[12.5px] font-medium transition cursor-pointer focus:outline-none ${
               filters.businessLine !== "ALL"
                 ? "bg-[#133020] border-[#133020] text-white"
-                : "bg-white border-[#D8D2C8] text-[#666666] hover:border-[#133020]/40"
+                : "bg-[#F9F7F7] border-[#E6E6E6] text-[#666666] hover:border-[#133020]/40"
             }`}
           >
             <option value="ALL">{locale === "en" ? "All business lines" : "所有业务线"}</option>
@@ -74,10 +74,10 @@ export function EventFilters({ filters, onChange, onClear }: EventFiltersProps) 
           <select
             value={filters.fitScore}
             onChange={(e) => onChange("fitScore", e.target.value)}
-            className={`px-3.5 py-1.5 rounded-full border-[1.5px] text-[12.5px] font-medium transition cursor-pointer focus:outline-none ${
+            className={`px-3.5 py-1.5 rounded-full border text-[12.5px] font-medium transition cursor-pointer focus:outline-none ${
               filters.fitScore !== "ALL"
                 ? "bg-[#133020] border-[#133020] text-white"
-                : "bg-white border-[#D8D2C8] text-[#666666] hover:border-[#133020]/40"
+                : "bg-[#F9F7F7] border-[#E6E6E6] text-[#666666] hover:border-[#133020]/40"
             }`}
           >
             <option value="ALL">{locale === "en" ? "All fit scores" : "所有适配度"}</option>
@@ -90,10 +90,10 @@ export function EventFilters({ filters, onChange, onClear }: EventFiltersProps) 
           <select
             value={filters.priority}
             onChange={(e) => onChange("priority", e.target.value)}
-            className={`px-3.5 py-1.5 rounded-full border-[1.5px] text-[12.5px] font-medium transition cursor-pointer focus:outline-none ${
+            className={`px-3.5 py-1.5 rounded-full border text-[12.5px] font-medium transition cursor-pointer focus:outline-none ${
               filters.priority !== "ALL"
                 ? "bg-[#133020] border-[#133020] text-white"
-                : "bg-white border-[#D8D2C8] text-[#666666] hover:border-[#133020]/40"
+                : "bg-[#F9F7F7] border-[#E6E6E6] text-[#666666] hover:border-[#133020]/40"
             }`}
           >
             <option value="ALL">{locale === "en" ? "All priorities" : "所有优先级"}</option>
@@ -123,7 +123,7 @@ export function EventFilters({ filters, onChange, onClear }: EventFiltersProps) 
             value={filters.search}
             onChange={(e) => onChange("search", e.target.value)}
             placeholder={locale === "en" ? "Search event name, city, organizer..." : "搜索展会名称、城市、主办方..."}
-            className="w-full pl-9 pr-8 py-2 rounded-[8px] border-[1.5px] border-[#D8D2C8] bg-white text-xs text-[#133020] placeholder-[#999999] focus:outline-none focus:border-[#046241] focus:ring-2 focus:ring-[#046241]/15 transition"
+            className="w-full pl-9 pr-8 py-2 rounded-[8px] border border-[#E6E6E6] bg-white text-xs text-[#133020] placeholder-[#999999] focus:outline-none focus:border-[#046241] focus:ring-2 focus:ring-[#046241]/15 transition"
           />
           {filters.search && (
             <button

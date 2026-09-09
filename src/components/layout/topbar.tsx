@@ -28,17 +28,17 @@ export function Topbar() {
   const title = getPageTitle(pathname);
 
   return (
-    <header className="h-16 bg-[#F5EEDB] border-b border-[#D8D2C8] px-8 flex items-center justify-between sticky top-0 z-20 shadow-sm">
+    <header className="h-16 bg-[#F9F7F7] border-b border-[rgba(19,48,32,0.08)] shadow-[0_4px_20px_-2px_rgba(19,48,32,0.05)] px-8 flex items-center justify-between sticky top-0 z-20">
       {/* Page Title & Breadcrumbs */}
       <div>
         <div className="flex items-center gap-1.5 text-xs text-[#666666]">
           <Link href="/dashboard" className="hover:text-[#046241] transition font-medium">
-            Lifewood
+            Lifewood 活树
           </Link>
           <ChevronRight className="w-3 h-3 text-[#999999]" />
           <span className="text-[#133020] font-semibold">{title}</span>
         </div>
-        <h1 className="text-xl font-semibold text-[#133020] tracking-tight mt-0.5">
+        <h1 className="text-xl font-semibold text-[#133020] tracking-tight mt-0.5 font-manrope">
           {title}
         </h1>
       </div>

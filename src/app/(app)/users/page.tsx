@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { ModalPortal } from "@/components/shared/modal-portal";
-import { Users, UserPlus, Shield, Trash2, Edit, Loader2, Check, X } from "lucide-react";
+import { Users, UserPlus, Shield, Trash2, Edit, Loader2, Check, X, Key } from "lucide-react";
 import { toast } from "sonner";
 import { useLocaleStore } from "@/stores/locale-store";
 
@@ -18,6 +18,9 @@ export default function UsersPage() {
   // Modal states
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingUser, setEditingUser] = useState<any | null>(null);
+  const [resetPasswordUser, setResetPasswordUser] = useState<any | null>(null);
+  const [newPasswordValue, setNewPasswordValue] = useState("");
+  const [resetting, setResetting] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -113,6 +116,37 @@ export default function UsersPage() {
     }
   };
 
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetPasswordUser || !newPasswordValue) return;
+    if (newPasswordValue.length < 6) {
+      toast.error("Password must be at least 6 characters long");
+      return;
+    }
+
+    setResetting(true);
+    try {
+      const res = await fetch(`/api/users/${resetPasswordUser.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: newPasswordValue }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(`Password updated for "${resetPasswordUser.name}"!`);
+        setResetPasswordUser(null);
+        setNewPasswordValue("");
+      } else {
+        toast.error(data.error || "Failed to update password");
+      }
+    } catch {
+      toast.error("Error updating user password");
+    } finally {
+      setResetting(false);
+    }
+  };
+
   const getRoleBadgeStyle = (role: string) => {
     switch (role) {
       case "ADMIN":
@@ -160,7 +194,7 @@ export default function UsersPage() {
           </span>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-[#D8D2C8] shadow-xs overflow-hidden">
+        <div className="bg-white rounded-xl border border-[#E6E6E6] shadow-xs overflow-hidden">
           <table className="w-full text-xs text-left border-collapse">
             <thead>
               <tr className="bg-[#133020] text-white font-semibold uppercase tracking-wider text-[10px]">
@@ -171,7 +205,7 @@ export default function UsersPage() {
                 <th className="p-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#D8D2C8]">
+            <tbody className="divide-y divide-[#E6E6E6]">
               {users.map((u) => (
                 <tr key={u.id} className="hover:bg-[#F9F7F7] transition">
                   <td className="p-3.5 font-bold text-[#133020]">
@@ -188,7 +222,7 @@ export default function UsersPage() {
                       <select
                         value={editingUser.role}
                         onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
-                        className="px-2 py-1 border border-[#D8D2C8] rounded text-xs text-[#133020] bg-white font-bold"
+                        className="px-2 py-1 border border-[#E6E6E6] rounded text-xs text-[#133020] bg-white font-bold"
                       >
                         <option value="ADMIN">ADMIN</option>
                         <option value="SUPERVISOR">SUPERVISOR</option>
@@ -224,18 +258,34 @@ export default function UsersPage() {
                             </button>
                           </>
                         ) : (
-                          <button
-                            onClick={() => setEditingUser(u)}
-                            className="p-1.5 text-[#046241] hover:bg-[#046241]/10 rounded-lg transition font-medium flex items-center gap-1"
-                          >
-                            <Edit className="w-3.5 h-3.5" />
-                            <span>Role</span>
-                          </button>
+                          <>
+                            <button
+                              onClick={() => setEditingUser(u)}
+                              className="p-1.5 text-[#046241] hover:bg-[#046241]/10 rounded-lg transition font-medium flex items-center gap-1"
+                              title="Change Role"
+                            >
+                              <Edit className="w-3.5 h-3.5" />
+                              <span>Role</span>
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                setResetPasswordUser(u);
+                                setNewPasswordValue("");
+                              }}
+                              className="p-1.5 text-[#C17110] hover:bg-[#FFB347]/15 rounded-lg transition font-medium flex items-center gap-1"
+                              title="Change / Reset Password"
+                            >
+                              <Key className="w-3.5 h-3.5" />
+                              <span>Password</span>
+                            </button>
+                          </>
                         )}
 
                         <button
                           onClick={() => handleDeleteUser(u.id, u.name)}
                           className="p-1.5 text-[#B91C1C] hover:bg-[#B91C1C]/10 rounded-lg transition font-medium flex items-center gap-1"
+                          title="Delete User"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -328,7 +378,7 @@ export default function UsersPage() {
               <button
                 type="button"
                 onClick={() => setShowAddModal(false)}
-                className="px-4 py-2 border border-[#D8D2C8] rounded-lg text-xs text-[#666666] font-semibold hover:bg-gray-50"
+                className="px-4 py-2 border border-[#E6E6E6] rounded-lg text-xs text-[#666666] font-semibold hover:bg-gray-50"
               >
                 Cancel
               </button>
@@ -337,6 +387,62 @@ export default function UsersPage() {
                 className="px-4 py-2 bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] font-bold text-xs rounded-lg transition"
               >
                 Create User
+              </button>
+            </div>
+          </form>
+        </div>
+      </ModalPortal>
+
+      {/* Reset Password Modal */}
+      <ModalPortal isOpen={!!resetPasswordUser} onClose={() => setResetPasswordUser(null)}>
+        <div className="p-6 space-y-4">
+          <div className="flex items-center justify-between border-b border-[#E6E6E6] pb-3">
+            <div>
+              <h3 className="text-base font-bold text-[#133020]">
+                {locale === "en" ? "Reset / Change User Password" : "重置/修改用户密码"}
+              </h3>
+              <p className="text-xs text-[#666666] mt-0.5">
+                Set a new password for {resetPasswordUser?.name} ({resetPasswordUser?.email})
+              </p>
+            </div>
+            <button
+              onClick={() => setResetPasswordUser(null)}
+              className="text-[#666666] hover:text-[#133020] p-1"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <form onSubmit={handleResetPassword} className="space-y-4 text-xs">
+            <div>
+              <label className="block font-bold text-[#133020] uppercase tracking-wider mb-1.5">
+                New Password
+              </label>
+              <input
+                type="password"
+                required
+                minLength={6}
+                placeholder="Enter at least 6 characters"
+                value={newPasswordValue}
+                onChange={(e) => setNewPasswordValue(e.target.value)}
+                className="w-full px-3.5 py-2.5 border border-[#E6E6E6] rounded-lg text-xs bg-white text-[#133020] focus:outline-none focus:border-[#046241]"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setResetPasswordUser(null)}
+                className="px-4 py-2 border border-[#E6E6E6] rounded-lg text-xs text-[#666666] font-semibold hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={resetting}
+                className="px-4 py-2 bg-[#133020] hover:bg-[#133020]/90 text-white hover:text-[#FFB347] font-bold text-xs rounded-lg transition disabled:opacity-50"
+              >
+                {resetting ? "Updating..." : "Set New Password"}
               </button>
             </div>
           </form>

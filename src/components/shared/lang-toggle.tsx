@@ -1,10 +1,22 @@
 "use client";
 
+import { useEffect } from "react";
 import { useLocaleStore } from "@/stores/locale-store";
 import { Globe } from "lucide-react";
 
 export function LangToggle() {
   const { locale, toggleLocale } = useLocaleStore();
+
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.documentElement.lang = locale;
+      if (locale === "zh") {
+        document.documentElement.classList.add("font-zh");
+      } else {
+        document.documentElement.classList.remove("font-zh");
+      }
+    }
+  }, [locale]);
 
   return (
     <button
