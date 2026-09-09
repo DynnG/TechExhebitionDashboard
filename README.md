@@ -95,9 +95,14 @@ The platform equips executive decision-makers, business development leaders, and
    npm install
    ```
 
-2. Create your `.env.local` configuration file:
+2. Create and configure your environment file (`.env` or `.env.local`):
    ```bash
-   cp .env.example .env.local
+   cp .env.example .env
+   ```
+   *Ensure `NEXTAUTH_SECRET` and `NEXTAUTH_URL` are present in your `.env` file to avoid NextAuth `Configuration 500` errors:*
+   ```env
+   NEXTAUTH_SECRET="lifewood-secret-key-super-secure-2026"
+   NEXTAUTH_URL="http://localhost:3000"
    ```
 
 3. Initialize the Prisma database and seed sample data:
@@ -110,7 +115,19 @@ The platform equips executive decision-makers, business development leaders, and
    ```bash
    npm run dev
    ```
-   *The application will be available at `http://localhost:3000`.*
+   *The application will be available at `http://localhost:3000`.*  
+   *(Note: If you just created or updated your `.env` file, make sure to stop (`Ctrl + C`) and restart `npm run dev` so Next.js reloads the environment variables).*
+
+5. Launch the Scraper / Crawler Engine (in a separate terminal):
+   ```bash
+   npm run crawler
+   ```
+   *Runs the background crawling microservice engine on port 5000 (`http://localhost:5000`).*
+
+6. Build for production:
+   ```bash
+   npm run build
+   ```
 
 ---
 
@@ -129,6 +146,7 @@ The seed script (`prisma/seed.ts`) populates default test accounts for each syst
 ## 🔒 Security & Rate Limiting
 
 * **Password Hashing:** All user passwords are encrypted using `bcrypt.hash()` with a salt factor of 10.
+* **NextAuth & JWT Encryption:** NextAuth handles JWT session tokens signed using `NEXTAUTH_SECRET` (configured in `.env` and `src/lib/auth.ts`).
 * **Session Verification:** API endpoints enforce JWT session role validation (`ADMIN`, `SUPERVISOR`, `INTERN`).
 * **Rate Limiting:** Scraper trigger requests are rate-limited (`/api/scraper/run`, max 10 requests/hour per user) via `lib/rate-limit.ts`.
 

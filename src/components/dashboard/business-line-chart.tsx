@@ -18,7 +18,7 @@ interface BusinessLineChartProps {
 
 const LOB_COLORS: Record<string, string> = {
   "Global AI Data": "#046241",
-  AIGC: "#133020",
+  AIGC: "#FFB347",
   "Global Scanning + Indexing": "#C17110",
   "Autonomous Driving": "#034E34",
   "AEO/GEO": "#E89131",
@@ -49,12 +49,12 @@ export function BusinessLineChart({ data }: BusinessLineChartProps) {
   }, [data]);
 
   return (
-    <div className="bg-white p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] shadow-[0_2px_16px_rgba(0,0,0,0.05)] font-manrope">
-      <div className="border-b border-[#D8D2C8] pb-3 mb-4">
-        <h3 className="text-[14px] font-semibold text-[#133020]">
+    <div className="bg-white dark:bg-[#133020] p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] dark:border-[#1E4830] shadow-sm font-manrope transition-colors">
+      <div className="border-b border-[#D8D2C8] dark:border-[#1E4830] pb-3 mb-4">
+        <h3 className="text-[14px] font-semibold text-emerald-950 dark:text-white">
           Business line distribution
         </h3>
-        <p className="text-[11px] text-[#666666]">
+        <p className="text-[11px] text-emerald-800/70 dark:text-slate-400">
           Exhibitions mapped across Lifewood's 6 core business lines
         </p>
       </div>
@@ -66,11 +66,11 @@ export function BusinessLineChart({ data }: BusinessLineChartProps) {
             data={chartData}
             margin={{ top: 5, right: 35, left: 10, bottom: 5 }}
           >
-            <XAxis type="number" tick={{ fontSize: 10, fill: "#133020", fontWeight: 500 }} allowDecimals={false} />
+            <XAxis type="number" tick={{ fontSize: 10, fill: "currentColor", fontWeight: 500 }} allowDecimals={false} />
             <YAxis
               dataKey="name"
               type="category"
-              tick={{ fontSize: 10, fill: "#133020", fontWeight: 500 }}
+              tick={{ fontSize: 10, fill: "currentColor", fontWeight: 500 }}
               width={160}
               tickLine={false}
               axisLine={{ stroke: "#D8D2C8" }}
@@ -83,7 +83,7 @@ export function BusinessLineChart({ data }: BusinessLineChartProps) {
                   fill={LOB_COLORS[entry.name] || "#046241"}
                 />
               ))}
-              <LabelList dataKey="exhibitions" position="right" style={{ fontSize: 11, fontWeight: 700, fill: "#133020" }} />
+              <LabelList dataKey="exhibitions" position="right" style={{ fontSize: 11, fontWeight: 700, fill: "currentColor" }} />
             </Bar>
           </BarChart>
         </ResponsiveContainer>

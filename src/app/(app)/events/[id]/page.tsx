@@ -181,7 +181,7 @@ export default function EventDetailPage() {
             </div>
           </div>
 
-          <h1 className="text-[28px] font-semibold text-[#133020] tracking-tight leading-tight mb-3">
+          <h1 className="text-[28px] font-bold text-emerald-950 dark:text-white tracking-tight leading-tight mb-3">
             {event.eventName}
           </h1>
 
@@ -192,12 +192,12 @@ export default function EventDetailPage() {
           </div>
 
           {/* Logistics & Official Website CTA */}
-          <div className="flex items-center justify-between flex-wrap gap-4 pt-4 border-t border-[#D8D2C8]">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs text-[#133020]">
+          <div className="flex items-center justify-between flex-wrap gap-4 pt-4 border-t border-[#D8D2C8] dark:border-[#1E4830]">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs text-emerald-950 dark:text-slate-100">
               <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-[#046241] shrink-0" />
+                <Calendar className="w-4 h-4 text-emerald-600 dark:text-amber-400 shrink-0" />
                 <div>
-                  <span className="text-[10px] text-[#666666] block uppercase font-medium">
+                  <span className="text-[10px] text-emerald-800/70 dark:text-slate-400 block uppercase font-medium">
                     Dates
                   </span>
                   <span className="font-semibold text-sm">{event.dates}</span>
@@ -205,9 +205,9 @@ export default function EventDetailPage() {
               </div>
 
               <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-[#046241] shrink-0" />
+                <MapPin className="w-4 h-4 text-emerald-600 dark:text-amber-400 shrink-0" />
                 <div>
-                  <span className="text-[10px] text-[#666666] block uppercase font-medium">
+                  <span className="text-[10px] text-emerald-800/70 dark:text-slate-400 block uppercase font-medium">
                     Location
                   </span>
                   <span className="font-semibold text-sm">
@@ -217,9 +217,9 @@ export default function EventDetailPage() {
               </div>
 
               <div className="flex items-center gap-2">
-                <Building className="w-4 h-4 text-[#046241] shrink-0" />
+                <Building className="w-4 h-4 text-emerald-600 dark:text-amber-400 shrink-0" />
                 <div>
-                  <span className="text-[10px] text-[#666666] block uppercase font-medium">
+                  <span className="text-[10px] text-emerald-800/70 dark:text-slate-400 block uppercase font-medium">
                     Venue
                   </span>
                   <span className="font-semibold text-sm truncate block max-w-[200px]">

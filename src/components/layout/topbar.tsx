@@ -28,18 +28,23 @@ export function Topbar() {
   const title = getPageTitle(pathname);
 
   return (
-    <header className="h-14 bg-[#F5EEDB] border-b border-[#D8D2C8] px-8 flex items-center justify-between sticky top-0 z-20 shadow-xs">
-      {/* Breadcrumbs */}
-      <nav aria-label="Breadcrumbs" className="flex items-center gap-1.5 text-xs text-[#666666]">
-        <Link href="/dashboard" className="hover:text-[#046241] transition font-medium">
-          Lifewood 活树
-        </Link>
-        <ChevronRight className="w-3 h-3 text-[#999999]" />
-        <span className="text-[#133020] font-semibold">{title}</span>
-      </nav>
+    <header className="h-16 bg-[#F5EEDB] border-b border-[#D8D2C8] px-6 lg:px-8 flex items-center justify-between sticky top-0 z-20 shadow-xs font-manrope">
+      {/* Page Title & Breadcrumbs */}
+      <div>
+        <div className="flex items-center gap-1.5 text-xs text-[#666666]">
+          <Link href="/dashboard" className="hover:text-[#046241] transition font-medium">
+            Lifewood 活树
+          </Link>
+          <ChevronRight className="w-3 h-3 text-[#999999]" />
+          <span className="text-[#133020] font-semibold">{title}</span>
+        </div>
+        <h1 className="text-xl font-bold text-[#133020] tracking-tight mt-0.5 font-manrope">
+          {title}
+        </h1>
+      </div>
 
-      {/* Right Actions */}
-      <div className="flex items-center gap-4">
+      {/* Right Actions: Improved Language Toggle */}
+      <div className="flex items-center gap-3">
         <LangToggle />
       </div>
     </header>

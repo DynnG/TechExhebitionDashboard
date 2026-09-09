@@ -45,6 +45,43 @@
   }
 }
 
+/* Bulletproof Saffron Gold Yellow Buttons & Badges: Always enforce dark (#133020) text and SVG icons, on normal and hover */
+.bg-\[\#FFB347\],
+.bg-\[\#FFC370\],
+.bg-amber-400,
+.bg-amber-300,
+.bg-amber-500,
+button.bg-\[\#FFB347\],
+a.bg-\[\#FFB347\],
+button.bg-amber-400,
+a.bg-amber-400 {
+  color: #133020 !important;
+}
+
+.bg-\[\#FFB347\] *,
+.bg-\[\#FFC370\] *,
+.bg-amber-400 *,
+.bg-amber-300 *,
+.bg-amber-500 * {
+  color: #133020 !important;
+  stroke: #133020 !important;
+}
+
+.bg-\[\#FFB347\]:hover,
+.bg-\[\#FFC370\]:hover,
+.bg-amber-400:hover,
+.bg-amber-300:hover {
+  color: #133020 !important;
+}
+
+.bg-\[\#FFB347\]:hover *,
+.bg-\[\#FFC370\]:hover *,
+.bg-amber-400:hover *,
+.bg-amber-300:hover * {
+  color: #133020 !important;
+  stroke: #133020 !important;
+}
+
 /* Custom scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
