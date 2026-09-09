@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
+import Image from "next/image";
 import {
   LayoutDashboard,
   CalendarDays,
@@ -85,7 +86,7 @@ export function Sidebar() {
 
   return (
     <aside
-      className={`bg-[#133020] text-white flex flex-col justify-between transition-all duration-200 ease-in-out relative z-30 h-screen sticky top-0 shadow-xl ${
+      className={`bg-white text-[#133020] flex flex-col justify-between transition-all duration-200 ease-in-out relative z-30 h-screen sticky top-0 shadow-xl border-r border-[#133020]/10 ${
         collapsed ? "w-20" : "w-64"
       }`}
     >
@@ -104,22 +105,22 @@ export function Sidebar() {
 
       {/* Top Header & Logo */}
       <div>
-        <div className="p-5 flex items-center gap-3 border-b border-white/10">
-          <div className="w-9 h-9 bg-[#FFB347] rounded-lg flex items-center justify-center shrink-0 shadow-inner transform rotate-45">
-            <span className="transform -rotate-45 font-black text-lg text-[#133020]">
-              ❖
-            </span>
-          </div>
-          {!collapsed && (
-            <div>
-              <h1 className="font-semibold text-lg text-white tracking-tight leading-tight">
-                Lifewood
-              </h1>
-              <p className="text-[10px] text-[#F5EEDB]/60 uppercase tracking-wider font-medium">
+        <div className="p-2.5 flex flex-col items-start gap-2 border-b border-[#133020]/10">
+        <div className="relative w-full h-5">
+        <Image
+            src="/logo.png"
+            alt="Lifewood logo"
+            fill
+            className="object-contain object-left"
+        />
+        </div>
+        {!collapsed && (
+        <div className="text-center">
+            <p className="text-[10px] text-[#133020]/60 uppercase tracking-wider font-bold">
                 Exhibition Intelligence
-              </p>
-            </div>
-          )}
+            </p>
+        </div>
+        )}
         </div>
 
         {/* Navigation Items */}
@@ -136,14 +137,14 @@ export function Sidebar() {
                 href={item.href}
                 className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-medium transition-all duration-150 relative ${
                   isActive
-                    ? "bg-[#FFB347]/15 text-white border-l-4 border-[#FFB347] pl-2.5 font-semibold"
-                    : "text-[#F5EEDB]/65 hover:bg-white/10 hover:text-white"
+                    ? "bg-[#FFB347]/15 text-[#133020] border-l-4 border-[#FFB347] pl-2.5 font-semibold"
+                    : "text-[#133020]/65 hover:bg-[#133020]/5 hover:text-[#133020]"
                 }`}
                 title={collapsed ? item.label : undefined}
               >
                 <Icon
                   className={`w-5 h-5 shrink-0 ${
-                    isActive ? "text-[#FFB347]" : "text-[#F5EEDB]/65"
+                    isActive ? "text-[#FFB347]" : "text-[#133020]/65"
                   }`}
                 />
                 {!collapsed && <span>{item.label}</span>}
@@ -154,15 +155,15 @@ export function Sidebar() {
       </div>
 
       {/* Footer / User Profile & Role */}
-      <div className="p-4 border-t border-white/10 bg-black/10">
+      <div className="p-4 border-t border-[#133020]/10 bg-[#133020]/5">
         {!collapsed ? (
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5 overflow-hidden">
-              <div className="w-8 h-8 rounded-full bg-[#046241] flex items-center justify-center text-xs font-bold text-white shrink-0 border border-white/20">
+              <div className="w-8 h-8 rounded-full bg-[#046241] flex items-center justify-center text-xs font-bold text-white shrink-0 border border-[#133020]/20">
                 {userName.charAt(0).toUpperCase()}
               </div>
               <div className="truncate">
-                <p className="text-xs font-semibold text-white truncate">
+                <p className="text-xs font-semibold text-[#133020] truncate">
                   {userName}
                 </p>
                 <span
@@ -177,7 +178,7 @@ export function Sidebar() {
             <button
               onClick={() => signOut({ callbackUrl: "/login" })}
               title="Sign Out"
-              className="p-2 text-[#F5EEDB]/60 hover:text-[#FFB347] hover:bg-white/10 rounded-lg transition"
+              className="p-2 text-[#133020]/60 hover:text-[#FFB347] hover:bg-[#133020]/5 rounded-lg transition"
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -186,7 +187,7 @@ export function Sidebar() {
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
             title={`Sign Out (${userName})`}
-            className="w-full flex justify-center p-2 text-[#F5EEDB]/60 hover:text-[#FFB347] hover:bg-white/10 rounded-lg transition"
+            className="w-full flex justify-center p-2 text-[#133020]/60 hover:text-[#FFB347] hover:bg-[#133020]/5 rounded-lg transition"
           >
             <LogOut className="w-5 h-5" />
           </button>
