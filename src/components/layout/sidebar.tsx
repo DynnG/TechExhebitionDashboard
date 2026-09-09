@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
   CalendarDays,
@@ -42,7 +43,7 @@ export function Sidebar() {
     },
     {
       href: "/scraper",
-      label: locale === "en" ? "Scraper" : "数据抓取器",
+      label: locale === "en" ? "Scraper Engine" : "数据抓取器",
       icon: Bot,
     },
     {
@@ -84,15 +85,15 @@ export function Sidebar() {
   };
 
   return (
-    <aside
-      className={`bg-white text-[#133020] flex flex-col justify-between transition-all duration-200 ease-in-out relative z-30 h-screen sticky top-0 shadow-xl border-r border-[#133020]/10 ${
-        collapsed ? "w-20" : "w-64"
-      }`}
+    <motion.aside
+      animate={{ width: collapsed ? 80 : 256 }}
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      className="bg-white text-[#133020] flex flex-col justify-between relative z-30 h-screen sticky top-0 shadow-xl border-r border-[#133020]/10 font-manrope"
     >
       {/* Collapse Toggle Button */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-7 w-6 h-6 bg-[#FFB347] text-[#133020] rounded-full flex items-center justify-center shadow-md hover:bg-[#FFC370] transition z-40"
+        className="absolute -right-3 top-7 w-6 h-6 bg-[#FFB347] text-[#133020] rounded-full flex items-center justify-center shadow-md hover:bg-[#FFC370] hover:scale-110 transition z-40"
         title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
         {collapsed ? (
@@ -104,8 +105,8 @@ export function Sidebar() {
 
       {/* Top Header & Logo */}
       <div>
-        <div className="p-1.5 flex flex-col items-start gap-2 border-b border-[#133020]/10">
-          <div className="relative w-full h-5">
+        <div className="p-3 flex flex-col items-start gap-2 border-b border-[#133020]/10">
+          <div className="relative w-full h-7">
             <Image
               src="/logo.png"
               alt="Lifewood logo"
@@ -113,13 +114,19 @@ export function Sidebar() {
               className="object-contain object-left"
             />
           </div>
-          {!collapsed && (
-            <div>
-              <p className="text-[10px] text-[#133020]/60 uppercase tracking-wider font-bold">
-                {locale === "en" ? "Exhibition Intelligence" : "全球展会智能平台"}
-              </p>
-            </div>
-          )}
+          <AnimatePresence>
+            {!collapsed && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <p className="text-[10px] text-[#133020]/60 uppercase tracking-widest font-bold">
+                  {locale === "en" ? "Exhibition Intelligence" : "全球展会智能平台"}
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Navigation Items */}
@@ -134,19 +141,28 @@ export function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-medium transition-all duration-150 relative ${
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all duration-200 relative group overflow-hidden ${
                   isActive
-                    ? "bg-[#FFB347]/15 text-[#133020] border-l-4 border-[#FFB347] pl-2.5 font-semibold"
+                    ? "bg-[#FFB347]/15 text-[#133020] font-bold"
                     : "text-[#133020]/65 hover:bg-[#133020]/5 hover:text-[#133020]"
                 }`}
                 title={collapsed ? item.label : undefined}
               >
+                {isActive && (
+                  <motion.div
+                    layoutId="sidebar-active-indicator"
+                    className="absolute left-0 top-1 bottom-1 w-1 bg-[#FFB347] rounded-r-full"
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  />
+                )}
                 <Icon
-                  className={`w-5 h-5 shrink-0 ${
+                  className={`w-5 h-5 shrink-0 transition-transform group-hover:scale-110 ${
                     isActive ? "text-[#FFB347]" : "text-[#133020]/65"
                   }`}
                 />
-                {!collapsed && <span>{item.label}</span>}
+                {!collapsed && (
+                  <span className="truncate tracking-wide">{item.label}</span>
+                )}
               </Link>
             );
           })}
@@ -154,11 +170,11 @@ export function Sidebar() {
       </div>
 
       {/* Footer / User Profile & Role */}
-      <div className="p-4 border-t border-[#133020]/10 bg-[#133020]/5">
+      <div className="p-3.5 border-t border-[#133020]/10 bg-[#133020]/5">
         {!collapsed ? (
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5 overflow-hidden">
-              <div className="w-8 h-8 rounded-full bg-[#046241] flex items-center justify-center text-xs font-bold text-white shrink-0 border border-[#133020]/20">
+              <div className="w-8 h-8 rounded-full bg-[#046241] flex items-center justify-center text-xs font-bold text-white shrink-0 shadow-sm border border-[#133020]/20">
                 {userName.charAt(0).toUpperCase()}
               </div>
               <div className="truncate">
@@ -192,6 +208,6 @@ export function Sidebar() {
           </button>
         )}
       </div>
-    </aside>
+    </motion.aside>
   );
 }

@@ -1,5 +1,7 @@
 import { EventForm } from "@/components/events/event-form";
 
+export const dynamic = "force-dynamic";
+
 export default function NewEventPage() {
   return (
     <div className="space-y-6">

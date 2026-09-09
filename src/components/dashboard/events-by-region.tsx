@@ -6,7 +6,7 @@ interface EventsByRegionProps {
   data: { region: string; count: number }[];
 }
 
-const COLORS = ["#133020", "#046241", "#C17110", "#E89131", "#417256", "#708E7C", "#9CAFA4"];
+const COLORS = ["#FFB347", "#046241", "#C17110", "#E89131", "#417256", "#708E7C", "#FFC370"];
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
@@ -23,12 +23,12 @@ const CustomTooltip = ({ active, payload }: any) => {
 
 export function EventsByRegionChart({ data }: EventsByRegionProps) {
   return (
-    <div className="bg-white p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] shadow-[0_2px_16px_rgba(0,0,0,0.05)] font-manrope">
-      <div className="border-b border-[#D8D2C8] pb-3 mb-4">
-        <h3 className="text-[14px] font-semibold text-[#133020]">
+    <div className="bg-white dark:bg-[#133020] p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] dark:border-[#1E4830] shadow-sm font-manrope transition-colors">
+      <div className="border-b border-[#D8D2C8] dark:border-[#1E4830] pb-3 mb-4">
+        <h3 className="text-[14px] font-semibold text-emerald-950 dark:text-white">
           Events by region
         </h3>
-        <p className="text-[11px] text-[#666666]">
+        <p className="text-[11px] text-emerald-800/70 dark:text-slate-400">
           Geographic distribution of strategic tech exhibitions
         </p>
       </div>
@@ -62,7 +62,7 @@ export function EventsByRegionChart({ data }: EventsByRegionProps) {
               verticalAlign="bottom"
               height={36}
               iconType="circle"
-              wrapperStyle={{ fontSize: "11px", color: "#133020" }}
+              wrapperStyle={{ fontSize: "11px" }}
             />
           </PieChart>
         </ResponsiveContainer>
