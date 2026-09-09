@@ -5,13 +5,40 @@ import { REGIONS, BUSINESS_LINES } from "@/lib/constants/business-lines";
 import { Bot, Play, Check, X, RefreshCw, Sparkles, Sliders, Calendar, ShieldCheck, Edit, Search } from "lucide-react";
 import { toast } from "sonner";
 import { useLocaleStore } from "@/stores/locale-store";
-import EventScraperDashboard from "@/components/events/EventScraperDashboard";
+import dynamic from "next/dynamic";
+import { Skeleton } from "@/components/shared/skeleton";
+
+const EventScraperDashboard = dynamic(
+  () => import("@/components/events/EventScraperDashboard"),
+  {
+    loading: () => (
+      <div className="p-6 font-manrope space-y-5 bg-white">
+        <div className="flex items-start justify-between flex-wrap gap-4 border-b border-[#D8D2C8] pb-4">
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-64 rounded" />
+            <Skeleton className="h-3.5 w-96 rounded" />
+          </div>
+          <Skeleton className="h-7 w-32 rounded-full" />
+        </div>
+        <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
+          <Skeleton className="h-10 flex-1 rounded-[8px]" />
+          <Skeleton className="h-10 w-44 rounded-[8px]" />
+        </div>
+        <div className="border border-[#D8D2C8] rounded-[10px] p-6 space-y-4">
+          {[...Array(5)].map((_, i) => (
+            <Skeleton key={i} className="h-12 w-full rounded-md" />
+          ))}
+        </div>
+      </div>
+    ),
+  }
+);
 
 export default function ScraperPage() {
   const [engineMode, setEngineMode] = useState<"apify_gemini" | "standard">("apify_gemini");
   const [running, setRunning] = useState(false);
   const [results, setResults] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const { locale } = useLocaleStore();
 
   const [config, setConfig] = useState({
@@ -32,8 +59,10 @@ export default function ScraperPage() {
   });
 
   useEffect(() => {
-    fetchResults();
-  }, []);
+    if (engineMode === "standard" && results.length === 0) {
+      fetchResults();
+    }
+  }, [engineMode]);
 
   const fetchResults = async () => {
     setLoading(true);
