@@ -34,23 +34,166 @@ const ai = new GoogleGenAI({ apiKey: geminiApiKey });
 // ==========================================
 const CACHE_FILE = path.join(process.cwd(), 'data', 'live_crawled_events.json');
 
-function saveToCache(events) {
+// ==========================================
+// Deduplication & Similarity Helpers
+// ==========================================
+const AGGREGATOR_DOMAINS = [
+  'eventbrite.com',
+  '10times.com',
+  'gevme.com',
+  'meetup.com',
+  'linkedin.com',
+  'facebook.com',
+  'techinasia.com',
+  'google.com',
+];
+
+function normalizeDomain(urlStr) {
+  if (!urlStr) return '';
   try {
-    const dir = path.dirname(CACHE_FILE);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(CACHE_FILE, JSON.stringify(events, null, 2), 'utf-8');
-  } catch (err) {
-    console.warn('[Cache] Could not write cache file:', err.message);
+    const url = new URL(urlStr.startsWith('http') ? urlStr : `https://${urlStr}`);
+    return url.hostname.replace(/^www\./, '').toLowerCase().trim();
+  } catch {
+    return urlStr.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0].toLowerCase().trim();
   }
+}
+
+function cleanString(str) {
+  if (!str) return '';
+  return str
+    .toLowerCase()
+    .replace(/&/g, 'and')
+    .replace(/[^\w\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function extractYear(eventName, dates) {
+  const match = `${eventName || ''} ${dates || ''}`.match(/\b(202[5-9]|203[0-9])\b/);
+  return match ? match[1] : null;
+}
+
+function stringSimilarity(s1, s2) {
+  const c1 = cleanString(s1);
+  const c2 = cleanString(s2);
+  if (!c1 || !c2) return 0;
+  if (c1 === c2) return 1.0;
+  if (c1.includes(c2) || c2.includes(c1)) {
+    return Math.min(c1.length, c2.length) / Math.max(c1.length, c2.length);
+  }
+
+  const track = Array(c2.length + 1)
+    .fill(null)
+    .map(() => Array(c1.length + 1).fill(null));
+  for (let i = 0; i <= c1.length; i += 1) track[0][i] = i;
+  for (let j = 0; j <= c2.length; j += 1) track[j][0] = j;
+  for (let j = 1; j <= c2.length; j += 1) {
+    for (let i = 1; i <= c1.length; i += 1) {
+      const indicator = c1[i - 1] === c2[j - 1] ? 0 : 1;
+      track[j][i] = Math.min(
+        track[j][i - 1] + 1,
+        track[j - 1][i] + 1,
+        track[j - 1][i - 1] + indicator
+      );
+    }
+  }
+  const dist = track[c2.length][c1.length];
+  return 1 - dist / Math.max(c1.length, c2.length);
+}
+
+function checkIsDuplicate(candidate, existingEventsList) {
+  if (!candidate || !existingEventsList || !existingEventsList.length) {
+    return { isDuplicate: false };
+  }
+
+  const candName = candidate.event_name || candidate.eventName || '';
+  const candCity = cleanString(candidate.city || '');
+  const candYear = extractYear(candName, candidate.dates || '');
+  const candDomain = normalizeDomain(candidate.official_website || candidate.officialWebsite || '');
+
+  for (const existing of existingEventsList) {
+    const exName = existing.event_name || existing.eventName || '';
+    const exCity = cleanString(existing.city || '');
+    const exYear = extractYear(exName, existing.dates || '');
+    const exDomain = normalizeDomain(existing.official_website || existing.officialWebsite || '');
+
+    // Rule 1: Same official website domain (excluding aggregators)
+    if (
+      candDomain &&
+      exDomain &&
+      candDomain === exDomain &&
+      !AGGREGATOR_DOMAINS.includes(candDomain)
+    ) {
+      // If years are explicitly different, they are separate editions (2026 vs 2027)
+      if (candYear && exYear && candYear !== exYear) {
+        continue;
+      }
+      return {
+        isDuplicate: true,
+        reason: `Matches official website (${candDomain}) of existing event "${exName}"`,
+        matchedEvent: exName,
+      };
+    }
+
+    // Rule 2: High name similarity
+    const similarity = stringSimilarity(candName, exName);
+    if (similarity >= 0.82) {
+      // Rule 3: Same brand in different city is NOT duplicate (GITEX Dubai != GITEX Singapore)
+      if (candCity && exCity && candCity !== exCity && !candCity.includes(exCity) && !exCity.includes(candCity)) {
+        continue;
+      }
+
+      // Rule 4: Same event in different year is NOT duplicate (2026 vs 2027)
+      if (candYear && exYear && candYear !== exYear) {
+        continue;
+      }
+
+      return {
+        isDuplicate: true,
+        reason: `Matches name (${Math.round(similarity * 100)}% match) of existing event "${exName}" in ${existing.city || 'same location'}`,
+        matchedEvent: exName,
+      };
+    }
+  }
+
+  return { isDuplicate: false };
 }
 
 function loadFromCache() {
   try {
     if (fs.existsSync(CACHE_FILE)) {
-      return JSON.parse(fs.readFileSync(CACHE_FILE, 'utf-8'));
+      const parsed = JSON.parse(fs.readFileSync(CACHE_FILE, 'utf-8'));
+      return Array.isArray(parsed) ? parsed : [];
     }
   } catch {}
   return [];
+}
+
+function saveToCache(items) {
+  try {
+    const dir = path.dirname(CACHE_FILE);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+    const existing = loadFromCache();
+    const itemsToAdd = Array.isArray(items) ? items : [items];
+
+    for (const item of itemsToAdd) {
+      if (!item || item.is_duplicate) continue;
+      const dup = checkIsDuplicate(item, existing);
+      if (!dup.isDuplicate) {
+        existing.push({
+          ...item,
+          no: existing.length + 1,
+        });
+      }
+    }
+
+    fs.writeFileSync(CACHE_FILE, JSON.stringify(existing, null, 2), 'utf-8');
+    return existing;
+  } catch (err) {
+    console.warn('[Cache] Could not write cache file:', err.message);
+    return [];
+  }
 }
 
 // ==========================================
@@ -193,6 +336,18 @@ app.get('/api/crawl-events/cache', (req, res) => {
   res.json({ success: true, count: cached.length, data: cached });
 });
 
+// Endpoint to clear crawler cache
+app.delete('/api/crawl-events/cache', (req, res) => {
+  try {
+    if (fs.existsSync(CACHE_FILE)) {
+      fs.unlinkSync(CACHE_FILE);
+    }
+    res.json({ success: true, message: 'Cache cleared successfully' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // ==========================================
 // 4. API PIPELINE ROUTE (WITH REAL-TIME STREAMING & PARALLEL BATCHING)
 // ==========================================
@@ -264,6 +419,10 @@ app.post('/api/crawl-events', scrapeLimiter, async (req, res) => {
       })
     );
 
+    const existingDbEvents = req.body.existingEvents || [];
+    const cachedEvents = loadFromCache();
+    const allKnownEvents = [...existingDbEvents, ...cachedEvents];
+
     const { items: searchResults } = await apify.dataset(searchRun.defaultDatasetId).listItems();
     const candidateUrls = [];
     searchResults.forEach((item) => {
@@ -276,7 +435,26 @@ app.post('/api/crawl-events', scrapeLimiter, async (req, res) => {
       }
     });
 
-    const targetUrls = candidateUrls.slice(0, 5);
+    // Prioritize fresh candidate URLs over already indexed domains
+    const knownDomains = new Set(
+      allKnownEvents
+        .map((e) => normalizeDomain(e.official_website || e.officialWebsite))
+        .filter(Boolean)
+    );
+
+    const targetUrls = [];
+    for (const url of candidateUrls) {
+      if (targetUrls.length >= 5) break;
+      const domain = normalizeDomain(url);
+      if (!AGGREGATOR_DOMAINS.includes(domain) && knownDomains.has(domain)) {
+        console.log(`[Deduplication] Prioritizing unvisited domain over known: ${domain}`);
+        continue;
+      }
+      targetUrls.push(url);
+    }
+    if (targetUrls.length === 0) {
+      targetUrls.push(...candidateUrls.slice(0, 5));
+    }
     console.log(`Discovered ${targetUrls.length} candidate URLs:`, targetUrls);
     sendSSE({
       type: 'candidates',
@@ -328,7 +506,7 @@ app.post('/api/crawl-events', scrapeLimiter, async (req, res) => {
     }
 
     // ----------------------------------------------------
-    // STEP 3: Gemini AI Auditing & Immediate Streaming
+    // STEP 3: Gemini AI Auditing, Deduplication & Immediate Streaming
     // ----------------------------------------------------
     sendSSE({
       type: 'status',
@@ -377,25 +555,42 @@ app.post('/api/crawl-events', scrapeLimiter, async (req, res) => {
 
         // Quality Gate: Within date scope and Fit Score >= 3
         if (parsed.is_in_scope && parsed.fit_score >= 3 && parsed.data) {
+          // Check for duplicate against database records, local cache, and current batch
+          const dupCheck = checkIsDuplicate(parsed.data, [...allKnownEvents, ...eventsList]);
+
           const newEvent = {
             no: eventsList.length + 1,
             ...parsed.data,
             fit_score: parsed.fit_score,
             official_website: parsed.data.official_website || targetUrl,
             source_links: targetUrl,
+            is_duplicate: dupCheck.isDuplicate,
+            duplicate_reason: dupCheck.reason || null,
+            duplicate_of: dupCheck.matchedEvent || null,
           };
 
           eventsList.push(newEvent);
 
-          // 🌟 Save to disk cache IMMEDIATELY so it is never lost!
-          saveToCache(eventsList);
+          if (!dupCheck.isDuplicate) {
+            // 🌟 Save to disk cache IMMEDIATELY so it accumulates
+            saveToCache(newEvent);
 
-          // 🌟 Stream directly to frontend screen IMMEDIATELY!
-          sendSSE({
-            type: 'event',
-            data: newEvent,
-            message: `✓ Added: ${newEvent.event_name} (Fit ${newEvent.fit_score}/5)`,
-          });
+            // 🌟 Stream directly to frontend screen IMMEDIATELY!
+            sendSSE({
+              type: 'event',
+              data: newEvent,
+              isDuplicate: false,
+              message: `✓ Added: ${newEvent.event_name} (Fit ${newEvent.fit_score}/5)`,
+            });
+          } else {
+            console.log(`[Deduplication] Duplicate recognized: ${newEvent.event_name} -> ${dupCheck.reason}`);
+            sendSSE({
+              type: 'event',
+              data: newEvent,
+              isDuplicate: true,
+              message: `⚠️ Duplicate detected: ${newEvent.event_name} (${dupCheck.reason})`,
+            });
+          }
         }
 
         // Brief safety pause for Gemini RPM
@@ -405,14 +600,18 @@ app.post('/api/crawl-events', scrapeLimiter, async (req, res) => {
       }
     }
 
-    console.log(`Pipeline complete! Verified ${eventsList.length} events.`);
+    const uniqueCount = eventsList.filter((e) => !e.is_duplicate).length;
+    const dupCount = eventsList.filter((e) => e.is_duplicate).length;
+    console.log(`Pipeline complete! Verified ${uniqueCount} unique events (${dupCount} duplicates recognized).`);
 
     if (isStream) {
       sendSSE({
         type: 'done',
         count: eventsList.length,
+        uniqueCount,
+        dupCount,
         data: eventsList,
-        message: `Pipeline complete! Verified ${eventsList.length} strategic exhibition records.`,
+        message: `Pipeline complete! Verified ${uniqueCount} unique events (${dupCount} duplicate(s) recognized & flagged).`,
       });
       return res.end();
     }
@@ -420,6 +619,8 @@ app.post('/api/crawl-events', scrapeLimiter, async (req, res) => {
     return res.json({
       success: true,
       count: eventsList.length,
+      uniqueCount,
+      dupCount,
       data: eventsList,
     });
   } catch (err) {
