@@ -2,9 +2,10 @@ import { BUSINESS_LINES } from "@/lib/constants/business-lines";
 
 interface BusinessLineChipProps {
   name: string;
+  className?: string;
 }
 
-export function BusinessLineChip({ name }: BusinessLineChipProps) {
+export function BusinessLineChip({ name, className = "" }: BusinessLineChipProps) {
   const config = BUSINESS_LINES.find(
     (b) => b.name.toLowerCase() === name.toLowerCase()
   );
@@ -14,7 +15,7 @@ export function BusinessLineChip({ name }: BusinessLineChipProps) {
   return (
     <span
       style={bgStyle}
-      className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-medium text-white shadow-xs tracking-tight"
+      className={`inline-block px-[11px] py-[3px] rounded-full text-[11px] font-medium font-manrope text-white shadow-2xs tracking-tight whitespace-nowrap ${className}`}
     >
       {name}
     </span>

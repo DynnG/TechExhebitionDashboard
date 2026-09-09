@@ -12,9 +12,9 @@ const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0];
     return (
-      <div className="bg-[#133020] text-white px-3 py-2 rounded-lg border border-[#FFB347] shadow-xl text-xs">
-        <p className="font-bold text-[#FFB347] mb-0.5">{data.name}</p>
-        <p className="text-white font-semibold">{data.value} Exhibitions</p>
+      <div className="bg-[#133020] text-white px-3 py-2 rounded-[8px] border border-[#FFB347] shadow-[0_4px_20px_rgba(0,0,0,0.12)] text-xs font-manrope">
+        <p className="font-semibold text-[#FFB347] mb-0.5">{data.name}</p>
+        <p className="text-white font-medium">{data.value} exhibitions</p>
       </div>
     );
   }
@@ -23,13 +23,15 @@ const CustomTooltip = ({ active, payload }: any) => {
 
 export function EventsByRegionChart({ data }: EventsByRegionProps) {
   return (
-    <div className="bg-white p-5 rounded-xl border border-[#D8D2C8] shadow-xs">
-      <h3 className="text-sm font-bold text-[#133020] mb-1">
-        Events by Region
-      </h3>
-      <p className="text-[11px] text-[#666666] mb-4">
-        Geographic distribution of strategic tech exhibitions
-      </p>
+    <div className="bg-white p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] shadow-[0_2px_16px_rgba(0,0,0,0.05)] font-manrope">
+      <div className="border-b border-[#D8D2C8] pb-3 mb-4">
+        <h3 className="text-[14px] font-semibold text-[#133020]">
+          Events by region
+        </h3>
+        <p className="text-[11px] text-[#666666]">
+          Geographic distribution of strategic tech exhibitions
+        </p>
+      </div>
 
       <div className="h-64 w-full [&_*:focus]:outline-none [&_path]:outline-none">
         <ResponsiveContainer width="100%" height="100%">

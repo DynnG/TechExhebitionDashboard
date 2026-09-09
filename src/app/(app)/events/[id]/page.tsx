@@ -148,76 +148,68 @@ export default function EventDetailPage() {
       </div>
 
       {/* Main Full-Width Standalone Card Container */}
-      <div className="bg-white rounded-2xl border-[1.5px] border-[#D8D2C8] shadow-lg overflow-hidden relative">
+      <div className="bg-white rounded-[12px] border-[1.5px] border-[#D8D2C8] shadow-[0_2px_16px_rgba(0,0,0,0.05)] overflow-hidden relative">
         {/* 6px Left Accent Bar */}
         <div
-          className="absolute left-0 top-0 bottom-0 w-2 z-10"
+          className="absolute left-0 top-0 bottom-0 w-[6px] z-10 rounded-l-[12px]"
           style={{ backgroundColor: accentColor }}
         />
 
         {/* HEADER AREA */}
-        <div className="p-8 pl-10 border-b border-[#D8D2C8]/60 bg-gradient-to-r from-white to-[#F9F7F7]">
-          <div className="flex items-center justify-between gap-4 flex-wrap mb-3">
+        <div className="p-6 pl-8 border-b border-[#D8D2C8] bg-white">
+          <div className="flex items-center justify-between gap-4 flex-wrap mb-2">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#046241] bg-[#046241]/10 px-3 py-1 rounded-full">
-                Record #{event.eventNumber} • {event.region}
+              <span className="text-[12px] font-semibold text-[#133020]">
+                Record #{event.eventNumber} · {event.region}
               </span>
               <span
-                className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium tracking-tight ${
                   isFree
                     ? "bg-[#046241]/10 text-[#046241]"
                     : "bg-[#FFB347]/25 text-[#133020]"
                 }`}
               >
-                <Ticket className="w-3.5 h-3.5" />
-                {isFree ? "Free Entry" : "Paid / Ticketed"}
+                <Ticket className="w-3 h-3" />
+                {isFree ? "Free entry" : "Paid / Ticketed"}
               </span>
             </div>
 
             <div className="flex items-center gap-3">
               <PriorityIndicator priority={event.priorityLevel} />
-              
-              {/* ENLARGED & HIGHLIGHTED TOP-RIGHT FIT SCORE BADGE */}
-              <div className="flex items-center gap-2 bg-[#FFB347] text-[#133020] px-4 py-2 rounded-xl border-2 border-[#133020] shadow-md transform hover:scale-105 transition">
-                <Award className="w-5 h-5 text-[#133020]" />
-                <div className="leading-none text-left">
-                  <span className="text-[9px] uppercase font-black tracking-wider block text-[#133020]/80">Fit Score</span>
-                  <span className="text-base font-black text-[#133020]">{event.fitScore}.0 / 5.0</span>
-                </div>
-              </div>
+              <FitScoreBadge score={event.fitScore} />
             </div>
           </div>
 
-          <h1 className="text-2xl md:text-3xl font-bold text-[#133020] tracking-tight mb-3">
+          <h1 className="text-[28px] font-semibold text-[#133020] tracking-tight leading-tight mb-3">
             {event.eventName}
           </h1>
 
-          <div className="flex items-center gap-2 flex-wrap mb-5">
+          <div className="flex items-center gap-2 flex-wrap mb-4">
             {businessLines.map((bl) => (
               <BusinessLineChip key={bl} name={bl} />
             ))}
           </div>
 
-          {/* Prominent External Website Button & Logistics Row */}
-          <div className="flex items-center justify-between flex-wrap gap-4 pt-4 border-t border-[#D8D2C8]/60">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs text-[#133020]">
+          {/* Logistics & Official Website CTA */}
+          <div className="flex items-center justify-between flex-wrap gap-4 pt-4 border-t border-[#D8D2C8]">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs text-[#133020]">
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-[#046241] shrink-0" />
                 <div>
-                  <span className="text-[10px] text-[#666666] block uppercase font-semibold">
+                  <span className="text-[10px] text-[#666666] block uppercase font-medium">
                     Dates
                   </span>
-                  <span className="font-bold text-sm">{event.dates}</span>
+                  <span className="font-semibold text-sm">{event.dates}</span>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-[#046241] shrink-0" />
                 <div>
-                  <span className="text-[10px] text-[#666666] block uppercase font-semibold">
+                  <span className="text-[10px] text-[#666666] block uppercase font-medium">
                     Location
                   </span>
-                  <span className="font-bold text-sm">
+                  <span className="font-semibold text-sm">
                     {event.city}, {event.country}
                   </span>
                 </div>
@@ -226,169 +218,153 @@ export default function EventDetailPage() {
               <div className="flex items-center gap-2">
                 <Building className="w-4 h-4 text-[#046241] shrink-0" />
                 <div>
-                  <span className="text-[10px] text-[#666666] block uppercase font-semibold">
+                  <span className="text-[10px] text-[#666666] block uppercase font-medium">
                     Venue
                   </span>
-                  <span className="font-bold text-sm truncate block max-w-[200px]">
+                  <span className="font-semibold text-sm truncate block max-w-[200px]">
                     {event.venue}
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* PROMINENT OFFICIAL WEBSITE CTA */}
+            {/* Official Website Button */}
             {event.officialWebsite && (
               <a
                 href={event.officialWebsite}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-5 py-2.5 bg-[#046241] hover:bg-[#133020] text-white font-bold text-xs rounded-xl transition shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                className="flex items-center gap-2 px-4 py-2 bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] font-medium text-xs rounded-[8px] transition-all duration-180 shadow-2xs"
               >
-                <Globe className="w-4 h-4" />
-                <span>Visit Official Website</span>
-                <ExternalLink className="w-3.5 h-3.5" />
+                <Globe className="w-3.5 h-3.5" />
+                <span>Visit official website</span>
+                <ExternalLink className="w-3 h-3" />
               </a>
             )}
           </div>
         </div>
 
         {/* BODY (2-Column Grid) */}
-        <div className="p-8 pl-10 grid grid-cols-1 md:grid-cols-2 gap-8 border-b border-[#D8D2C8]">
-          {/* Left Column: Strategic Focus */}
-          <div className="space-y-6">
+        <div className="p-6 pl-8 grid grid-cols-1 md:grid-cols-2 gap-6 border-b border-[#D8D2C8]">
+          {/* Left Column: Strategic Assessment */}
+          <div className="space-y-4">
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[#046241] mb-2 flex items-center gap-1.5">
-                <MapPin className="w-4 h-4 text-[#046241]" />
-                <span>Event Location & Map Address</span>
+              <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#046241] mb-1.5 flex items-center gap-1.5">
+                <FileCheck className="w-3.5 h-3.5 text-[#046241]" />
+                <span>Strategic focus & purpose</span>
               </h3>
-              <div className="bg-[#F5EEDB] p-4 rounded-xl border border-[#D8D2C8] space-y-2 text-xs text-[#133020]">
-                <div>
-                  <span className="font-bold block text-[#133020] text-sm">{event.venue}</span>
-                  <p className="text-[#666666] mt-0.5">
-                    {event.locationAddress || `${event.city}, ${event.country}`}
-                  </p>
-                  <span className="text-[11px] text-[#046241] font-semibold block mt-1">
-                    Region: {event.region} • Country: {event.country} • City: {event.city}
-                  </span>
-                </div>
-
-                <div className="pt-2 border-t border-[#D8D2C8] flex justify-start">
-                  {event.locationAddress && event.locationAddress !== "Not publicly disclosed" ? (
-                    <a
-                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${event.venue}, ${event.locationAddress}, ${event.city}, ${event.country}`)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#133020] text-white font-bold text-xs rounded-xl hover:bg-[#046241] transition shadow-xs"
-                    >
-                      <MapPin className="w-4 h-4 text-[#FFB347]" />
-                      <span>Open Location in Google Maps ↗</span>
-                    </a>
-                  ) : (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/70 text-[#666666] font-semibold text-xs rounded-lg border border-[#D8D2C8]">
-                      <MapPin className="w-3.5 h-3.5 text-[#999999]" />
-                      <span>No map link available for this event</span>
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[#046241] mb-2 flex items-center gap-1.5">
-                <FileCheck className="w-4 h-4" />
-                <span>Strategic Focus & Purpose</span>
-              </h3>
-              <p className="text-xs text-[#133020] leading-relaxed bg-[#F9F7F7] p-4 rounded-xl border border-[#D8D2C8]/60">
-                {event.strategicFocus}
+              <p className="text-xs text-[#133020] leading-relaxed bg-[#F9F7F7] p-3.5 rounded-[8px] border border-[#D8D2C8]">
+                {event.strategicFocus || "Strategic industrial intelligence event"}
               </p>
             </div>
 
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[#046241] mb-2">
+              <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#046241] mb-1.5">
                 Relevance to Lifewood
               </h3>
-              <p className="text-xs font-medium text-[#133020] leading-relaxed bg-[rgba(4,98,65,0.06)] p-4 rounded-xl border border-[#046241]/20">
-                {event.relevanceToLifewood}
+              <p className="text-xs font-medium text-[#133020] leading-relaxed bg-[#F0F5F2] p-3.5 rounded-[8px] border border-[#046241]/20">
+                {event.relevanceToLifewood || "High alignment with Lifewood target buyers"}
               </p>
             </div>
 
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[#133020] mb-2">
-                Target Audience & Buyers
+              <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#666666] mb-1.5">
+                Target audience & buyers
               </h3>
-              <p className="text-xs text-[#666666]">
-                {event.targetAudience}
+              <p className="text-xs text-[#133020] bg-white p-3 rounded-[8px] border border-[#D8D2C8]">
+                {event.targetAudience || "Enterprise buyers, AI leaders, procurement teams"}
+              </p>
+            </div>
+
+            {/* Location card */}
+            <div className="bg-[#F5EEDB] p-3.5 rounded-[8px] border border-[#D8D2C8] space-y-1.5 text-xs text-[#133020]">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-[13px]">{event.venue}</span>
+                {event.locationAddress && event.locationAddress !== "Not publicly disclosed" && (
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${event.venue}, ${event.locationAddress}, ${event.city}, ${event.country}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-[11px] text-[#046241] hover:underline font-semibold"
+                  >
+                    <span>Google Maps</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                )}
+              </div>
+              <p className="text-[#666666] text-[11.5px]">
+                {event.locationAddress || `${event.city}, ${event.country}`}
               </p>
             </div>
           </div>
 
           {/* Right Column: Commercial & Organizer Specs */}
-          <div className="space-y-4 bg-[#F9F7F7] p-6 rounded-xl border border-[#D8D2C8] text-xs">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[#133020] border-b border-[#D8D2C8] pb-2">
-              Commercial & Organizer Detail
+          <div className="space-y-4 bg-[#F9F7F7] p-5 rounded-[8px] border border-[#D8D2C8] text-xs">
+            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#133020] border-b border-[#D8D2C8] pb-2">
+              Commercial & organizer detail
             </h3>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3.5">
               <div className="col-span-2">
-                <span className="text-[10px] uppercase font-bold text-[#666666] block">
+                <span className="text-[10px] uppercase font-medium text-[#666666] block">
                   Organizer
                 </span>
-                <span className="font-semibold text-[#133020]">
-                  {event.organizer}
+                <span className="font-semibold text-[#133020] text-sm">
+                  {event.organizer || "Not publicly disclosed"}
                 </span>
               </div>
 
               <div>
-                <span className="text-[10px] uppercase font-bold text-[#666666] block">
-                  Est. Attendees
-                </span>
-                <span className="font-bold text-[#046241]">
-                  {event.estimatedAttendees}
-                </span>
-              </div>
-
-              <div>
-                <span className="text-[10px] uppercase font-bold text-[#666666] block">
-                  Booth / Sponsor Cost
-                </span>
-                <span className="font-bold text-[#133020]">
-                  {event.boothCost}
-                </span>
-              </div>
-
-              <div>
-                <span className="text-[10px] uppercase font-bold text-[#666666] block">
-                  Registration Deadline
-                </span>
-                <span className="font-semibold text-[#133020]">
-                  {event.registrationDeadline}
-                </span>
-              </div>
-
-              <div>
-                <span className="text-[10px] uppercase font-bold text-[#666666] block">
-                  Contact Person
-                </span>
-                <span className="font-semibold text-[#133020]">
-                  {event.contactPerson}
-                </span>
-              </div>
-
-              <div className="col-span-2">
-                <span className="text-[10px] uppercase font-bold text-[#666666] block">
-                  Contact Email
+                <span className="text-[10px] uppercase font-medium text-[#666666] block">
+                  Estimated attendees
                 </span>
                 <span className="font-semibold text-[#046241]">
-                  {event.contactEmail}
+                  {event.estimatedAttendees || "Not publicly disclosed"}
+                </span>
+              </div>
+
+              <div>
+                <span className="text-[10px] uppercase font-medium text-[#666666] block">
+                  Booth / sponsorship cost
+                </span>
+                <span className="font-semibold text-[#133020]">
+                  {event.boothCost || "Not publicly disclosed"}
+                </span>
+              </div>
+
+              <div>
+                <span className="text-[10px] uppercase font-medium text-[#666666] block">
+                  Registration deadline
+                </span>
+                <span className="font-medium text-[#133020]">
+                  {event.registrationDeadline || "Not publicly disclosed"}
+                </span>
+              </div>
+
+              <div>
+                <span className="text-[10px] uppercase font-medium text-[#666666] block">
+                  Contact person
+                </span>
+                <span className="font-medium text-[#133020]">
+                  {event.contactPerson || "Not publicly disclosed"}
                 </span>
               </div>
 
               <div className="col-span-2">
-                <span className="text-[10px] uppercase font-bold text-[#666666] block">
-                  Exhibitor Opportunities
+                <span className="text-[10px] uppercase font-medium text-[#666666] block">
+                  Contact email
+                </span>
+                <span className="font-medium text-[#046241]">
+                  {event.contactEmail || "Not publicly disclosed"}
+                </span>
+              </div>
+
+              <div className="col-span-2">
+                <span className="text-[10px] uppercase font-medium text-[#666666] block">
+                  Exhibitor opportunities
                 </span>
                 <span className="text-[#133020]">
-                  {event.exhibitorOpportunity}
+                  {event.exhibitorOpportunity || "Not publicly disclosed"}
                 </span>
               </div>
             </div>
@@ -396,35 +372,33 @@ export default function EventDetailPage() {
         </div>
 
         {/* FOOTER & ACTIONS */}
-        <div className="p-6 pl-10 bg-[#133020] text-white flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-4">
-            <div>
-              <span className="text-[10px] uppercase tracking-wider text-[#FFB347] block font-bold">
-                Participation Recommendation
-              </span>
-              <span className="text-lg font-bold text-white">
-                {event.participationRec}
-              </span>
-            </div>
+        <div className="p-5 pl-8 bg-[#133020] text-white flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-3">
+            <span className="text-[11px] uppercase tracking-wider text-[#FFB347] font-semibold">
+              Recommendation:
+            </span>
+            <span className="px-3 py-1 rounded-[6px] text-xs font-semibold bg-[#FFB347] text-[#133020]">
+              {event.participationRec || "Exhibit"}
+            </span>
           </div>
 
           <div className="flex items-center gap-3">
             {(userRole === "ADMIN" || userRole === "SUPERVISOR") && (
               <button
                 onClick={() => setShowEditModal(true)}
-                className="flex items-center gap-1.5 px-4 py-2 bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] font-bold text-xs rounded-lg transition"
+                className="flex items-center gap-1.5 px-4 py-2 bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] font-medium text-xs rounded-[8px] transition shadow-2xs"
               >
-                <Edit className="w-4 h-4" />
-                <span>Edit Record</span>
+                <Edit className="w-3.5 h-3.5" />
+                <span>Edit record</span>
               </button>
             )}
 
             {userRole === "ADMIN" && (
               <button
                 onClick={handleDelete}
-                className="flex items-center gap-1.5 px-4 py-2 bg-[#B91C1C] hover:bg-[#B91C1C]/80 text-white font-bold text-xs rounded-lg transition"
+                className="flex items-center gap-1.5 px-4 py-2 bg-[#B91C1C] hover:bg-[#B91C1C]/90 text-white font-medium text-xs rounded-[8px] transition"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-3.5 h-3.5" />
                 <span>Delete</span>
               </button>
             )}
