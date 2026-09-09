@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { PriorityIndicator } from "./priority-indicator";
 import { BusinessLineChip } from "./business-line-chip";
-import { FitScoreBadge } from "./fit-score-badge";
 import { BUSINESS_LINES } from "@/lib/constants/business-lines";
 import { MapPin } from "lucide-react";
 
@@ -25,10 +24,19 @@ export function EventCard({ event }: EventCardProps) {
   );
   const accentColor = blConfig ? blConfig.colorHex : "#046241";
 
+  const fitLevel =
+    event.fitScore >= 4 ? "High" : event.fitScore === 3 ? "Mid" : "Low";
+  const fitColor =
+    event.fitScore >= 4
+      ? "text-[#046241]"
+      : event.fitScore === 3
+      ? "text-[#C17110]"
+      : "text-[#708E7C]";
+
   return (
     <Link
       href={`/events/${event.id}`}
-      className="bg-white rounded-[12px] border-[1.5px] border-[#D8D2C8] shadow-[0_2px_16px_rgba(0,0,0,0.05)] hover:shadow-[0_6px_30px_rgba(0,0,0,0.08)] hover:-translate-y-[1px] transition-all duration-180 overflow-hidden flex flex-col justify-between relative group cursor-pointer block"
+      className="bg-white rounded-[12px] border-[1.5px] border-[#D8D2C8] shadow-[0_2px_16px_rgba(0,0,0,0.05)] hover:shadow-[0_6px_30px_rgba(0,0,0,0.08)] hover:-translate-y-[1px] transition-all duration-180 overflow-hidden flex flex-col justify-between relative group cursor-pointer block font-manrope"
     >
       {/* 6px Color Accent Bar on Left Edge */}
       <div
@@ -52,9 +60,20 @@ export function EventCard({ event }: EventCardProps) {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-3 shrink-0">
             <PriorityIndicator priority={event.priorityLevel} />
-            <FitScoreBadge score={event.fitScore} />
+            {/* Enlarged numeric fit score + High / Mid / Low indicator below */}
+            <div
+              className="flex flex-col items-center justify-center min-w-[44px] px-2 py-1 rounded-[8px] bg-[#F5EEDB]/50 border border-[#D8D2C8]"
+              title={`Fit score: ${event.fitScore}/5 (${fitLevel} fit)`}
+            >
+              <span className="text-[26px] font-extrabold text-[#133020] leading-none">
+                {event.fitScore}
+              </span>
+              <span className={`text-[9.5px] font-bold uppercase tracking-wider mt-0.5 ${fitColor}`}>
+                {fitLevel}
+              </span>
+            </div>
           </div>
         </div>
 

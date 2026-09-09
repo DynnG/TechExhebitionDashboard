@@ -33,12 +33,12 @@ export function Topbar() {
       <div>
         <div className="flex items-center gap-1.5 text-xs text-[#666666]">
           <Link href="/dashboard" className="hover:text-[#046241] transition font-medium">
-            Lifewood
+            Lifewood 活树
           </Link>
           <ChevronRight className="w-3 h-3 text-[#999999]" />
           <span className="text-[#133020] font-semibold">{title}</span>
         </div>
-        <h1 className="text-xl font-semibold text-[#133020] tracking-tight mt-0.5">
+        <h1 className="text-xl font-semibold text-[#133020] tracking-tight mt-0.5 font-manrope">
           {title}
         </h1>
       </div>
