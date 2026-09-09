@@ -18,7 +18,7 @@ interface BusinessLineChartProps {
 
 const LOB_COLORS: Record<string, string> = {
   "Global AI Data": "#046241",
-  AIGC: "#133020",
+  AIGC: "#FFB347",
   "Global Scanning + Indexing": "#C17110",
   "Autonomous Driving": "#034E34",
   "AEO/GEO": "#E89131",
@@ -83,7 +83,7 @@ export function BusinessLineChart({ data }: BusinessLineChartProps) {
                   fill={LOB_COLORS[entry.name] || "#046241"}
                 />
               ))}
-              <LabelList dataKey="exhibitions" position="right" style={{ fontSize: 11, fontWeight: 700, fill: "#133020" }} />
+              <LabelList dataKey="exhibitions" position="right" style={{ fontSize: 11, fontWeight: 700, fill: "currentColor" }} />
             </Bar>
           </BarChart>
         </ResponsiveContainer>

@@ -9,6 +9,7 @@ import {
 } from "@/lib/rate-limit";
 
 export const authOptions: NextAuthOptions = {
+  secret: process.env.NEXTAUTH_SECRET || "lifewood-secret-key-super-secure-2026",
   session: {
     strategy: "jwt",
   },

@@ -90,27 +90,90 @@ The platform equips executive decision-makers, business development leaders, and
 
 ## ⚡ Setup & Local Development Guide
 
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
+Follow these steps to run the complete platform locally on your machine.
 
-2. Create your `.env.local` configuration file:
-   ```bash
-   cp .env.example .env.local
-   ```
+### 📋 Prerequisites
+- **Node.js**: Version `18.17.0` or higher (`node -v`)
+- **npm**: Version `9.x` or higher (`npm -v`)
+- **Git** installed on your system
 
-3. Initialize the Prisma database and seed sample data:
-   ```bash
-   npx prisma db push
-   npx prisma db seed
-   ```
+---
 
-4. Launch the Next.js development server:
-   ```bash
-   npm run dev
-   ```
-   *The application will be available at `http://localhost:3000`.*
+### 1️⃣ Clone the Repository
+```bash
+git clone https://github.com/Zycheee/TechExhebitionDashboard.git
+cd TechExhebitionDashboard
+```
+
+### 2️⃣ Install Dependencies
+```bash
+npm install
+```
+
+### 3️⃣ Configure Environment Variables (`.env.example` vs `.env` / `.env.local`)
+
+This repository includes a template file named **`.env.example`** with all the required configuration keys.
+
+> **💡 What is `.env.example`?**  
+> It is an intentionally committed blueprint showing every environment variable the platform needs. It contains placeholder values so that you know what keys to configure without exposing any private API tokens to Git.
+
+Create your local environment files from `.env.example`:
+
+```bash
+# For Next.js (Dashboard frontend & API routes)
+cp .env.example .env.local
+
+# For the Crawler Microservice (Express engine on port 5000)
+cp .env.example .env
+```
+
+*Ensure `NEXTAUTH_SECRET` and `NEXTAUTH_URL` are present to avoid NextAuth `Configuration 500` errors:*
+```env
+NEXTAUTH_SECRET="lifewood-secret-key-super-secure-2026"
+NEXTAUTH_URL="http://localhost:3000"
+```
+
+Open `.env` (or `.env.local`) and configure your optional API keys for web scraping:
+- **`APIFY_TOKEN`**: *(Optional)* Required to discover real exhibition URLs using Apify Google Search scraper. [Get an Apify token](https://console.apify.com/account#/integrations).
+- **`GEMINI_API_KEY`**: *(Optional)* Required for AI-powered event extraction, normalization, and fit scoring. [Get a free Gemini API key](https://aistudio.google.com/app/apikey).
+- **`NEXTAUTH_SECRET`**: Set to any random secret string for session encryption.
+
+*(Note: If you do not provide Apify or Gemini keys, you can still use the full dashboard, view events, manage users, queues, and review cached scraped data!)*
+
+### 4️⃣ Initialize Database & Seed Default Data
+The platform uses **SQLite** (`prisma/dev.db`) by default for local development, so **no external database server is required**.
+
+```bash
+# Push Prisma schema to SQLite dev.db
+npx prisma db push
+
+# Seed default user accounts and initial demo exhibitions
+npx prisma db seed
+```
+
+### 5️⃣ Run the Application
+
+The platform consists of two services:
+1. **Next.js Web Application** (Dashboard, UI, Authentication, Queue & Event Management on port `3000`)
+2. **AI Crawler Microservice** (Express, Apify + Gemini extraction pipeline on port `5000`)
+
+#### Terminal 1 — Start Next.js App:
+```bash
+npm run dev
+```
+*The application will be available at `http://localhost:3000`.*  
+*(Note: If you just created or updated your `.env` file, make sure to stop (`Ctrl + C`) and restart `npm run dev` so Next.js reloads the environment variables).*
+
+#### Terminal 2 — Start AI Discovery & Crawler Engine (Optional for live crawling):
+```bash
+npm run crawler
+```
+*Runs the background crawling microservice engine on port 5000 (`http://localhost:5000`) for live web searches, real-time SSE extraction, and crawler caching.*
+
+### 6️⃣ Build for Production
+```bash
+npm run build
+```
 
 ---
 
@@ -126,11 +189,42 @@ The seed script (`prisma/seed.ts`) populates default test accounts for each syst
 
 ---
 
+## 🛠️ Common Troubleshooting & FAQ
+
+<details>
+<summary><b>Q: I see "Failed to reach Crawling Engine on port 5000" in the scraper tab.</b></summary>
+
+The live web scraper runs as a microservice on port 5000. Open a second terminal window and run:
+```bash
+npm run crawler
+```
+If you only run `npm run dev`, you can still view previously cached events and test manual event additions without running the crawler.
+</details>
+
+<details>
+<summary><b>Q: How do I reset the local database?</b></summary>
+
+To wipe and re-seed the SQLite database:
+```bash
+npx prisma db push --force-reset
+npx prisma db seed
+```
+</details>
+
+<details>
+<summary><b>Q: Why was `.env` tracked in git earlier?</b></summary>
+
+An initial commit included a blank `.env` with empty keys (`PORT=5000`, `APIFY_TOKEN=`, `GEMINI_API_KEY=`). `.gitignore` has now been updated to ensure that all local `.env` and `.env*.local` files containing your private API keys remain strictly local and are never committed.
+</details>
+
+---
+
 ## 🔒 Security & Rate Limiting
 
 * **Password Hashing:** All user passwords are encrypted using `bcrypt.hash()` with a salt factor of 10.
+* **NextAuth & JWT Encryption:** NextAuth handles JWT session tokens signed using `NEXTAUTH_SECRET` (configured in `.env` and `src/lib/auth.ts`).
 * **Session Verification:** API endpoints enforce JWT session role validation (`ADMIN`, `SUPERVISOR`, `INTERN`).
-* **Rate Limiting:** Scraper trigger requests are rate-limited (`/api/scraper/run`, max 10 requests/hour per user) via `lib/rate-limit.ts`.
+* **Environment Protection:** `.env` and `.env*.local` are ignored to prevent credential leakage.
 
 ---
 

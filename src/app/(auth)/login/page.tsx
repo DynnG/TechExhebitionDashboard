@@ -33,10 +33,62 @@ export default function LoginPage() {
               alt="Lifewood"
               className="h-12 sm:h-20 w-auto object-contain drop-shadow-md"
             />
-            <p className="text-xs sm:text-sm text-[#F5EEDB]/80 tracking-wide font-medium leading-snug">
-              Global Tech Exhibition Intelligence Platform
-            </p>
-          </div>
+            <span>Remember me</span>
+          </label>
+          <span className="text-[#046241] font-medium hover:underline cursor-pointer">
+            Forgot password?
+          </span>
+        </div>
+
+        {/* Primary CTA: Dark Serpent filled with Saffron hover accent */}
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full py-3 px-5 rounded-lg bg-[#133020] hover:bg-[#133020]/90 text-white hover:text-[#FFB347] border border-[#133020] hover:border-[#FFB347]/60 font-semibold text-xs transition-all duration-200 shadow-sm flex items-center justify-center gap-2 group disabled:opacity-50 mt-2"
+        >
+          {loading ? (
+            <span>Signing in...</span>
+          ) : (
+            <>
+              <span>Sign in to Dashboard</span>
+              <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition text-[#FFB347]" />
+            </>
+          )}
+        </button>
+      </form>
+
+      {/* Quick Demo Login Preset Buttons */}
+      <div className="mt-8 pt-5 border-t border-[#D8D2C8]">
+        <p className="text-[11px] text-[#666666] mb-2.5 font-medium">
+          Quick switch demo account:
+        </p>
+        <div className="grid grid-cols-3 gap-2">
+          <button
+            type="button"
+            onClick={() => setQuickUser("admin@lifewood.com", "admin123")}
+            className="py-1.5 px-2 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-lg border border-[#D8D2C8] transition text-center"
+          >
+            Admin
+          </button>
+          <button
+            type="button"
+            onClick={() => setQuickUser("supervisor@lifewood.com", "supervisor123")}
+            className="py-1.5 px-2 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-lg border border-[#D8D2C8] transition text-center"
+          >
+            Supervisor
+          </button>
+          <button
+            type="button"
+            onClick={() => setQuickUser("intern@lifewood.com", "intern123")}
+            className="py-1.5 px-2 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-lg border border-[#D8D2C8] transition text-center"
+          >
+            Intern
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
           <TypewriterText text="Lifewood Data Technology is a global leader in AI data operations and enterprise business intelligence. We deliver high-precision data annotation, automated discovery, and curated exhibition tracking to power machine learning and strategic decision-making for global enterprises." />
 

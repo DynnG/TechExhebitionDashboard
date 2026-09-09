@@ -6,13 +6,26 @@ import { Bot, Play, Check, X, RefreshCw, Sparkles, Sliders, Calendar, ShieldChec
 import { toast } from "sonner";
 import { useLocaleStore } from "@/stores/locale-store";
 import EventScraperDashboard from "@/components/events/EventScraperDashboard";
+import { LifewoodDropdown } from "@/components/shared/lifewood-dropdown";
 
 export default function ScraperPage() {
   const [engineMode, setEngineMode] = useState<"apify_gemini" | "standard">("apify_gemini");
   const [running, setRunning] = useState(false);
   const [results, setResults] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const { locale } = useLocaleStore();
+
+  const frequencyOptions = [
+    { value: "Daily", label: "Daily Execution" },
+    { value: "Weekly", label: "Weekly (Recommended)" },
+    { value: "Monthly", label: "Monthly" },
+  ];
+
+  const dayOptions = [
+    { value: "Monday", label: "Monday" },
+    { value: "Wednesday", label: "Wednesday" },
+    { value: "Friday", label: "Friday" },
+  ];
 
   const [config, setConfig] = useState({
     startDate: "2026-09-01",
@@ -32,8 +45,10 @@ export default function ScraperPage() {
   });
 
   useEffect(() => {
-    fetchResults();
-  }, []);
+    if (engineMode === "standard" && results.length === 0) {
+      fetchResults();
+    }
+  }, [engineMode]);
 
   const fetchResults = async () => {
     setLoading(true);
@@ -110,28 +125,11 @@ export default function ScraperPage() {
               {locale === "en" ? "AI Event Scraper Engine" : "AI 智能抓取引擎"}
             </h2>
           </div>
-          <p className="text-xs text-[#666666] mt-0.5">
+          <p className="text-xs text-[#333333] mt-0.5">
             Automated crawler parsing official organizer sites, convention centers & AI conference calendars
           </p>
         </div>
 
-        <button
-          onClick={handleRunScraper}
-          disabled={running}
-          className="flex items-center gap-2 px-5 py-2.5 bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] font-bold text-xs rounded-lg transition shadow-md disabled:opacity-50"
-        >
-          {running ? (
-            <>
-              <RefreshCw className="w-4 h-4 animate-spin text-[#133020]" />
-              <span>Crawling Target Sources...</span>
-            </>
-          ) : (
-            <>
-              <Play className="w-4 h-4 fill-current" />
-              <span>Run Scraper Now</span>
-            </>
-          )}
-        </button>
       </div>
 
       {/* Mode Switcher Tabs */}
@@ -267,15 +265,12 @@ export default function ScraperPage() {
             <label className="block text-xs font-bold text-[#133020] uppercase tracking-wider mb-1">
               Frequency
             </label>
-            <select
+            <LifewoodDropdown
               value={schedule.frequency}
-              onChange={(e) => setSchedule({ ...schedule, frequency: e.target.value })}
-              className="w-full px-3 py-2 rounded-lg border border-[#D8D2C8] text-xs text-[#133020] bg-white"
-            >
-              <option value="Daily">Daily Execution</option>
-              <option value="Weekly">Weekly (Recommended)</option>
-              <option value="Monthly">Monthly</option>
-            </select>
+              onChange={(val) => setSchedule({ ...schedule, frequency: val })}
+              options={frequencyOptions}
+              aria-label="Frequency"
+            />
           </div>
 
           <div>
@@ -283,15 +278,12 @@ export default function ScraperPage() {
               Execution Day & Time
             </label>
             <div className="grid grid-cols-2 gap-2 text-xs">
-              <select
+              <LifewoodDropdown
                 value={schedule.day}
-                onChange={(e) => setSchedule({ ...schedule, day: e.target.value })}
-                className="px-3 py-2 rounded-lg border border-[#D8D2C8] bg-white text-[#133020]"
-              >
-                <option value="Monday">Monday</option>
-                <option value="Wednesday">Wednesday</option>
-                <option value="Friday">Friday</option>
-              </select>
+                onChange={(val) => setSchedule({ ...schedule, day: val })}
+                options={dayOptions}
+                aria-label="Execution Day"
+              />
               <input
                 type="text"
                 value={schedule.time}

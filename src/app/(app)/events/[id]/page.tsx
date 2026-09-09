@@ -195,7 +195,7 @@ export default function EventDetailPage() {
           <div className="flex items-center justify-between flex-wrap gap-4 pt-4 border-t border-[#D8D2C8]">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs text-[#133020]">
               <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-[#046241] shrink-0" />
+                <Calendar className="w-4 h-4 text-emerald-600 dark:text-amber-400 shrink-0" />
                 <div>
                   <span className="text-[10px] text-[#666666] block uppercase font-medium">
                     Dates
@@ -205,7 +205,7 @@ export default function EventDetailPage() {
               </div>
 
               <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-[#046241] shrink-0" />
+                <MapPin className="w-4 h-4 text-emerald-600 dark:text-amber-400 shrink-0" />
                 <div>
                   <span className="text-[10px] text-[#666666] block uppercase font-medium">
                     Location
@@ -217,7 +217,7 @@ export default function EventDetailPage() {
               </div>
 
               <div className="flex items-center gap-2">
-                <Building className="w-4 h-4 text-[#046241] shrink-0" />
+                <Building className="w-4 h-4 text-emerald-600 dark:text-amber-400 shrink-0" />
                 <div>
                   <span className="text-[10px] text-[#666666] block uppercase font-medium">
                     Venue
