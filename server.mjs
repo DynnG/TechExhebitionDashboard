@@ -4,6 +4,9 @@ import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import { ApifyClient } from 'apify-client';
 import { GoogleGenAI } from '@google/genai';
+import fs from 'fs';
+import path from 'path';
+import * as cheerio from 'cheerio';
 
 // Load environment variables from .env and .env.local
 dotenv.config();
@@ -27,14 +30,38 @@ const apify = new ApifyClient({ token: apifyToken });
 const ai = new GoogleGenAI({ apiKey: geminiApiKey });
 
 // ==========================================
+// Cache & Local Storage Helpers
+// ==========================================
+const CACHE_FILE = path.join(process.cwd(), 'data', 'live_crawled_events.json');
+
+function saveToCache(events) {
+  try {
+    const dir = path.dirname(CACHE_FILE);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(CACHE_FILE, JSON.stringify(events, null, 2), 'utf-8');
+  } catch (err) {
+    console.warn('[Cache] Could not write cache file:', err.message);
+  }
+}
+
+function loadFromCache() {
+  try {
+    if (fs.existsSync(CACHE_FILE)) {
+      return JSON.parse(fs.readFileSync(CACHE_FILE, 'utf-8'));
+    }
+  } catch {}
+  return [];
+}
+
+// ==========================================
 // 1. ROUTE-LEVEL RATE LIMITER
 // ==========================================
 const scrapeLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5,
+  max: 10,
   message: {
     success: false,
-    error: 'Rate limit exceeded: Maximum 5 crawl runs per 15 minutes per IP.',
+    error: 'Rate limit exceeded: Maximum 10 crawl runs per 15 minutes per IP.',
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -45,7 +72,7 @@ const scrapeLimiter = rateLimit({
 // ==========================================
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function callWithRetry(fn, retries = 3, delay = 2000) {
+async function callWithRetry(fn, retries = 2, delay = 1500) {
   try {
     return await fn();
   } catch (error) {
@@ -60,6 +87,30 @@ async function callWithRetry(fn, retries = 3, delay = 2000) {
       return callWithRetry(fn, retries - 1, delay * 2);
     }
     throw error;
+  }
+}
+
+// Fallback HTML text extractor if Apify website-content-crawler fails or times out
+async function fetchPageDirect(url) {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    const resp = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+      },
+    });
+    clearTimeout(timeout);
+    if (!resp.ok) return null;
+    const html = await resp.text();
+    const $ = cheerio.load(html);
+    $('script, style, noscript, nav, footer, svg').remove();
+    const text = $('body').text().replace(/\s+/g, ' ').trim();
+    return text.slice(0, 10000);
+  } catch {
+    return null;
   }
 }
 
@@ -125,38 +176,81 @@ Return a JSON object conforming exactly to this schema:
 // Health & Diagnostic Endpoint
 // ==========================================
 app.get('/api/health', (req, res) => {
+  const cached = loadFromCache();
   res.json({
     status: 'ok',
-    service: 'Tech Exhibition Discovery & Crawling Engine',
+    service: 'Optimized Tech Exhibition Discovery & Crawling Engine',
     hasApifyToken: Boolean(process.env.APIFY_TOKEN),
     hasGeminiKey: Boolean(geminiApiKey),
+    cachedEventsCount: cached.length,
     targetDateRange: 'Sep 1, 2026 - Dec 31, 2027',
   });
 });
 
+// Endpoint to fetch previously cached scraped events
+app.get('/api/crawl-events/cache', (req, res) => {
+  const cached = loadFromCache();
+  res.json({ success: true, count: cached.length, data: cached });
+});
+
 // ==========================================
-// 4. API PIPELINE ROUTE
+// 4. API PIPELINE ROUTE (WITH REAL-TIME STREAMING & PARALLEL BATCHING)
 // ==========================================
 app.post('/api/crawl-events', scrapeLimiter, async (req, res) => {
   const { query } = req.body;
   const searchQuery = query || 'tech exhibition 2027 Singapore OR "Hong Kong" OR "United States"';
 
+  const isStream =
+    req.query.stream === 'true' ||
+    req.headers.accept?.includes('text/event-stream');
+
+  // SSE helper function
+  const sendSSE = (payload) => {
+    if (isStream && !res.writableEnded) {
+      res.write(`data: ${JSON.stringify(payload)}\n\n`);
+      if (typeof res.flush === 'function') res.flush();
+    }
+  };
+
+  if (isStream) {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    if (typeof res.flushHeaders === 'function') res.flushHeaders();
+  }
+
   if (!process.env.APIFY_TOKEN) {
-    return res.status(400).json({
-      success: false,
-      error: 'APIFY_TOKEN is missing. Please set APIFY_TOKEN in your environment or .env file.',
-    });
+    const errorMsg = 'APIFY_TOKEN is missing. Please set APIFY_TOKEN in your environment or .env file.';
+    if (isStream) {
+      sendSSE({ type: 'error', error: errorMsg });
+      return res.end();
+    }
+    return res.status(400).json({ success: false, error: errorMsg });
   }
 
   if (!geminiApiKey) {
-    return res.status(400).json({
-      success: false,
-      error: 'GEMINI_API_KEY is missing. Please set GEMINI_API_KEY in your environment or .env file.',
-    });
+    const errorMsg = 'GEMINI_API_KEY is missing. Please set GEMINI_API_KEY in your environment or .env file.';
+    if (isStream) {
+      sendSSE({ type: 'error', error: errorMsg });
+      return res.end();
+    }
+    return res.status(400).json({ success: false, error: errorMsg });
   }
 
+  const eventsList = [];
+  const geminiModel = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+
   try {
+    // ----------------------------------------------------
+    // STEP 1: Fast Google Discovery Search (Apify)
+    // ----------------------------------------------------
     console.log(`[Step 1] Running Discovery Search: "${searchQuery}"`);
+    sendSSE({
+      type: 'status',
+      step: 1,
+      message: `Searching Google for: "${searchQuery}"...`,
+    });
+
     const searchRun = await callWithRetry(() =>
       apify.actor('apify/google-search-scraper').call({
         queries: searchQuery,
@@ -169,36 +263,88 @@ app.post('/api/crawl-events', scrapeLimiter, async (req, res) => {
     const candidateUrls = [];
     searchResults.forEach((item) => {
       if (item.organicResults) {
-        item.organicResults.forEach((res) => {
-          if (res.url && !res.url.includes('google.com')) {
-            candidateUrls.push(res.url);
+        item.organicResults.forEach((r) => {
+          if (r.url && !r.url.includes('google.com') && !candidateUrls.includes(r.url)) {
+            candidateUrls.push(r.url);
           }
         });
       }
     });
 
-    console.log(`Discovered ${candidateUrls.length} pages. Executing sequential scrape...`);
-    const eventsList = [];
-    const geminiModel = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+    const targetUrls = candidateUrls.slice(0, 5);
+    console.log(`Discovered ${targetUrls.length} candidate URLs:`, targetUrls);
+    sendSSE({
+      type: 'candidates',
+      urls: targetUrls,
+      message: `Discovered ${targetUrls.length} candidate event websites. Extracting content...`,
+    });
 
-    for (const targetUrl of candidateUrls) {
+    // ----------------------------------------------------
+    // STEP 2: Fast Parallel Page Extraction (Cheerio mode)
+    // ----------------------------------------------------
+    sendSSE({
+      type: 'status',
+      step: 2,
+      message: `Crawling ${targetUrls.length} websites in parallel using high-speed Cheerio parser...`,
+    });
+
+    const pageDataMap = new Map();
+
+    try {
+      // Run Apify website-content-crawler in BATCH with fast Cheerio crawler (seconds instead of minutes)
+      const crawlRun = await callWithRetry(() =>
+        apify.actor('apify/website-content-crawler').call({
+          startUrls: targetUrls.map((url) => ({ url })),
+          crawlerType: 'cheerio',
+          maxCrawlPages: targetUrls.length,
+          maxCrawlingDurationSecs: 35,
+        })
+      );
+
+      const { items: crawledPages } = await apify.dataset(crawlRun.defaultDatasetId).listItems();
+      for (const p of crawledPages) {
+        if (p.url && p.text) {
+          pageDataMap.set(p.url, p.text.slice(0, 10000));
+        }
+      }
+    } catch (crawlErr) {
+      console.warn('[Crawl Warning] Batch crawler issue, using direct fallback:', crawlErr.message);
+    }
+
+    // Direct fetch fallback for any missing URLs to ensure zero data loss
+    for (const url of targetUrls) {
+      if (!pageDataMap.has(url)) {
+        console.log(`[Direct Fetch] Extracting ${url}...`);
+        const fallbackText = await fetchPageDirect(url);
+        if (fallbackText) {
+          pageDataMap.set(url, fallbackText);
+        }
+      }
+    }
+
+    // ----------------------------------------------------
+    // STEP 3: Gemini AI Auditing & Immediate Streaming
+    // ----------------------------------------------------
+    sendSSE({
+      type: 'status',
+      step: 3,
+      message: 'Applying Lifewood 27-column audit & Fit Scoring with Gemini AI...',
+    });
+
+    let index = 0;
+    for (const targetUrl of targetUrls) {
+      index++;
+      const rawText = pageDataMap.get(targetUrl);
+      if (!rawText) continue;
+
       try {
-        console.log(`[Step 2] Crawling page: ${targetUrl}`);
-        const crawlRun = await callWithRetry(() =>
-          apify.actor('apify/website-content-crawler').call({
-            startUrls: [{ url: targetUrl }],
-            maxCrawlPages: 1,
-          })
-        );
-        const { items: pageData } = await apify.dataset(crawlRun.defaultDatasetId).listItems();
-        if (!pageData.length || !pageData[0].text) continue;
+        console.log(`[Step 3] AI Auditing ${index}/${targetUrls.length}: ${targetUrl}`);
+        sendSSE({
+          type: 'auditing',
+          url: targetUrl,
+          message: `AI auditing ${index}/${targetUrls.length}: ${new URL(targetUrl).hostname}...`,
+        });
 
-        const rawText = pageData[0].text.slice(0, 10000);
-
-        // Enforce safe RPM spacing for Gemini API
-        await sleep(1500);
-
-        console.log(`[Step 3] Parsing and scoring with Gemini (${geminiModel}): ${targetUrl}`);
         const response = await callWithRetry(async () => {
           try {
             return await ai.models.generateContent({
@@ -231,32 +377,63 @@ app.post('/api/crawl-events', scrapeLimiter, async (req, res) => {
 
         // Quality Gate: Within date scope and Fit Score >= 3
         if (parsed.is_in_scope && parsed.fit_score >= 3 && parsed.data) {
-          eventsList.push({
+          const newEvent = {
             no: eventsList.length + 1,
             ...parsed.data,
             fit_score: parsed.fit_score,
             official_website: parsed.data.official_website || targetUrl,
             source_links: targetUrl,
+          };
+
+          eventsList.push(newEvent);
+
+          // 🌟 Save to disk cache IMMEDIATELY so it is never lost!
+          saveToCache(eventsList);
+
+          // 🌟 Stream directly to frontend screen IMMEDIATELY!
+          sendSSE({
+            type: 'event',
+            data: newEvent,
+            message: `✓ Added: ${newEvent.event_name} (Fit ${newEvent.fit_score}/5)`,
           });
         }
 
-        // Delay between page crawls to respect remote servers
-        await sleep(2000);
-      } catch (err) {
-        console.error(`Failed to process ${targetUrl}:`, err.message);
+        // Brief safety pause for Gemini RPM
+        await sleep(1000);
+      } catch (itemErr) {
+        console.error(`Error processing ${targetUrl}:`, itemErr.message);
       }
     }
 
-    res.json({
+    console.log(`Pipeline complete! Verified ${eventsList.length} events.`);
+
+    if (isStream) {
+      sendSSE({
+        type: 'done',
+        count: eventsList.length,
+        data: eventsList,
+        message: `Pipeline complete! Verified ${eventsList.length} strategic exhibition records.`,
+      });
+      return res.end();
+    }
+
+    return res.json({
       success: true,
       count: eventsList.length,
       data: eventsList,
     });
   } catch (err) {
     console.error('Fatal Pipeline Error:', err);
-    res.status(500).json({ success: false, error: err.message });
+    if (isStream) {
+      sendSSE({ type: 'error', error: err.message });
+      return res.end();
+    }
+    return res.status(500).json({ success: false, error: err.message });
   }
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Pipeline backend running on http://localhost:${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Optimized Pipeline backend running on http://localhost:${PORT}`);
+});
+
