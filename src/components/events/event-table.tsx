@@ -19,15 +19,15 @@ export function EventTable({ events, onDelete }: EventTableProps) {
   }
 
   return (
-    <div className="w-full overflow-x-auto rounded-xl border border-[#D8D2C8] bg-white shadow-sm">
+    <div className="w-full overflow-x-auto rounded-[12px] border-[1.5px] border-[#D8D2C8] bg-white shadow-[0_2px_16px_rgba(0,0,0,0.05)] font-manrope">
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="bg-[#133020] text-white text-[10.5px] uppercase tracking-[0.08em] font-semibold border-b border-[#133020]">
             <th className="py-3.5 px-4 text-center w-12">#</th>
-            <th className="py-3.5 px-4 min-w-[240px]">Event Name</th>
+            <th className="py-3.5 px-4 min-w-[240px]">Event name</th>
             <th className="py-3.5 px-4 min-w-[120px]">Dates</th>
             <th className="py-3.5 px-4 min-w-[140px]">City / Country</th>
-            <th className="py-3.5 px-4 min-w-[180px]">Business Line</th>
+            <th className="py-3.5 px-4 min-w-[180px]">Business lines</th>
             <th className="py-3.5 px-4 text-center w-20">Fit</th>
             <th className="py-3.5 px-4 text-center w-24">Priority</th>
             <th className="py-3.5 px-4 min-w-[100px]">Action</th>

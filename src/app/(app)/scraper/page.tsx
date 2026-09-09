@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { REGIONS, BUSINESS_LINES } from "@/lib/constants/business-lines";
-import { Bot, Play, Check, X, RefreshCw, Sparkles, Sliders, Calendar, ShieldCheck, Edit } from "lucide-react";
+import { Bot, Play, Check, X, RefreshCw, Sparkles, Sliders, Calendar, ShieldCheck, Edit, Search } from "lucide-react";
 import { toast } from "sonner";
 import { useLocaleStore } from "@/stores/locale-store";
+import EventScraperDashboard from "@/components/events/EventScraperDashboard";
 
 export default function ScraperPage() {
+  const [engineMode, setEngineMode] = useState<"apify_gemini" | "standard">("apify_gemini");
   const [running, setRunning] = useState(false);
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -132,8 +134,40 @@ export default function ScraperPage() {
         </button>
       </div>
 
-      {/* Grid: Config Panel & Schedule Panel */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Mode Switcher Tabs */}
+      <div className="flex items-center gap-2 border-b border-[#D8D2C8] pb-2">
+        <button
+          onClick={() => setEngineMode("apify_gemini")}
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 ${
+            engineMode === "apify_gemini"
+              ? "bg-[#046241] text-white shadow-xs"
+              : "bg-white text-[#133020] border border-[#D8D2C8] hover:bg-[#F5EEDB]"
+          }`}
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>Apify + Google Gemini Engine (Batch 11 Spec)</span>
+        </button>
+        <button
+          onClick={() => setEngineMode("standard")}
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 ${
+            engineMode === "standard"
+              ? "bg-[#046241] text-white shadow-xs"
+              : "bg-white text-[#133020] border border-[#D8D2C8] hover:bg-[#F5EEDB]"
+          }`}
+        >
+          <Sliders className="w-3.5 h-3.5" />
+          <span>Internal Crawler & Scheduler</span>
+        </button>
+      </div>
+
+      {engineMode === "apify_gemini" ? (
+        <div className="bg-white rounded-xl border border-[#D8D2C8] shadow-xs overflow-hidden">
+          <EventScraperDashboard />
+        </div>
+      ) : (
+        <>
+          {/* Grid: Config Panel & Schedule Panel */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Config Panel */}
         <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-[#D8D2C8] shadow-xs space-y-5">
           <div className="flex items-center justify-between border-b border-[#D8D2C8] pb-3">
@@ -357,6 +391,8 @@ export default function ScraperPage() {
           </div>
         )}
       </div>
+        </>
+      )}
     </div>
   );
 }

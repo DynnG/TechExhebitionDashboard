@@ -20,10 +20,10 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     const val = payload[0].value;
     return (
-      <div className="bg-[#133020] text-white p-3 rounded-xl border border-[#FFB347] shadow-xl text-xs space-y-1">
-        <p className="font-bold text-[#FFB347]">{label}</p>
-        <p className="font-semibold text-white">
-          Exhibitions: <span className="text-[#FFB347] font-black text-sm">{val}</span>
+      <div className="bg-[#133020] text-white p-3 rounded-[8px] border border-[#FFB347] shadow-[0_4px_20px_rgba(0,0,0,0.12)] text-xs font-manrope space-y-1">
+        <p className="font-semibold text-[#FFB347]">{label}</p>
+        <p className="font-medium text-white">
+          Exhibitions: <span className="text-[#FFB347] font-bold text-xs">{val}</span>
         </p>
       </div>
     );
@@ -72,37 +72,37 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
   };
 
   return (
-    <div className="bg-white p-5 rounded-xl border border-[#D8D2C8] shadow-xs">
+    <div className="bg-white p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] shadow-[0_2px_16px_rgba(0,0,0,0.05)] font-manrope">
       <div className="flex items-center justify-between flex-wrap gap-3 mb-4 border-b border-[#D8D2C8] pb-3">
         <div>
-          <h3 className="text-sm font-bold text-[#133020]">
-            Exhibitions Distribution by Month
+          <h3 className="text-[14px] font-semibold text-[#133020]">
+            Exhibitions distribution by month
           </h3>
           <p className="text-[11px] text-[#666666]">
-            Target threshold: ≥5 exhibitions per month (gaps highlighted in Saffron)
+            Target threshold: ≥ 5 exhibitions per month (gaps highlighted in Saffron)
           </p>
         </div>
 
         {/* Custom Interactive Date Range Pickers (Month, Day, Year) */}
         <div className="flex items-center gap-2 flex-wrap text-xs">
-          <div className="flex items-center gap-1.5 bg-[#F9F7F7] px-2.5 py-1.5 rounded-xl border border-[#D8D2C8] shadow-2xs">
+          <div className="flex items-center gap-1.5 bg-[#F9F7F7] px-2.5 py-1.5 rounded-[8px] border-[1.5px] border-[#D8D2C8]">
             <Calendar className="w-3.5 h-3.5 text-[#046241]" />
-            <span className="font-bold text-[#133020]">From:</span>
+            <span className="font-semibold text-[#133020]">From:</span>
             <input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="bg-transparent text-xs font-bold text-[#133020] focus:outline-none cursor-pointer"
+              className="bg-transparent text-xs font-semibold text-[#133020] focus:outline-none cursor-pointer"
             />
           </div>
 
-          <div className="flex items-center gap-1.5 bg-[#F9F7F7] px-2.5 py-1.5 rounded-xl border border-[#D8D2C8] shadow-2xs">
-            <span className="font-bold text-[#133020]">To:</span>
+          <div className="flex items-center gap-1.5 bg-[#F9F7F7] px-2.5 py-1.5 rounded-[8px] border-[1.5px] border-[#D8D2C8]">
+            <span className="font-semibold text-[#133020]">To:</span>
             <input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="bg-transparent text-xs font-bold text-[#133020] focus:outline-none cursor-pointer"
+              className="bg-transparent text-xs font-semibold text-[#133020] focus:outline-none cursor-pointer"
             />
           </div>
 
@@ -110,7 +110,7 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
             <button
               onClick={handleResetDates}
               title="Reset Date Range"
-              className="p-1.5 text-[#046241] bg-[#046241]/10 hover:bg-[#046241]/20 rounded-xl transition flex items-center gap-1 font-bold text-[11px]"
+              className="px-2.5 py-1 text-[#046241] bg-[#046241]/10 hover:bg-[#046241]/20 rounded-[8px] transition flex items-center gap-1 font-semibold text-[11px]"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Reset</span>
@@ -119,14 +119,14 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
         </div>
       </div>
 
-      <div className="flex items-center justify-end gap-3 mb-2 text-xs font-semibold">
-        <div className="flex items-center gap-1 text-[11px]">
-          <span className="w-2.5 h-2.5 rounded-sm bg-[#046241] inline-block" />
-          <span className="text-[#133020]">Target Met (≥5 Exhibitions)</span>
+      <div className="flex items-center justify-end gap-3 mb-2 text-xs font-medium">
+        <div className="flex items-center gap-1.5 text-[11px]">
+          <span className="w-2.5 h-2.5 rounded-[2px] bg-[#046241] inline-block" />
+          <span className="text-[#133020]">Target met (≥ 5 exhibitions)</span>
         </div>
-        <div className="flex items-center gap-1 text-[11px]">
-          <span className="w-2.5 h-2.5 rounded-sm bg-[#FFB347] inline-block" />
-          <span className="text-[#C17110]">Gap (&lt;5 Exhibitions)</span>
+        <div className="flex items-center gap-1.5 text-[11px]">
+          <span className="w-2.5 h-2.5 rounded-[2px] bg-[#FFB347] inline-block" />
+          <span className="text-[#C17110]">Gap (&lt; 5 exhibitions)</span>
         </div>
       </div>
 
@@ -135,11 +135,11 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
           <BarChart data={formattedData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <XAxis
               dataKey="month"
-              tick={{ fontSize: 10, fill: "#133020", fontWeight: 600 }}
+              tick={{ fontSize: 10, fill: "#133020", fontWeight: 500 }}
               axisLine={{ stroke: "#D8D2C8" }}
             />
             <YAxis
-              tick={{ fontSize: 10, fill: "#133020", fontWeight: 600 }}
+              tick={{ fontSize: 10, fill: "#133020", fontWeight: 500 }}
               axisLine={{ stroke: "#D8D2C8" }}
               allowDecimals={false}
             />
