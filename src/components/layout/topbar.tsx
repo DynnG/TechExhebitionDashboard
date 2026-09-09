@@ -28,7 +28,7 @@ export function Topbar() {
   const title = getPageTitle(pathname);
 
   return (
-    <header className="h-16 bg-[#F9F7F7] border-b border-[rgba(19,48,32,0.08)] shadow-[0_4px_20px_-2px_rgba(19,48,32,0.05)] px-8 flex items-center justify-between sticky top-0 z-20">
+    <header className="h-16 bg-[#F5EEDB] border-b border-[#D8D2C8] px-8 flex items-center justify-between sticky top-0 z-20 shadow-sm">
       {/* Page Title & Breadcrumbs */}
       <div>
         <div className="flex items-center gap-1.5 text-xs text-[#666666]">

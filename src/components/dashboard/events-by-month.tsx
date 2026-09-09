@@ -72,8 +72,8 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
   };
 
   return (
-    <div className="bg-white p-5 rounded-[12px] border border-[#E6E6E6] shadow-[0_2px_16px_rgba(0,0,0,0.03)] hover:border-[#046241]/40 transition-colors duration-200 font-manrope">
-      <div className="flex items-center justify-between flex-wrap gap-3 mb-4 border-b border-[#E6E6E6] pb-3">
+    <div className="bg-white p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] shadow-[0_2px_16px_rgba(0,0,0,0.05)] font-manrope">
+      <div className="flex items-center justify-between flex-wrap gap-3 mb-4 border-b border-[#D8D2C8] pb-3">
         <div>
           <h3 className="text-[14px] font-semibold text-[#133020]">
             Exhibitions distribution by month
@@ -85,7 +85,8 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
 
         {/* Custom Interactive Date Range Pickers (Month, Day, Year) */}
         <div className="flex items-center gap-2 flex-wrap text-xs">
-          <div className="flex items-center gap-1.5 bg-[#F9F7F7] px-2.5 py-1.5 rounded-[8px] border border-[#E6E6E6]">
+          <div className="flex items-center gap-1.5 bg-[#F9F7F7] px-2.5 py-1.5 rounded-[8px] border-[1.5px] border-[#D8D2C8]">
+            <Calendar className="w-3.5 h-3.5 text-[#046241]" />
             <span className="font-semibold text-[#133020]">From:</span>
             <input
               type="date"
@@ -95,7 +96,7 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
             />
           </div>
 
-          <div className="flex items-center gap-1.5 bg-[#F9F7F7] px-2.5 py-1.5 rounded-[8px] border border-[#E6E6E6]">
+          <div className="flex items-center gap-1.5 bg-[#F9F7F7] px-2.5 py-1.5 rounded-[8px] border-[1.5px] border-[#D8D2C8]">
             <span className="font-semibold text-[#133020]">To:</span>
             <input
               type="date"

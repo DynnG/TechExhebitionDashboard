@@ -19,7 +19,7 @@ export function EventTable({ events, onDelete }: EventTableProps) {
   }
 
   return (
-    <div className="w-full overflow-x-auto rounded-[12px] border border-[#E6E6E6] bg-white shadow-xs font-manrope">
+    <div className="w-full overflow-x-auto rounded-[12px] border-[1.5px] border-[#D8D2C8] bg-white shadow-[0_2px_16px_rgba(0,0,0,0.05)] font-manrope">
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="bg-[#133020] text-white text-[10.5px] uppercase tracking-[0.08em] font-semibold border-b border-[#133020]">
@@ -34,7 +34,7 @@ export function EventTable({ events, onDelete }: EventTableProps) {
             <th className="py-3.5 px-4 text-right min-w-[100px]">Manage</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-[#E6E6E6] text-xs text-[#133020]">
+        <tbody className="divide-y divide-[#D8D2C8] text-xs text-[#133020]">
           {events.map((evt) => {
             let businessLines: string[] = [];
             try {

@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { PriorityIndicator } from "./priority-indicator";
 import { BusinessLineChip } from "./business-line-chip";
-import { FitScoreBadge } from "./fit-score-badge";
 import { BUSINESS_LINES } from "@/lib/constants/business-lines";
 import { MapPin } from "lucide-react";
 
@@ -25,10 +24,19 @@ export function EventCard({ event }: EventCardProps) {
   );
   const accentColor = blConfig ? blConfig.colorHex : "#046241";
 
+  const fitLevel =
+    event.fitScore >= 4 ? "High" : event.fitScore === 3 ? "Mid" : "Low";
+  const fitColor =
+    event.fitScore >= 4
+      ? "text-[#046241]"
+      : event.fitScore === 3
+      ? "text-[#C17110]"
+      : "text-[#708E7C]";
+
   return (
     <Link
       href={`/events/${event.id}`}
-      className="bg-white rounded-[12px] border border-[#E6E6E6] shadow-[0_2px_16px_rgba(0,0,0,0.03)] hover:border-[#046241]/40 hover:shadow-[0_4px_20px_rgba(0,0,0,0.06)] transition-colors duration-180 overflow-hidden flex flex-col justify-between relative group cursor-pointer block font-manrope"
+      className="bg-white rounded-[12px] border-[1.5px] border-[#D8D2C8] shadow-[0_2px_16px_rgba(0,0,0,0.05)] hover:shadow-[0_6px_30px_rgba(0,0,0,0.08)] hover:-translate-y-[1px] transition-all duration-180 overflow-hidden flex flex-col justify-between relative group cursor-pointer block font-manrope"
     >
       {/* 6px Color Accent Bar on Left Edge */}
       <div
@@ -54,12 +62,17 @@ export function EventCard({ event }: EventCardProps) {
 
           <div className="flex items-center gap-3 shrink-0">
             <PriorityIndicator priority={event.priorityLevel} />
-            {/* Enlarged numeric score hierarchy + Fit indicator badge */}
-            <div className="flex items-center gap-1.5 bg-[#F9F7F7] px-2 py-1 rounded-[8px] border border-[#E6E6E6]" title={`Fit score: ${event.fitScore}/5`}>
-              <span className="text-2xl font-bold text-[#133020] leading-none">
+            {/* Enlarged numeric fit score + High / Mid / Low indicator below */}
+            <div
+              className="flex flex-col items-center justify-center min-w-[44px] px-2 py-1 rounded-[8px] bg-[#F5EEDB]/50 border border-[#D8D2C8]"
+              title={`Fit score: ${event.fitScore}/5 (${fitLevel} fit)`}
+            >
+              <span className="text-[26px] font-extrabold text-[#133020] leading-none">
                 {event.fitScore}
               </span>
-              <FitScoreBadge score={event.fitScore} size="sm" />
+              <span className={`text-[9.5px] font-bold uppercase tracking-wider mt-0.5 ${fitColor}`}>
+                {fitLevel}
+              </span>
             </div>
           </div>
         </div>
@@ -89,7 +102,7 @@ export function EventCard({ event }: EventCardProps) {
       </div>
 
       {/* BODY GRID (auto-fit columns) */}
-      <div className="border-t border-[#E6E6E6] bg-white px-5 pl-6 py-3 grid grid-cols-3 gap-2.5 text-[12px]">
+      <div className="border-t border-[#D8D2C8] bg-white px-5 pl-6 py-3 grid grid-cols-3 gap-2.5 text-[12px]">
         <div className="min-w-0">
           <span className="text-[10px] uppercase tracking-wider text-[#666666] font-medium block">
             Organizer
@@ -117,7 +130,7 @@ export function EventCard({ event }: EventCardProps) {
       </div>
 
       {/* STRATEGIC SECTION (green-tinted bg) */}
-      <div className="border-t border-[#E6E6E6] bg-[#F0F5F2] px-5 pl-6 py-3 flex items-center justify-between gap-3 text-xs">
+      <div className="border-t border-[#D8D2C8] bg-[#F0F5F2] px-5 pl-6 py-3 flex items-center justify-between gap-3 text-xs">
         <div className="min-w-0 flex-1">
           <span className="text-[10px] uppercase tracking-wider text-[#046241] font-semibold block mb-0.5">
             Relevance to Lifewood

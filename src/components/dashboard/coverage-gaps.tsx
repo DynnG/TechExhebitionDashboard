@@ -7,9 +7,9 @@ interface CoverageGapsProps {
 
 export function CoverageGapsWidget({ gaps }: CoverageGapsProps) {
   return (
-    <div className="bg-white p-5 rounded-[12px] border border-[#E6E6E6] shadow-[0_2px_16px_rgba(0,0,0,0.03)] hover:border-[#046241]/40 transition-colors duration-200 flex flex-col justify-between font-manrope">
+    <div className="bg-white p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] shadow-[0_2px_16px_rgba(0,0,0,0.05)] flex flex-col justify-between font-manrope">
       <div>
-        <div className="flex items-center justify-between mb-4 border-b border-[#E6E6E6] pb-3">
+        <div className="flex items-center justify-between mb-4 border-b border-[#D8D2C8] pb-3">
           <div className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-[#C17110] shrink-0" />
             <div>

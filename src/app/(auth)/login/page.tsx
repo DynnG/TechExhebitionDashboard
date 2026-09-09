@@ -48,7 +48,7 @@ function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md bg-white rounded-2xl shadow-[0_4px_25px_rgba(0,0,0,0.04)] p-8 sm:p-10 border border-[#E6E6E6] relative">
+    <div className="w-full max-w-md bg-white rounded-2xl shadow-[0_4px_25px_rgba(0,0,0,0.04)] p-8 sm:p-10 border border-[#D8D2C8] relative">
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-[#133020] tracking-tight">
           Welcome back
@@ -76,7 +76,7 @@ function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="user@lifewood.com"
-            className="w-full px-3.5 py-2.5 rounded-lg border border-[#E6E6E6] text-xs text-[#133020] bg-white placeholder-[#999999] focus:outline-none focus:border-[#046241] focus:ring-2 focus:ring-[#046241]/20 transition"
+            className="w-full px-3.5 py-2.5 rounded-lg border border-[#D8D2C8] text-xs text-[#133020] bg-white placeholder-[#999999] focus:outline-none focus:border-[#046241] focus:ring-2 focus:ring-[#046241]/20 transition"
           />
         </div>
 
@@ -90,7 +90,7 @@ function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
-            className="w-full px-3.5 py-2.5 rounded-lg border border-[#E6E6E6] text-xs text-[#133020] bg-white placeholder-[#999999] focus:outline-none focus:border-[#046241] focus:ring-2 focus:ring-[#046241]/20 transition"
+            className="w-full px-3.5 py-2.5 rounded-lg border border-[#D8D2C8] text-xs text-[#133020] bg-white placeholder-[#999999] focus:outline-none focus:border-[#046241] focus:ring-2 focus:ring-[#046241]/20 transition"
           />
         </div>
 
@@ -128,7 +128,7 @@ function LoginForm() {
       </form>
 
       {/* Quick Demo Login Preset Buttons */}
-      <div className="mt-8 pt-5 border-t border-[#E6E6E6]">
+      <div className="mt-8 pt-5 border-t border-[#D8D2C8]">
         <p className="text-[11px] text-[#666666] mb-2.5 font-medium">
           Quick switch demo account:
         </p>
@@ -136,21 +136,21 @@ function LoginForm() {
           <button
             type="button"
             onClick={() => setQuickUser("admin@lifewood.com", "admin123")}
-            className="py-1.5 px-2 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-lg border border-[#E6E6E6] transition text-center"
+            className="py-1.5 px-2 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-lg border border-[#D8D2C8] transition text-center"
           >
             Admin
           </button>
           <button
             type="button"
             onClick={() => setQuickUser("supervisor@lifewood.com", "supervisor123")}
-            className="py-1.5 px-2 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-lg border border-[#E6E6E6] transition text-center"
+            className="py-1.5 px-2 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-lg border border-[#D8D2C8] transition text-center"
           >
             Supervisor
           </button>
           <button
             type="button"
             onClick={() => setQuickUser("intern@lifewood.com", "intern123")}
-            className="py-1.5 px-2 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-lg border border-[#E6E6E6] transition text-center"
+            className="py-1.5 px-2 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-lg border border-[#D8D2C8] transition text-center"
           >
             Intern
           </button>

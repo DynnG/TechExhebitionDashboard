@@ -194,7 +194,7 @@ export default function UsersPage() {
           </span>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-[#E6E6E6] shadow-xs overflow-hidden">
+        <div className="bg-white rounded-xl border border-[#D8D2C8] shadow-xs overflow-hidden">
           <table className="w-full text-xs text-left border-collapse">
             <thead>
               <tr className="bg-[#133020] text-white font-semibold uppercase tracking-wider text-[10px]">
@@ -205,7 +205,7 @@ export default function UsersPage() {
                 <th className="p-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#E6E6E6]">
+            <tbody className="divide-y divide-[#D8D2C8]">
               {users.map((u) => (
                 <tr key={u.id} className="hover:bg-[#F9F7F7] transition">
                   <td className="p-3.5 font-bold text-[#133020]">
@@ -222,7 +222,7 @@ export default function UsersPage() {
                       <select
                         value={editingUser.role}
                         onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
-                        className="px-2 py-1 border border-[#E6E6E6] rounded text-xs text-[#133020] bg-white font-bold"
+                        className="px-2 py-1 border border-[#D8D2C8] rounded text-xs text-[#133020] bg-white font-bold"
                       >
                         <option value="ADMIN">ADMIN</option>
                         <option value="SUPERVISOR">SUPERVISOR</option>
@@ -378,7 +378,7 @@ export default function UsersPage() {
               <button
                 type="button"
                 onClick={() => setShowAddModal(false)}
-                className="px-4 py-2 border border-[#E6E6E6] rounded-lg text-xs text-[#666666] font-semibold hover:bg-gray-50"
+                className="px-4 py-2 border border-[#D8D2C8] rounded-lg text-xs text-[#666666] font-semibold hover:bg-gray-50"
               >
                 Cancel
               </button>
@@ -396,7 +396,7 @@ export default function UsersPage() {
       {/* Reset Password Modal */}
       <ModalPortal isOpen={!!resetPasswordUser} onClose={() => setResetPasswordUser(null)}>
         <div className="p-6 space-y-4">
-          <div className="flex items-center justify-between border-b border-[#E6E6E6] pb-3">
+          <div className="flex items-center justify-between border-b border-[#D8D2C8] pb-3">
             <div>
               <h3 className="text-base font-bold text-[#133020]">
                 {locale === "en" ? "Reset / Change User Password" : "重置/修改用户密码"}
@@ -425,7 +425,7 @@ export default function UsersPage() {
                 placeholder="Enter at least 6 characters"
                 value={newPasswordValue}
                 onChange={(e) => setNewPasswordValue(e.target.value)}
-                className="w-full px-3.5 py-2.5 border border-[#E6E6E6] rounded-lg text-xs bg-white text-[#133020] focus:outline-none focus:border-[#046241]"
+                className="w-full px-3.5 py-2.5 border border-[#D8D2C8] rounded-lg text-xs bg-white text-[#133020] focus:outline-none focus:border-[#046241]"
               />
             </div>
 
@@ -433,7 +433,7 @@ export default function UsersPage() {
               <button
                 type="button"
                 onClick={() => setResetPasswordUser(null)}
-                className="px-4 py-2 border border-[#E6E6E6] rounded-lg text-xs text-[#666666] font-semibold hover:bg-gray-50"
+                className="px-4 py-2 border border-[#D8D2C8] rounded-lg text-xs text-[#666666] font-semibold hover:bg-gray-50"
               >
                 Cancel
               </button>

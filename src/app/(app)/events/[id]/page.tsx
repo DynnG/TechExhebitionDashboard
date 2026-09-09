@@ -148,7 +148,7 @@ export default function EventDetailPage() {
       </div>
 
       {/* Main Full-Width Standalone Card Container */}
-      <div className="bg-white rounded-[12px] border border-[#E6E6E6] shadow-[0_2px_16px_rgba(0,0,0,0.05)] overflow-hidden relative">
+      <div className="bg-white rounded-[12px] border-[1.5px] border-[#D8D2C8] shadow-[0_2px_16px_rgba(0,0,0,0.05)] overflow-hidden relative">
         {/* 6px Left Accent Bar */}
         <div
           className="absolute left-0 top-0 bottom-0 w-[6px] z-10 rounded-l-[12px]"
@@ -156,7 +156,7 @@ export default function EventDetailPage() {
         />
 
         {/* HEADER AREA */}
-        <div className="p-6 pl-8 border-b border-[#E6E6E6] bg-white">
+        <div className="p-6 pl-8 border-b border-[#D8D2C8] bg-white">
           <div className="flex items-center justify-between gap-4 flex-wrap mb-2">
             <div className="flex items-center gap-2">
               <span className="text-[12px] font-semibold text-[#133020]">
@@ -191,7 +191,7 @@ export default function EventDetailPage() {
           </div>
 
           {/* Logistics & Official Website CTA */}
-          <div className="flex items-center justify-between flex-wrap gap-4 pt-4 border-t border-[#E6E6E6]">
+          <div className="flex items-center justify-between flex-wrap gap-4 pt-4 border-t border-[#D8D2C8]">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs text-[#133020]">
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-[#046241] shrink-0" />
@@ -245,7 +245,7 @@ export default function EventDetailPage() {
         </div>
 
         {/* BODY (2-Column Grid) */}
-        <div className="p-6 pl-8 grid grid-cols-1 md:grid-cols-2 gap-6 border-b border-[#E6E6E6]">
+        <div className="p-6 pl-8 grid grid-cols-1 md:grid-cols-2 gap-6 border-b border-[#D8D2C8]">
           {/* Left Column: Strategic Assessment */}
           <div className="space-y-4">
             <div>
@@ -253,7 +253,7 @@ export default function EventDetailPage() {
                 <FileCheck className="w-3.5 h-3.5 text-[#046241]" />
                 <span>Strategic focus & purpose</span>
               </h3>
-              <p className="text-xs text-[#133020] leading-relaxed bg-[#F9F7F7] p-3.5 rounded-[8px] border border-[#E6E6E6]">
+              <p className="text-xs text-[#133020] leading-relaxed bg-[#F9F7F7] p-3.5 rounded-[8px] border border-[#D8D2C8]">
                 {event.strategicFocus || "Strategic industrial intelligence event"}
               </p>
             </div>
@@ -271,13 +271,13 @@ export default function EventDetailPage() {
               <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#666666] mb-1.5">
                 Target audience & buyers
               </h3>
-              <p className="text-xs text-[#133020] bg-white p-3 rounded-[8px] border border-[#E6E6E6]">
+              <p className="text-xs text-[#133020] bg-white p-3 rounded-[8px] border border-[#D8D2C8]">
                 {event.targetAudience || "Enterprise buyers, AI leaders, procurement teams"}
               </p>
             </div>
 
             {/* Location card */}
-            <div className="bg-[#F5EEDB] p-3.5 rounded-[8px] border border-[#E6E6E6] space-y-1.5 text-xs text-[#133020]">
+            <div className="bg-[#F5EEDB] p-3.5 rounded-[8px] border border-[#D8D2C8] space-y-1.5 text-xs text-[#133020]">
               <div className="flex items-center justify-between">
                 <span className="font-semibold text-[13px]">{event.venue}</span>
                 {event.locationAddress && event.locationAddress !== "Not publicly disclosed" && (
@@ -299,8 +299,8 @@ export default function EventDetailPage() {
           </div>
 
           {/* Right Column: Commercial & Organizer Specs */}
-          <div className="space-y-4 bg-[#F9F7F7] p-5 rounded-[8px] border border-[#E6E6E6] text-xs">
-            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#133020] border-b border-[#E6E6E6] pb-2">
+          <div className="space-y-4 bg-[#F9F7F7] p-5 rounded-[8px] border border-[#D8D2C8] text-xs">
+            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#133020] border-b border-[#D8D2C8] pb-2">
               Commercial & organizer detail
             </h3>
 
@@ -445,4 +445,3 @@ export default function EventDetailPage() {
     </div>
   );
 }
-

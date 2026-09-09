@@ -45,7 +45,7 @@ export function ScraperStatusWidget() {
   };
 
   return (
-    <div className="bg-white rounded-[12px] p-5 border border-[#E6E6E6] shadow-[0_2px_16px_rgba(0,0,0,0.03)] hover:border-[#046241]/40 transition-colors duration-200 font-manrope">
+    <div className="bg-white rounded-[12px] p-5 border-[1.5px] border-[#D8D2C8] shadow-[0_2px_16px_rgba(0,0,0,0.05)] font-manrope">
       <div className="flex items-center justify-between flex-wrap gap-4">
         {/* Title & Engine info */}
         <div className="flex items-center gap-3">
