@@ -22,6 +22,7 @@ import { FitScoreBadge } from "./fit-score-badge";
 import { PriorityIndicator } from "./priority-indicator";
 import { BusinessLineChip } from "./business-line-chip";
 import { toast } from "sonner";
+import { sanitizeEventUrl } from "@/lib/url";
 
 export interface EventRecord {
   no: number;
@@ -293,7 +294,9 @@ export default function EventScraperDashboard() {
           dates: event.dates,
           venue: event.venue,
           locationAddress: event.location_address,
-          officialWebsite: event.official_website,
+          officialWebsite:
+            sanitizeEventUrl(event.official_website, event.source_links) ||
+            "https://",
           organizer: event.organizer,
           eventCategory: event.event_category,
           businessLines: event.business_lines
@@ -729,17 +732,30 @@ export default function EventScraperDashboard() {
                       {e.booth_sponsorship_cost || "Not disclosed"}
                     </td>
                     <td className="py-3 px-3.5 text-right whitespace-nowrap">
-                      {e.official_website && (
-                        <a
-                          href={e.official_website}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#046241] hover:text-[#133020] transition"
-                        >
-                          <span>Visit</span>
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
-                      )}
+                      {(() => {
+                        const targetUrl = sanitizeEventUrl(
+                          e.official_website,
+                          e.source_links
+                        );
+                        if (!targetUrl) {
+                          return (
+                            <span className="text-[11px] text-[#999999]">
+                              No link
+                            </span>
+                          );
+                        }
+                        return (
+                          <a
+                            href={targetUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#046241] hover:text-[#133020] transition"
+                          >
+                            <span>Visit</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        );
+                      })()}
                     </td>
                     <td className="py-3 px-3.5 text-right whitespace-nowrap">
                       {isAccepted ? (

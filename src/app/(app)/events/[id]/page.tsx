@@ -9,6 +9,7 @@ import { BusinessLineChip } from "@/components/events/business-line-chip";
 import { BUSINESS_LINES } from "@/lib/constants/business-lines";
 import { EventForm } from "@/components/events/event-form";
 import { ModalPortal } from "@/components/shared/modal-portal";
+import { sanitizeEventUrl } from "@/lib/url";
 import {
   MapPin,
   Calendar,
@@ -229,18 +230,31 @@ export default function EventDetailPage() {
             </div>
 
             {/* Official Website Button */}
-            {event.officialWebsite && (
-              <a
-                href={event.officialWebsite}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2 bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] font-medium text-xs rounded-[8px] transition-all duration-180 shadow-2xs"
-              >
-                <Globe className="w-3.5 h-3.5" />
-                <span>Visit official website</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
-            )}
+            {(() => {
+              let firstSource: string | null = null;
+              try {
+                const parsed = JSON.parse(event.sourceLinks || "[]");
+                firstSource = Array.isArray(parsed) ? parsed[0] : null;
+              } catch {
+                firstSource = event.sourceLinks || null;
+              }
+
+              const validUrl = sanitizeEventUrl(event.officialWebsite, firstSource);
+              if (!validUrl) return null;
+
+              return (
+                <a
+                  href={validUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2 bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] font-medium text-xs rounded-[8px] transition-all duration-180 shadow-2xs"
+                >
+                  <Globe className="w-3.5 h-3.5" />
+                  <span>Visit official website</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              );
+            })()}
           </div>
         </div>
 

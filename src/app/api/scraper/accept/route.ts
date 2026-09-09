@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { sanitizeEventUrl } from "@/lib/url";
 
 export async function POST(req: Request) {
   try {
@@ -82,7 +83,7 @@ export async function POST(req: Request) {
         endDate: body.endDate ? new Date(body.endDate) : null,
         venue: body.venue || "TBD",
         locationAddress: body.locationAddress || "",
-        officialWebsite: body.officialWebsite || "https://",
+        officialWebsite: sanitizeEventUrl(body.officialWebsite) || "https://",
         organizer: body.organizer || "TBD",
         eventCategory: body.eventCategory || "Tech Exhibition",
         businessLines: JSON.stringify(businessLines),
@@ -91,7 +92,7 @@ export async function POST(req: Request) {
         targetAudience: body.targetAudience || "Tech Executives",
         estimatedAttendees: body.estimatedAttendees || "Not publicly disclosed",
         exhibitorOpportunity: "Not publicly disclosed",
-        boothCost: "Not publicly disclosed",
+        boothCost: body.boothCost || "Not publicly disclosed",
         registrationDeadline: "Not publicly disclosed",
         contactEmail: "Not publicly disclosed",
         contactPerson: "Not publicly disclosed",
@@ -100,7 +101,7 @@ export async function POST(req: Request) {
         priorityLevel: body.priorityLevel || "High",
         fitScore: body.fitScore || 4,
         keyNotes: "Scraped via AI Scraper Microservice",
-        sourceLinks: JSON.stringify([body.officialWebsite || "https://"]),
+        sourceLinks: JSON.stringify([sanitizeEventUrl(body.officialWebsite) || "https://"]),
         status: "PENDING_REVIEW",
         source: "SCRAPED",
         createdById: parseInt((session.user as any).id || "1", 10),
