@@ -3,7 +3,8 @@
 import { useState, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AlertCircle, ArrowRight, ShieldCheck, Sparkles, Globe, BarChart3, CheckCircle2 } from "lucide-react";
+import { motion } from "framer-motion";
+import { AlertCircle, ArrowRight, Sparkles, Globe, BarChart3 } from "lucide-react";
 
 function LoginForm() {
   const router = useRouter();
@@ -48,18 +49,23 @@ function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md bg-white rounded-2xl shadow-[0_4px_25px_rgba(0,0,0,0.04)] p-8 sm:p-10 border border-[#D8D2C8] relative">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.96 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3 }}
+      className="w-full max-w-md bg-white dark:bg-[#133020] rounded-2xl shadow-xl p-8 sm:p-10 border border-[#D8D2C8] dark:border-[#1E4830] relative transition-colors"
+    >
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-[#133020] tracking-tight">
+        <h2 className="text-2xl font-bold text-emerald-950 dark:text-white tracking-tight">
           Welcome back
         </h2>
-        <p className="text-xs text-[#666666] mt-1">
+        <p className="text-xs text-emerald-800/70 dark:text-slate-400 mt-1">
           Enter your credentials to access the intelligence platform
         </p>
       </div>
 
       {error && (
-        <div className="mb-5 p-3.5 bg-[#B91C1C]/10 border border-[#B91C1C]/30 rounded-lg flex items-center gap-2.5 text-xs text-[#B91C1C]">
+        <div className="mb-5 p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-lg flex items-center gap-2.5 text-xs text-rose-600 dark:text-rose-400">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{error}</span>
         </div>
@@ -67,7 +73,7 @@ function LoginForm() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-[#133020] mb-1.5">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-emerald-950 dark:text-slate-200 mb-1.5">
             Work Email
           </label>
           <input
@@ -76,12 +82,12 @@ function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="user@lifewood.com"
-            className="w-full px-3.5 py-2.5 rounded-lg border border-[#D8D2C8] text-xs text-[#133020] bg-white placeholder-[#999999] focus:outline-none focus:border-[#046241] focus:ring-2 focus:ring-[#046241]/20 transition"
+            className="w-full px-3.5 py-2.5 rounded-lg border border-[#D8D2C8] dark:border-white/10 text-xs text-emerald-950 dark:text-slate-100 bg-paper dark:bg-black/30 placeholder:text-slate-400 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 transition"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-[#133020] mb-1.5">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-emerald-950 dark:text-slate-200 mb-1.5">
             Password
           </label>
           <input
@@ -90,85 +96,84 @@ function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
-            className="w-full px-3.5 py-2.5 rounded-lg border border-[#D8D2C8] text-xs text-[#133020] bg-white placeholder-[#999999] focus:outline-none focus:border-[#046241] focus:ring-2 focus:ring-[#046241]/20 transition"
+            className="w-full px-3.5 py-2.5 rounded-lg border border-[#D8D2C8] dark:border-white/10 text-xs text-emerald-950 dark:text-slate-100 bg-paper dark:bg-black/30 placeholder:text-slate-400 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 transition"
           />
         </div>
 
         {/* Remember Me Checkbox */}
         <div className="flex items-center justify-between text-xs pt-1">
-          <label className="flex items-center gap-2 cursor-pointer text-[#666666] select-none">
+          <label className="flex items-center gap-2 cursor-pointer text-emerald-800/70 dark:text-slate-400 select-none">
             <input
               type="checkbox"
               checked={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
-              className="w-4 h-4 rounded border-[#D8D2C8] text-[#046241] focus:ring-[#046241]"
+              className="w-4 h-4 rounded border-[#D8D2C8] text-emerald-600 focus:ring-emerald-500"
             />
             <span>Remember me</span>
           </label>
-          <span className="text-[#046241] font-medium hover:underline cursor-pointer">
+          <span className="text-emerald-700 dark:text-amber-400 font-medium hover:underline cursor-pointer">
             Forgot password?
           </span>
         </div>
 
-        {/* Primary CTA: Dark Serpent filled with Saffron hover accent */}
+        {/* Primary CTA */}
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 px-5 rounded-lg bg-[#133020] hover:bg-[#133020]/90 text-white hover:text-[#FFB347] border border-[#133020] hover:border-[#FFB347]/60 font-semibold text-xs transition-all duration-200 shadow-sm flex items-center justify-center gap-2 group disabled:opacity-50 mt-2"
+          className="w-full py-3 px-5 rounded-lg bg-emerald-950 hover:bg-emerald-900 dark:bg-amber-400 dark:hover:bg-amber-300 text-white dark:text-emerald-950 font-bold text-xs transition-all duration-200 shadow-md flex items-center justify-center gap-2 group disabled:opacity-50 mt-2"
         >
           {loading ? (
             <span>Signing in...</span>
           ) : (
             <>
               <span>Sign in to Dashboard</span>
-              <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition text-[#FFB347]" />
+              <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition text-amber-400 dark:text-emerald-950" />
             </>
           )}
         </button>
       </form>
 
       {/* Quick Demo Login Preset Buttons */}
-      <div className="mt-8 pt-5 border-t border-[#D8D2C8]">
-        <p className="text-[11px] text-[#666666] mb-2.5 font-medium">
+      <div className="mt-8 pt-5 border-t border-[#D8D2C8] dark:border-[#1E4830]">
+        <p className="text-[11px] text-emerald-800/70 dark:text-slate-400 mb-2.5 font-medium">
           Quick switch demo account:
         </p>
         <div className="grid grid-cols-3 gap-2">
           <button
             type="button"
             onClick={() => setQuickUser("admin@lifewood.com", "admin123")}
-            className="py-1.5 px-2 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-lg border border-[#D8D2C8] transition text-center"
+            className="py-1.5 px-2 bg-paper dark:bg-black/30 hover:bg-amber-400/20 text-xs font-semibold text-emerald-950 dark:text-slate-200 rounded-lg border border-[#D8D2C8] dark:border-white/10 transition text-center"
           >
             Admin
           </button>
           <button
             type="button"
             onClick={() => setQuickUser("supervisor@lifewood.com", "supervisor123")}
-            className="py-1.5 px-2 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-lg border border-[#D8D2C8] transition text-center"
+            className="py-1.5 px-2 bg-paper dark:bg-black/30 hover:bg-amber-400/20 text-xs font-semibold text-emerald-950 dark:text-slate-200 rounded-lg border border-[#D8D2C8] dark:border-white/10 transition text-center"
           >
             Supervisor
           </button>
           <button
             type="button"
             onClick={() => setQuickUser("intern@lifewood.com", "intern123")}
-            className="py-1.5 px-2 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-lg border border-[#D8D2C8] transition text-center"
+            className="py-1.5 px-2 bg-paper dark:bg-black/30 hover:bg-amber-400/20 text-xs font-semibold text-emerald-950 dark:text-slate-200 rounded-lg border border-[#D8D2C8] dark:border-white/10 transition text-center"
           >
             Intern
           </button>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen font-manrope grid grid-cols-1 lg:grid-cols-2 bg-[#F9F7F7]">
-      {/* Left Panel: Brand Showcase with Lifewood Corporate Imagery, Official Logo Lockup & Tagline */}
+    <div className="min-h-screen font-manrope grid grid-cols-1 lg:grid-cols-2 bg-paper dark:bg-[#0B1E14] transition-colors">
+      {/* Left Panel: Brand Showcase */}
       <div className="hidden lg:flex flex-col justify-between p-12 lg:p-16 bg-[#133020] text-white relative overflow-hidden">
         {/* Background ambient editorial glows */}
         <div className="absolute -top-32 -left-32 w-96 h-96 bg-[#046241]/40 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-[#FFB347]/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-radial from-[#046241]/20 to-transparent rounded-full blur-2xl pointer-events-none" />
 
         {/* Top Logo Lockup */}
         <div className="relative z-10">
@@ -188,7 +193,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Middle Feature Highlights / Bento Corporate Showcase */}
+        {/* Middle Feature Highlights */}
         <div className="relative z-10 my-auto py-10 space-y-6">
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#046241]/40 border border-[#046241] text-[#FFB347] text-xs font-semibold">
@@ -211,23 +216,23 @@ export default function LoginPage() {
             </div>
 
             <div className="p-4 bg-white/5 border border-white/10 rounded-xl backdrop-blur-xs space-y-1">
-              <BarChart3 className="w-5 h-5 text-[#046241] mb-2 text-[#FFB347]" />
+              <BarChart3 className="w-5 h-5 text-[#FFB347] mb-2" />
               <div className="text-lg font-bold text-white">Fit 3+ Verified</div>
               <div className="text-[11px] text-[#F5EEDB]/60">Enterprise buyer alignment</div>
             </div>
           </div>
         </div>
 
-        {/* Bottom Tagline / Corporate Footer */}
+        {/* Bottom Tagline */}
         <div className="relative z-10 pt-6 border-t border-white/10 flex items-center justify-between text-xs text-[#F5EEDB]/60">
           <span>Structured Enterprise Bento Grid & Editorial Minimalism</span>
           <span className="text-[#FFB347]">© 2026 Lifewood 活树</span>
         </div>
       </div>
 
-      {/* Right Panel: Clean White Form Card */}
+      {/* Right Panel: Form Card */}
       <div className="flex items-center justify-center p-6 sm:p-12 relative">
-        <Suspense fallback={<div className="text-xs text-[#133020] font-semibold">Loading...</div>}>
+        <Suspense fallback={<div className="text-xs text-emerald-950 font-semibold">Loading...</div>}>
           <LoginForm />
         </Suspense>
       </div>

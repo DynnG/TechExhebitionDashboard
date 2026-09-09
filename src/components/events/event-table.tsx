@@ -19,10 +19,10 @@ export function EventTable({ events, onDelete }: EventTableProps) {
   }
 
   return (
-    <div className="w-full overflow-x-auto rounded-[12px] border-[1.5px] border-[#D8D2C8] bg-white shadow-[0_2px_16px_rgba(0,0,0,0.05)] font-manrope">
+    <div className="w-full overflow-x-auto rounded-[12px] border-[1.5px] border-[#D8D2C8] dark:border-[#1E4830] bg-white dark:bg-[#133020] shadow-sm font-manrope transition-colors">
       <table className="w-full text-left border-collapse">
         <thead>
-          <tr className="bg-[#133020] text-white text-[10.5px] uppercase tracking-[0.08em] font-semibold border-b border-[#133020]">
+          <tr className="bg-emerald-950 dark:bg-black/50 text-white text-[10.5px] uppercase tracking-[0.08em] font-semibold border-b border-emerald-900 dark:border-[#1E4830]">
             <th className="py-3.5 px-4 text-center w-12">#</th>
             <th className="py-3.5 px-4 min-w-[240px]">Event name</th>
             <th className="py-3.5 px-4 min-w-[120px]">Dates</th>
@@ -34,7 +34,7 @@ export function EventTable({ events, onDelete }: EventTableProps) {
             <th className="py-3.5 px-4 text-right min-w-[100px]">Manage</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-[#D8D2C8] text-xs text-[#133020]">
+        <tbody className="divide-y divide-[#D8D2C8] dark:divide-[#1E4830] text-xs text-emerald-950 dark:text-slate-100">
           {events.map((evt) => {
             let businessLines: string[] = [];
             try {
@@ -48,30 +48,30 @@ export function EventTable({ events, onDelete }: EventTableProps) {
             return (
               <tr
                 key={evt.id}
-                className="hover:bg-[#F0F5F2] transition-colors duration-150"
+                className="hover:bg-emerald-900/5 dark:hover:bg-white/5 transition-colors duration-150"
               >
-                <td className="py-3 px-4 font-bold text-center text-[#666666]">
+                <td className="py-3 px-4 font-bold text-center text-emerald-800/70 dark:text-slate-400">
                   {evt.eventNumber}
                 </td>
                 <td className="py-3 px-4">
                   <Link
                     href={`/events/${evt.id}`}
-                    className="font-semibold text-[#133020] hover:text-[#046241] transition line-clamp-2"
+                    className="font-semibold text-emerald-950 dark:text-white hover:text-amber-500 transition line-clamp-2"
                   >
                     {evt.eventName}
                   </Link>
-                  <span className="text-[11px] text-[#666666] block truncate mt-0.5">
+                  <span className="text-[11px] text-emerald-800/70 dark:text-slate-400 block truncate mt-0.5">
                     {evt.venue}
                   </span>
                 </td>
-                <td className="py-3 px-4 font-medium text-[#133020] whitespace-nowrap">
+                <td className="py-3 px-4 font-medium text-emerald-950 dark:text-slate-200 whitespace-nowrap">
                   {evt.dates}
                 </td>
                 <td className="py-3 px-4 whitespace-nowrap">
-                  <span className="font-semibold text-[#133020]">
+                  <span className="font-semibold text-emerald-950 dark:text-slate-100">
                     {evt.city}
                   </span>
-                  <span className="text-[#666666] block text-[11px]">
+                  <span className="text-emerald-800/70 dark:text-slate-400 block text-[11px]">
                     {evt.country} ({evt.region})
                   </span>
                 </td>
@@ -81,7 +81,7 @@ export function EventTable({ events, onDelete }: EventTableProps) {
                       <BusinessLineChip key={bl} name={bl} />
                     ))}
                     {businessLines.length > 2 && (
-                      <span className="text-[10px] text-[#666666] font-semibold">
+                      <span className="text-[10px] text-emerald-800/70 dark:text-slate-400 font-semibold">
                         +{businessLines.length - 2}
                       </span>
                     )}
@@ -98,7 +98,7 @@ export function EventTable({ events, onDelete }: EventTableProps) {
                   </div>
                 </td>
                 <td className="py-3 px-4 whitespace-nowrap">
-                  <span className="inline-block px-2 py-0.5 rounded bg-[#046241]/10 text-[#046241] font-semibold text-[11px]">
+                  <span className="inline-block px-2 py-0.5 rounded bg-emerald-500/10 dark:bg-amber-400/10 text-emerald-700 dark:text-amber-300 font-semibold text-[11px]">
                     {evt.participationRec}
                   </span>
                 </td>
@@ -107,7 +107,7 @@ export function EventTable({ events, onDelete }: EventTableProps) {
                     <Link
                       href={`/events/${evt.id}`}
                       title="View Details"
-                      className="p-1.5 text-[#046241] hover:bg-[#046241]/10 rounded transition"
+                      className="p-1.5 text-emerald-700 dark:text-amber-400 hover:bg-emerald-500/10 rounded transition"
                     >
                       <Eye className="w-4 h-4" />
                     </Link>
@@ -115,7 +115,7 @@ export function EventTable({ events, onDelete }: EventTableProps) {
                       <Link
                         href={`/events/${evt.id}/edit`}
                         title="Edit Event"
-                        className="p-1.5 text-[#133020] hover:bg-[#133020]/10 rounded transition"
+                        className="p-1.5 text-emerald-950 dark:text-slate-200 hover:bg-black/10 dark:hover:bg-white/10 rounded transition"
                       >
                         <Edit className="w-4 h-4" />
                       </Link>
@@ -124,7 +124,7 @@ export function EventTable({ events, onDelete }: EventTableProps) {
                       <button
                         onClick={() => onDelete(evt.id)}
                         title="Delete Event"
-                        className="p-1.5 text-[#B91C1C] hover:bg-[#B91C1C]/10 rounded transition"
+                        className="p-1.5 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 rounded transition"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

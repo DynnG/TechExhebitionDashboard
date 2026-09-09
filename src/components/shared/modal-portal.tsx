@@ -2,6 +2,7 @@
 
 import { useEffect, useState, ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ModalPortalProps {
   isOpen: boolean;
@@ -25,20 +26,32 @@ export function ModalPortal({ isOpen, onClose, children }: ModalPortalProps) {
     };
   }, [isOpen]);
 
-  if (!mounted || !isOpen) return null;
+  if (!mounted) return null;
 
   return createPortal(
-    <div
-      className="fixed inset-0 w-screen h-screen z-[99999] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 overflow-y-auto no-scrollbar"
-      onClick={onClose}
-    >
-      <div
-        className="relative max-w-4xl w-full max-h-[92vh] overflow-y-auto no-scrollbar rounded-3xl bg-[#F9F7F7] border border-[#133020]/30 shadow-2xl my-auto overflow-hidden transform transition-all duration-200 animate-in fade-in zoom-in-95"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {children}
-      </div>
-    </div>,
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 w-screen h-screen z-[99999] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 overflow-y-auto no-scrollbar"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0, y: 10 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.95, opacity: 0, y: 10 }}
+            transition={{ type: "spring", stiffness: 350, damping: 25 }}
+            className="relative max-w-4xl w-full max-h-[92vh] overflow-y-auto no-scrollbar rounded-2xl bg-white dark:bg-[#133020] text-emerald-950 dark:text-slate-100 border border-[#D8D2C8] dark:border-[#1E4830] shadow-2xl my-auto overflow-hidden transition-colors"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {children}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>,
     document.body
   );
 }

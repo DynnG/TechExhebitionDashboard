@@ -48,22 +48,22 @@ export function BorderGlow({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       style={{ borderRadius }}
-      className={`relative p-[1.5px] bg-[#D8D2C8] transition-colors duration-200 overflow-hidden ${className}`}
+      className={`relative p-[1.5px] bg-[#D8D2C8] dark:bg-[#1E4830] transition-colors duration-200 overflow-hidden ${className}`}
     >
       {/* Dynamic Cursor Border Glow */}
       <div
         className="pointer-events-none absolute -inset-px transition-opacity duration-300"
         style={{
           opacity,
-          background: `radial-gradient(350px circle at ${position.x}px ${position.y}px, rgba(${glowRgb}, 0.5), transparent 70%)`,
+          background: `radial-gradient(350px circle at ${position.x}px ${position.y}px, rgba(${glowRgb}, 0.6), transparent 70%)`,
           borderRadius,
         }}
       />
 
-      {/* Solid White Surface Container */}
+      {/* Surface Container */}
       <div
         style={{ borderRadius: `calc(${borderRadius} - 1px)` }}
-        className="relative h-full w-full bg-white z-10"
+        className="relative h-full w-full bg-white dark:bg-[#133020] text-emerald-950 dark:text-slate-100 z-10 transition-colors"
       >
         {children}
       </div>

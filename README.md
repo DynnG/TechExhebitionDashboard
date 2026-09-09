@@ -127,6 +127,12 @@ cp .env.example .env.local
 cp .env.example .env
 ```
 
+*Ensure `NEXTAUTH_SECRET` and `NEXTAUTH_URL` are present to avoid NextAuth `Configuration 500` errors:*
+```env
+NEXTAUTH_SECRET="lifewood-secret-key-super-secure-2026"
+NEXTAUTH_URL="http://localhost:3000"
+```
+
 Open `.env` (or `.env.local`) and configure your optional API keys for web scraping:
 - **`APIFY_TOKEN`**: *(Optional)* Required to discover real exhibition URLs using Apify Google Search scraper. [Get an Apify token](https://console.apify.com/account#/integrations).
 - **`GEMINI_API_KEY`**: *(Optional)* Required for AI-powered event extraction, normalization, and fit scoring. [Get a free Gemini API key](https://aistudio.google.com/app/apikey).
@@ -155,13 +161,19 @@ The platform consists of two services:
 ```bash
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+*The application will be available at `http://localhost:3000`.*  
+*(Note: If you just created or updated your `.env` file, make sure to stop (`Ctrl + C`) and restart `npm run dev` so Next.js reloads the environment variables).*
 
 #### Terminal 2 — Start AI Discovery & Crawler Engine (Optional for live crawling):
 ```bash
 npm run crawler
 ```
-*Runs `server.mjs` on port `5000` for live web searches, real-time SSE extraction, and crawler caching.*
+*Runs the background crawling microservice engine on port 5000 (`http://localhost:5000`) for live web searches, real-time SSE extraction, and crawler caching.*
+
+### 6️⃣ Build for Production
+```bash
+npm run build
+```
 
 ---
 
@@ -210,6 +222,7 @@ An initial commit included a blank `.env` with empty keys (`PORT=5000`, `APIFY_T
 ## 🔒 Security & Rate Limiting
 
 * **Password Hashing:** All user passwords are encrypted using `bcrypt.hash()` with a salt factor of 10.
+* **NextAuth & JWT Encryption:** NextAuth handles JWT session tokens signed using `NEXTAUTH_SECRET` (configured in `.env` and `src/lib/auth.ts`).
 * **Session Verification:** API endpoints enforce JWT session role validation (`ADMIN`, `SUPERVISOR`, `INTERN`).
 * **Environment Protection:** `.env` and `.env*.local` are ignored to prevent credential leakage.
 

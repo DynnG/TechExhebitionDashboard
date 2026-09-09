@@ -72,37 +72,37 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
   };
 
   return (
-    <div className="bg-white p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] shadow-[0_2px_16px_rgba(0,0,0,0.05)] font-manrope">
-      <div className="flex items-center justify-between flex-wrap gap-3 mb-4 border-b border-[#D8D2C8] pb-3">
+    <div className="bg-white dark:bg-[#133020] p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] dark:border-[#1E4830] shadow-[0_2px_16px_rgba(0,0,0,0.05)] font-manrope transition-colors">
+      <div className="flex items-center justify-between flex-wrap gap-3 mb-4 border-b border-[#D8D2C8] dark:border-[#1E4830] pb-3">
         <div>
-          <h3 className="text-[14px] font-semibold text-[#133020]">
+          <h3 className="text-[14px] font-semibold text-emerald-950 dark:text-white">
             Exhibitions distribution by month
           </h3>
-          <p className="text-[11px] text-[#666666]">
+          <p className="text-[11px] text-emerald-800/70 dark:text-slate-400">
             Target threshold: ≥ 5 exhibitions per month (gaps highlighted in Saffron)
           </p>
         </div>
 
         {/* Custom Interactive Date Range Pickers (Month, Day, Year) */}
         <div className="flex items-center gap-2 flex-wrap text-xs">
-          <div className="flex items-center gap-1.5 bg-[#F9F7F7] px-2.5 py-1.5 rounded-[8px] border-[1.5px] border-[#D8D2C8]">
-            <Calendar className="w-3.5 h-3.5 text-[#046241]" />
-            <span className="font-semibold text-[#133020]">From:</span>
+          <div className="flex items-center gap-1.5 bg-[#F9F7F7] dark:bg-black/20 px-2.5 py-1.5 rounded-[8px] border-[1.5px] border-[#D8D2C8] dark:border-white/10">
+            <Calendar className="w-3.5 h-3.5 text-emerald-600 dark:text-amber-400" />
+            <span className="font-semibold text-emerald-950 dark:text-slate-200">From:</span>
             <input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="bg-transparent text-xs font-semibold text-[#133020] focus:outline-none cursor-pointer"
+              className="bg-transparent text-xs font-semibold text-emerald-950 dark:text-slate-200 focus:outline-none cursor-pointer"
             />
           </div>
 
-          <div className="flex items-center gap-1.5 bg-[#F9F7F7] px-2.5 py-1.5 rounded-[8px] border-[1.5px] border-[#D8D2C8]">
-            <span className="font-semibold text-[#133020]">To:</span>
+          <div className="flex items-center gap-1.5 bg-[#F9F7F7] dark:bg-black/20 px-2.5 py-1.5 rounded-[8px] border-[1.5px] border-[#D8D2C8] dark:border-white/10">
+            <span className="font-semibold text-emerald-950 dark:text-slate-200">To:</span>
             <input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="bg-transparent text-xs font-semibold text-[#133020] focus:outline-none cursor-pointer"
+              className="bg-transparent text-xs font-semibold text-emerald-950 dark:text-slate-200 focus:outline-none cursor-pointer"
             />
           </div>
 
@@ -110,7 +110,7 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
             <button
               onClick={handleResetDates}
               title="Reset Date Range"
-              className="px-2.5 py-1 text-[#046241] bg-[#046241]/10 hover:bg-[#046241]/20 rounded-[8px] transition flex items-center gap-1 font-semibold text-[11px]"
+              className="px-2.5 py-1 text-emerald-700 dark:text-amber-300 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-[8px] transition flex items-center gap-1 font-semibold text-[11px]"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Reset</span>
@@ -122,11 +122,11 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
       <div className="flex items-center justify-end gap-3 mb-2 text-xs font-medium">
         <div className="flex items-center gap-1.5 text-[11px]">
           <span className="w-2.5 h-2.5 rounded-[2px] bg-[#046241] inline-block" />
-          <span className="text-[#133020]">Target met (≥ 5 exhibitions)</span>
+          <span className="text-[#133020] dark:text-slate-300">Target met (≥ 5 exhibitions)</span>
         </div>
         <div className="flex items-center gap-1.5 text-[11px]">
           <span className="w-2.5 h-2.5 rounded-[2px] bg-[#FFB347] inline-block" />
-          <span className="text-[#C17110]">Gap (&lt; 5 exhibitions)</span>
+          <span className="text-amber-600 dark:text-amber-400">Gap (&lt; 5 exhibitions)</span>
         </div>
       </div>
 
@@ -135,11 +135,11 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
           <BarChart data={formattedData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <XAxis
               dataKey="month"
-              tick={{ fontSize: 10, fill: "#133020", fontWeight: 500 }}
+              tick={{ fontSize: 10, fill: "currentColor", fontWeight: 500 }}
               axisLine={{ stroke: "#D8D2C8" }}
             />
             <YAxis
-              tick={{ fontSize: 10, fill: "#133020", fontWeight: 500 }}
+              tick={{ fontSize: 10, fill: "currentColor", fontWeight: 500 }}
               axisLine={{ stroke: "#D8D2C8" }}
               allowDecimals={false}
             />
