@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { sanitizeEventUrl } from "@/lib/url";
 
 export async function POST(req: Request) {
   try {
@@ -11,6 +12,53 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
+
+    // 1. Deduplication Guard: Check if event already exists in database
+    const normalizedWebsite = body.officialWebsite
+      ? body.officialWebsite.trim().replace(/\/+$/, "").toLowerCase()
+      : "";
+    const cleanName = (body.eventName || "").trim().toLowerCase();
+    const cleanCity = (body.city || "").trim().toLowerCase();
+
+    const allDbEvents = await db.event.findMany({
+      select: {
+        id: true,
+        eventNumber: true,
+        eventName: true,
+        city: true,
+        dates: true,
+        officialWebsite: true,
+      },
+    });
+
+    const existingMatch = allDbEvents.find((e) => {
+      const exWebsite = e.officialWebsite
+        ? e.officialWebsite.trim().replace(/\/+$/, "").toLowerCase()
+        : "";
+      if (
+        normalizedWebsite &&
+        normalizedWebsite !== "https://" &&
+        exWebsite &&
+        exWebsite !== "https://"
+      ) {
+        if (exWebsite === normalizedWebsite) return true;
+      }
+      const exName = (e.eventName || "").trim().toLowerCase();
+      const exCity = (e.city || "").trim().toLowerCase();
+      if (exName === cleanName) {
+        if (!cleanCity || !exCity || cleanCity === exCity) return true;
+      }
+      return false;
+    });
+
+    if (existingMatch) {
+      return NextResponse.json({
+        success: true,
+        isDuplicate: true,
+        event: existingMatch,
+        message: `Event "${existingMatch.eventName}" is already recorded in the database (#${existingMatch.eventNumber}).`,
+      });
+    }
 
     // Get next eventNumber
     const maxEvent = await db.event.findFirst({
@@ -35,7 +83,7 @@ export async function POST(req: Request) {
         endDate: body.endDate ? new Date(body.endDate) : null,
         venue: body.venue || "TBD",
         locationAddress: body.locationAddress || "",
-        officialWebsite: body.officialWebsite || "https://",
+        officialWebsite: sanitizeEventUrl(body.officialWebsite) || "https://",
         organizer: body.organizer || "TBD",
         eventCategory: body.eventCategory || "Tech Exhibition",
         businessLines: JSON.stringify(businessLines),
@@ -44,7 +92,7 @@ export async function POST(req: Request) {
         targetAudience: body.targetAudience || "Tech Executives",
         estimatedAttendees: body.estimatedAttendees || "Not publicly disclosed",
         exhibitorOpportunity: "Not publicly disclosed",
-        boothCost: "Not publicly disclosed",
+        boothCost: body.boothCost || "Not publicly disclosed",
         registrationDeadline: "Not publicly disclosed",
         contactEmail: "Not publicly disclosed",
         contactPerson: "Not publicly disclosed",
@@ -53,7 +101,7 @@ export async function POST(req: Request) {
         priorityLevel: body.priorityLevel || "High",
         fitScore: body.fitScore || 4,
         keyNotes: "Scraped via AI Scraper Microservice",
-        sourceLinks: JSON.stringify([body.officialWebsite || "https://"]),
+        sourceLinks: JSON.stringify([sanitizeEventUrl(body.officialWebsite) || "https://"]),
         status: "PENDING_REVIEW",
         source: "SCRAPED",
         createdById: parseInt((session.user as any).id || "1", 10),

@@ -20,3 +20,7 @@
 *.tsbuildinfo
 next-env.d.ts
 
+# local cache
+/data/
+
+

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import bcrypt from "bcryptjs";
 
 export async function PUT(
   req: Request,
@@ -17,14 +18,21 @@ export async function PUT(
 
     const userId = parseInt(params.id, 10);
     const body = await req.json();
-    const { name, role } = body;
+    const { name, role, password } = body;
+
+    const dataToUpdate: any = {};
+    if (name) dataToUpdate.name = name;
+    if (role) dataToUpdate.role = role;
+    if (password) {
+      if (password.length < 6) {
+        return NextResponse.json({ error: "Password must be at least 6 characters long." }, { status: 400 });
+      }
+      dataToUpdate.passwordHash = await bcrypt.hash(password, 10);
+    }
 
     const updatedUser = await db.user.update({
       where: { id: userId },
-      data: {
-        ...(name ? { name } : {}),
-        ...(role ? { role } : {}),
-      },
+      data: dataToUpdate,
       select: {
         id: true,
         name: true,

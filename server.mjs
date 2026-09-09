@@ -4,6 +4,9 @@ import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import { ApifyClient } from 'apify-client';
 import { GoogleGenAI } from '@google/genai';
+import fs from 'fs';
+import path from 'path';
+import * as cheerio from 'cheerio';
 
 // Load environment variables from .env and .env.local
 dotenv.config();
@@ -27,14 +30,250 @@ const apify = new ApifyClient({ token: apifyToken });
 const ai = new GoogleGenAI({ apiKey: geminiApiKey });
 
 // ==========================================
+// Cache & Local Storage Helpers
+// ==========================================
+const CACHE_FILE = path.join(process.cwd(), 'data', 'live_crawled_events.json');
+
+// ==========================================
+// Deduplication & Similarity Helpers
+// ==========================================
+const AGGREGATOR_DOMAINS = [
+  'eventbrite.com',
+  '10times.com',
+  'gevme.com',
+  'meetup.com',
+  'linkedin.com',
+  'facebook.com',
+  'techinasia.com',
+  'google.com',
+  'eventseye.com',
+  'exposale.net',
+  'tradefairdates.com',
+  'cantonfair.net',
+  'eventsinamerica.com',
+  'b2bmap.com',
+  'worldconferencealerts.com',
+  'oceansciencetechnology.com',
+  'allconfs.com',
+  'conferenceindex.org',
+  'tsnn.com',
+  'clocate.com',
+  'eventslink.com',
+];
+
+function normalizeDomain(urlStr) {
+  if (!urlStr) return '';
+  try {
+    const url = new URL(urlStr.startsWith('http') ? urlStr : `https://${urlStr}`);
+    return url.hostname.replace(/^www\./, '').toLowerCase().trim();
+  } catch {
+    return urlStr.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0].toLowerCase().trim();
+  }
+}
+
+function cleanString(str) {
+  if (!str) return '';
+  return str
+    .toLowerCase()
+    .replace(/&/g, 'and')
+    .replace(/[^\w\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function extractYear(eventName, dates) {
+  const match = `${eventName || ''} ${dates || ''}`.match(/\b(202[5-9]|203[0-9])\b/);
+  return match ? match[1] : null;
+}
+
+function stringSimilarity(s1, s2) {
+  const c1 = cleanString(s1);
+  const c2 = cleanString(s2);
+  if (!c1 || !c2) return 0;
+  if (c1 === c2) return 1.0;
+  if (c1.includes(c2) || c2.includes(c1)) {
+    return Math.min(c1.length, c2.length) / Math.max(c1.length, c2.length);
+  }
+
+  const track = Array(c2.length + 1)
+    .fill(null)
+    .map(() => Array(c1.length + 1).fill(null));
+  for (let i = 0; i <= c1.length; i += 1) track[0][i] = i;
+  for (let j = 0; j <= c2.length; j += 1) track[j][0] = j;
+  for (let j = 1; j <= c2.length; j += 1) {
+    for (let i = 1; i <= c1.length; i += 1) {
+      const indicator = c1[i - 1] === c2[j - 1] ? 0 : 1;
+      track[j][i] = Math.min(
+        track[j][i - 1] + 1,
+        track[j - 1][i] + 1,
+        track[j - 1][i - 1] + indicator
+      );
+    }
+  }
+  const dist = track[c2.length][c1.length];
+  return 1 - dist / Math.max(c1.length, c2.length);
+}
+
+function checkIsDuplicate(candidate, existingEventsList) {
+  if (!candidate || !existingEventsList || !existingEventsList.length) {
+    return { isDuplicate: false };
+  }
+
+  const candName = candidate.event_name || candidate.eventName || '';
+  const candCity = cleanString(candidate.city || '');
+  const candYear = extractYear(candName, candidate.dates || '');
+  const candDomain = normalizeDomain(candidate.official_website || candidate.officialWebsite || '');
+
+  for (const existing of existingEventsList) {
+    const exName = existing.event_name || existing.eventName || '';
+    const exCity = cleanString(existing.city || '');
+    const exYear = extractYear(exName, existing.dates || '');
+    const exDomain = normalizeDomain(existing.official_website || existing.officialWebsite || '');
+
+    // Rule 1: Same official website domain (excluding aggregators)
+    if (
+      candDomain &&
+      exDomain &&
+      candDomain === exDomain &&
+      !AGGREGATOR_DOMAINS.includes(candDomain)
+    ) {
+      // If years are explicitly different, they are separate editions (2026 vs 2027)
+      if (candYear && exYear && candYear !== exYear) {
+        continue;
+      }
+      return {
+        isDuplicate: true,
+        reason: `Matches official website (${candDomain}) of existing event "${exName}"`,
+        matchedEvent: exName,
+      };
+    }
+
+    // Rule 2: High name similarity
+    const similarity = stringSimilarity(candName, exName);
+    if (similarity >= 0.82) {
+      // Rule 3: Same brand in different city is NOT duplicate (GITEX Dubai != GITEX Singapore)
+      if (candCity && exCity && candCity !== exCity && !candCity.includes(exCity) && !exCity.includes(candCity)) {
+        continue;
+      }
+
+      // Rule 4: Same event in different year is NOT duplicate (2026 vs 2027)
+      if (candYear && exYear && candYear !== exYear) {
+        continue;
+      }
+
+      return {
+        isDuplicate: true,
+        reason: `Matches name (${Math.round(similarity * 100)}% match) of existing event "${exName}" in ${existing.city || 'same location'}`,
+        matchedEvent: exName,
+      };
+    }
+  }
+
+  return { isDuplicate: false };
+}
+
+// Automatically resolve dedicated official exhibition homepage, bypassing aggregators
+async function resolveOfficialEventWebsite(eventName, currentUrl, candidateModelsList) {
+  const currentDomain = normalizeDomain(currentUrl);
+  const isAggregator =
+    !currentDomain ||
+    AGGREGATOR_DOMAINS.some(
+      (d) => currentDomain.includes(d) || d.includes(currentDomain)
+    );
+
+  const isValidHttp =
+    currentUrl &&
+    (currentUrl.startsWith('http://') || currentUrl.startsWith('https://')) &&
+    !currentUrl.toLowerCase().includes('not publicly') &&
+    !currentUrl.toLowerCase().includes('tba');
+
+  if (!isAggregator && isValidHttp) {
+    return currentUrl;
+  }
+
+  // If the extracted URL is an aggregator, directory, or placeholder, resolve the true dedicated event homepage
+  try {
+    const modelsToTry = candidateModelsList || ['gemini-2.5-flash-lite', 'gemini-flash-latest'];
+    const prompt = `What is the exact official primary website homepage URL for the tech exhibition "${eventName}"?
+Rules:
+1. Return ONLY the dedicated event website URL starting with https:// (e.g. https://www.geoconnectasia.com/ or https://www.asiatechx.com/).
+2. NEVER return directory, fair listing, or ticketing sites like Eventseye, Exposale, Eventbrite, 10times, or LinkedIn.
+3. Output strictly the single URL, with no markdown formatting, no explanations, and no quotes.`;
+
+    for (const model of modelsToTry) {
+      try {
+        const res = await ai.models.generateContent({
+          model,
+          contents: prompt,
+          config: { temperature: 0.0 },
+        });
+
+        const firstLine = (res.text || '').trim().split('\n')[0].trim().replace(/^[`'"]+|[`'"]+$/g, '');
+        if (
+          firstLine &&
+          (firstLine.startsWith('http://') || firstLine.startsWith('https://')) &&
+          !AGGREGATOR_DOMAINS.some((d) => firstLine.toLowerCase().includes(d))
+        ) {
+          console.log(`[Website Resolver] Resolved "${eventName}" -> ${firstLine} (source was: ${currentUrl})`);
+          return firstLine;
+        }
+      } catch (err) {
+        // Try next model candidate
+      }
+    }
+  } catch (err) {
+    console.warn(`[Website Resolver] Could not resolve official domain for ${eventName}:`, err.message);
+  }
+
+  return isValidHttp ? currentUrl : 'https://';
+}
+
+function loadFromCache() {
+  try {
+    if (fs.existsSync(CACHE_FILE)) {
+      const parsed = JSON.parse(fs.readFileSync(CACHE_FILE, 'utf-8'));
+      return Array.isArray(parsed) ? parsed : [];
+    }
+  } catch {}
+  return [];
+}
+
+function saveToCache(items) {
+  try {
+    const dir = path.dirname(CACHE_FILE);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+    const existing = loadFromCache();
+    const itemsToAdd = Array.isArray(items) ? items : [items];
+
+    for (const item of itemsToAdd) {
+      if (!item || item.is_duplicate) continue;
+      const dup = checkIsDuplicate(item, existing);
+      if (!dup.isDuplicate) {
+        existing.push({
+          ...item,
+          no: existing.length + 1,
+        });
+      }
+    }
+
+    fs.writeFileSync(CACHE_FILE, JSON.stringify(existing, null, 2), 'utf-8');
+    return existing;
+  } catch (err) {
+    console.warn('[Cache] Could not write cache file:', err.message);
+    return [];
+  }
+}
+
+// ==========================================
 // 1. ROUTE-LEVEL RATE LIMITER
 // ==========================================
 const scrapeLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5,
+  max: 10,
   message: {
     success: false,
-    error: 'Rate limit exceeded: Maximum 5 crawl runs per 15 minutes per IP.',
+    error: 'Rate limit exceeded: Maximum 10 crawl runs per 15 minutes per IP.',
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -45,7 +284,7 @@ const scrapeLimiter = rateLimit({
 // ==========================================
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function callWithRetry(fn, retries = 3, delay = 2000) {
+async function callWithRetry(fn, retries = 2, delay = 1500) {
   try {
     return await fn();
   } catch (error) {
@@ -60,6 +299,30 @@ async function callWithRetry(fn, retries = 3, delay = 2000) {
       return callWithRetry(fn, retries - 1, delay * 2);
     }
     throw error;
+  }
+}
+
+// Fallback HTML text extractor if Apify website-content-crawler fails or times out
+async function fetchPageDirect(url) {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    const resp = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+      },
+    });
+    clearTimeout(timeout);
+    if (!resp.ok) return null;
+    const html = await resp.text();
+    const $ = cheerio.load(html);
+    $('script, style, noscript, nav, footer, svg').remove();
+    const text = $('body').text().replace(/\s+/g, ' ').trim();
+    return text.slice(0, 10000);
+  } catch {
+    return null;
   }
 }
 
@@ -85,6 +348,11 @@ Audit and extract event information strictly against these parameters:
    - 1-2: Low fit or irrelevant industrial expo (mark is_in_scope: false).
 4. Non-negotiable Honesty Rule:
    If any commercial, deadline, or contact field is missing or not publicly listed, output exactly "Not publicly disclosed". NEVER estimate or guess.
+   CRITICAL REQUIREMENT FOR "official_website":
+   - "official_website" MUST be the actual dedicated official website URL of the exhibition itself (e.g. https://www.asiatechx.com/, https://www.geoconnectasia.com/, https://www.gitex.com/).
+   - DO NOT output directory, aggregator, or fair calendar URLs (e.g. eventseye.com, 10times.com, exposale.net, tradefairdates.com, etc.) as official_website.
+   - You MUST identify the event's actual dedicated homepage URL.
+   - Put the directory or crawled page URL into "source_links".
 5. Location: "city" must be a clean city name (e.g. "Singapore", "San Francisco"). Never output ZIP codes.
 
 Return a JSON object conforming exactly to this schema:
@@ -99,7 +367,7 @@ Return a JSON object conforming exactly to this schema:
     "dates": "Mmm DD-DD, YYYY or QX 2027 (dates TBA)",
     "venue": "Venue name or Not publicly disclosed",
     "location_address": "Street address or Not publicly disclosed",
-    "official_website": "Direct event URL",
+    "official_website": "Direct event website URL (must start with https:// or http://)",
     "organizer": "Organizer name",
     "event_category": "Short descriptor",
     "business_lines": "e.g. 2. Global AI Data, 3. AIGC",
@@ -125,38 +393,119 @@ Return a JSON object conforming exactly to this schema:
 // Health & Diagnostic Endpoint
 // ==========================================
 app.get('/api/health', (req, res) => {
+  const cached = loadFromCache();
   res.json({
     status: 'ok',
-    service: 'Tech Exhibition Discovery & Crawling Engine',
+    service: 'Optimized Tech Exhibition Discovery & Crawling Engine',
     hasApifyToken: Boolean(process.env.APIFY_TOKEN),
     hasGeminiKey: Boolean(geminiApiKey),
+    cachedEventsCount: cached.length,
     targetDateRange: 'Sep 1, 2026 - Dec 31, 2027',
   });
 });
 
+// Endpoint to fetch previously cached scraped events
+app.get('/api/crawl-events/cache', (req, res) => {
+  const cached = loadFromCache();
+  res.json({ success: true, count: cached.length, data: cached });
+});
+
+// Endpoint to clear crawler cache
+app.delete('/api/crawl-events/cache', (req, res) => {
+  try {
+    if (fs.existsSync(CACHE_FILE)) {
+      fs.unlinkSync(CACHE_FILE);
+    }
+    res.json({ success: true, message: 'Cache cleared successfully' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Endpoint to remove single accepted/dismissed event from crawler cache
+app.delete('/api/crawl-events/cache/item', (req, res) => {
+  try {
+    const { eventName } = req.body;
+    if (!eventName) {
+      return res.status(400).json({ success: false, error: 'eventName is required' });
+    }
+    const existing = loadFromCache();
+    const updated = existing.filter(
+      (e) => (e.event_name || e.eventName || '').toLowerCase().trim() !== eventName.toLowerCase().trim()
+    );
+    updated.forEach((e, i) => {
+      e.no = i + 1;
+    });
+    fs.writeFileSync(CACHE_FILE, JSON.stringify(updated, null, 2), 'utf-8');
+    res.json({ success: true, count: updated.length });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // ==========================================
-// 4. API PIPELINE ROUTE
+// 4. API PIPELINE ROUTE (WITH REAL-TIME STREAMING & PARALLEL BATCHING)
 // ==========================================
 app.post('/api/crawl-events', scrapeLimiter, async (req, res) => {
   const { query } = req.body;
   const searchQuery = query || 'tech exhibition 2027 Singapore OR "Hong Kong" OR "United States"';
 
+  const isStream =
+    req.query.stream === 'true' ||
+    req.headers.accept?.includes('text/event-stream');
+
+  // SSE helper function
+  const sendSSE = (payload) => {
+    if (isStream && !res.writableEnded) {
+      res.write(`data: ${JSON.stringify(payload)}\n\n`);
+      if (typeof res.flush === 'function') res.flush();
+    }
+  };
+
+  if (isStream) {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    if (typeof res.flushHeaders === 'function') res.flushHeaders();
+  }
+
   if (!process.env.APIFY_TOKEN) {
-    return res.status(400).json({
-      success: false,
-      error: 'APIFY_TOKEN is missing. Please set APIFY_TOKEN in your environment or .env file.',
-    });
+    const errorMsg = 'APIFY_TOKEN is missing. Please set APIFY_TOKEN in your environment or .env file.';
+    if (isStream) {
+      sendSSE({ type: 'error', error: errorMsg });
+      return res.end();
+    }
+    return res.status(400).json({ success: false, error: errorMsg });
   }
 
   if (!geminiApiKey) {
-    return res.status(400).json({
-      success: false,
-      error: 'GEMINI_API_KEY is missing. Please set GEMINI_API_KEY in your environment or .env file.',
-    });
+    const errorMsg = 'GEMINI_API_KEY is missing. Please set GEMINI_API_KEY in your environment or .env file.';
+    if (isStream) {
+      sendSSE({ type: 'error', error: errorMsg });
+      return res.end();
+    }
+    return res.status(400).json({ success: false, error: errorMsg });
   }
 
+  const eventsList = [];
+  const candidateModels = [
+    process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite',
+    'gemini-flash-latest',
+    'gemini-3.5-flash',
+    'gemini-2.0-flash',
+  ].filter((m, i, arr) => Boolean(m) && arr.indexOf(m) === i);
+
   try {
+    // ----------------------------------------------------
+    // STEP 1: Fast Google Discovery Search (Apify)
+    // ----------------------------------------------------
     console.log(`[Step 1] Running Discovery Search: "${searchQuery}"`);
+    sendSSE({
+      type: 'status',
+      step: 1,
+      message: `Searching Google for: "${searchQuery}"...`,
+    });
+
     const searchRun = await callWithRetry(() =>
       apify.actor('apify/google-search-scraper').call({
         queries: searchQuery,
@@ -165,56 +514,121 @@ app.post('/api/crawl-events', scrapeLimiter, async (req, res) => {
       })
     );
 
+    const existingDbEvents = req.body.existingEvents || [];
+    const cachedEvents = loadFromCache();
+    const allKnownEvents = [...existingDbEvents, ...cachedEvents];
+
     const { items: searchResults } = await apify.dataset(searchRun.defaultDatasetId).listItems();
     const candidateUrls = [];
     searchResults.forEach((item) => {
       if (item.organicResults) {
-        item.organicResults.forEach((res) => {
-          if (res.url && !res.url.includes('google.com')) {
-            candidateUrls.push(res.url);
+        item.organicResults.forEach((r) => {
+          if (r.url && !r.url.includes('google.com') && !candidateUrls.includes(r.url)) {
+            candidateUrls.push(r.url);
           }
         });
       }
     });
 
-    console.log(`Discovered ${candidateUrls.length} pages. Executing sequential scrape...`);
-    const eventsList = [];
-    const geminiModel = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+    // Prioritize fresh candidate URLs over already indexed domains
+    const knownDomains = new Set(
+      allKnownEvents
+        .map((e) => normalizeDomain(e.official_website || e.officialWebsite))
+        .filter(Boolean)
+    );
 
-    for (const targetUrl of candidateUrls) {
+    const targetUrls = [];
+    for (const url of candidateUrls) {
+      if (targetUrls.length >= 5) break;
+      const domain = normalizeDomain(url);
+      if (!AGGREGATOR_DOMAINS.includes(domain) && knownDomains.has(domain)) {
+        console.log(`[Deduplication] Prioritizing unvisited domain over known: ${domain}`);
+        continue;
+      }
+      targetUrls.push(url);
+    }
+    if (targetUrls.length === 0) {
+      targetUrls.push(...candidateUrls.slice(0, 5));
+    }
+    console.log(`Discovered ${targetUrls.length} candidate URLs:`, targetUrls);
+    sendSSE({
+      type: 'candidates',
+      urls: targetUrls,
+      message: `Discovered ${targetUrls.length} candidate event websites. Extracting content...`,
+    });
+
+    // ----------------------------------------------------
+    // STEP 2: Fast Parallel Page Extraction (Cheerio mode)
+    // ----------------------------------------------------
+    sendSSE({
+      type: 'status',
+      step: 2,
+      message: `Crawling ${targetUrls.length} websites in parallel using high-speed Cheerio parser...`,
+    });
+
+    const pageDataMap = new Map();
+
+    try {
+      // Run Apify website-content-crawler in BATCH with fast Cheerio crawler (seconds instead of minutes)
+      const crawlRun = await callWithRetry(() =>
+        apify.actor('apify/website-content-crawler').call({
+          startUrls: targetUrls.map((url) => ({ url })),
+          crawlerType: 'cheerio',
+          maxCrawlPages: targetUrls.length,
+          maxCrawlingDurationSecs: 35,
+        })
+      );
+
+      const { items: crawledPages } = await apify.dataset(crawlRun.defaultDatasetId).listItems();
+      for (const p of crawledPages) {
+        if (p.url && p.text) {
+          pageDataMap.set(p.url, p.text.slice(0, 10000));
+        }
+      }
+    } catch (crawlErr) {
+      console.warn('[Crawl Warning] Batch crawler issue, using direct fallback:', crawlErr.message);
+    }
+
+    // Direct fetch fallback for any missing URLs to ensure zero data loss
+    for (const url of targetUrls) {
+      if (!pageDataMap.has(url)) {
+        console.log(`[Direct Fetch] Extracting ${url}...`);
+        const fallbackText = await fetchPageDirect(url);
+        if (fallbackText) {
+          pageDataMap.set(url, fallbackText);
+        }
+      }
+    }
+
+    // ----------------------------------------------------
+    // STEP 3: Gemini AI Auditing, Deduplication & Immediate Streaming
+    // ----------------------------------------------------
+    sendSSE({
+      type: 'status',
+      step: 3,
+      message: 'Applying Lifewood 27-column audit & Fit Scoring with Gemini AI...',
+    });
+
+    let index = 0;
+    for (const targetUrl of targetUrls) {
+      index++;
+      const rawText = pageDataMap.get(targetUrl);
+      if (!rawText) continue;
+
       try {
-        console.log(`[Step 2] Crawling page: ${targetUrl}`);
-        const crawlRun = await callWithRetry(() =>
-          apify.actor('apify/website-content-crawler').call({
-            startUrls: [{ url: targetUrl }],
-            maxCrawlPages: 1,
-          })
-        );
-        const { items: pageData } = await apify.dataset(crawlRun.defaultDatasetId).listItems();
-        if (!pageData.length || !pageData[0].text) continue;
+        console.log(`[Step 3] AI Auditing ${index}/${targetUrls.length}: ${targetUrl}`);
+        sendSSE({
+          type: 'auditing',
+          url: targetUrl,
+          message: `AI auditing ${index}/${targetUrls.length}: ${new URL(targetUrl).hostname}...`,
+        });
 
-        const rawText = pageData[0].text.slice(0, 10000);
-
-        // Enforce safe RPM spacing for Gemini API
-        await sleep(1500);
-
-        console.log(`[Step 3] Parsing and scoring with Gemini (${geminiModel}): ${targetUrl}`);
         const response = await callWithRetry(async () => {
-          try {
-            return await ai.models.generateContent({
-              model: geminiModel,
-              contents: `Source URL: ${targetUrl}\n\nPage Text:\n${rawText}`,
-              config: {
-                systemInstruction: PROMPT_SYSTEM,
-                responseMimeType: 'application/json',
-                temperature: 0.1,
-              },
-            });
-          } catch (modelErr) {
-            if (geminiModel !== 'gemini-2.0-flash' && modelErr.message?.includes('not found')) {
-              console.warn(`[Model Fallback] Falling back from ${geminiModel} to gemini-2.0-flash`);
+          let lastErr = null;
+          for (const modelName of candidateModels) {
+            try {
               return await ai.models.generateContent({
-                model: 'gemini-2.0-flash',
+                model: modelName,
                 contents: `Source URL: ${targetUrl}\n\nPage Text:\n${rawText}`,
                 config: {
                   systemInstruction: PROMPT_SYSTEM,
@@ -222,41 +636,126 @@ app.post('/api/crawl-events', scrapeLimiter, async (req, res) => {
                   temperature: 0.1,
                 },
               });
+            } catch (modelErr) {
+              lastErr = modelErr;
+              console.warn(
+                `[Gemini Fallback] Model "${modelName}" failed (${modelErr.message?.slice(0, 100)}...). Trying fallback model...`
+              );
             }
-            throw modelErr;
           }
+          throw lastErr;
         });
 
         const parsed = JSON.parse(response.text);
 
         // Quality Gate: Within date scope and Fit Score >= 3
         if (parsed.is_in_scope && parsed.fit_score >= 3 && parsed.data) {
-          eventsList.push({
+          // Check for duplicate against database records, local cache, and current batch
+          const dupCheck = checkIsDuplicate(parsed.data, [...allKnownEvents, ...eventsList]);
+
+          // Clean and resolve official_website: never allow "Not publicly disclosed" as a link
+          const rawWebsite = (parsed.data.official_website || '').trim();
+          const isInvalidWebsite =
+            !rawWebsite ||
+            rawWebsite.toLowerCase().includes('not publicly') ||
+            rawWebsite.toLowerCase().includes('tba') ||
+            rawWebsite.toLowerCase().includes('unknown') ||
+            rawWebsite.toLowerCase().includes('n/a') ||
+            rawWebsite === 'https://' ||
+            rawWebsite === 'http://';
+
+          let resolvedWebsite = targetUrl;
+          if (!isInvalidWebsite) {
+            resolvedWebsite =
+              rawWebsite.startsWith('http://') || rawWebsite.startsWith('https://')
+                ? rawWebsite
+                : `https://${rawWebsite.replace(/^\/+/, '')}`;
+          }
+
+          // Ensure official_website leads to the actual exhibition homepage, bypassing aggregator/directory sources
+          resolvedWebsite = await resolveOfficialEventWebsite(
+            parsed.data.event_name,
+            resolvedWebsite,
+            candidateModels
+          );
+
+          const newEvent = {
             no: eventsList.length + 1,
             ...parsed.data,
             fit_score: parsed.fit_score,
-            official_website: parsed.data.official_website || targetUrl,
+            official_website: resolvedWebsite,
             source_links: targetUrl,
-          });
+            is_duplicate: dupCheck.isDuplicate,
+            duplicate_reason: dupCheck.reason || null,
+            duplicate_of: dupCheck.matchedEvent || null,
+          };
+
+          eventsList.push(newEvent);
+
+          if (!dupCheck.isDuplicate) {
+            // 🌟 Save to disk cache IMMEDIATELY so it accumulates
+            saveToCache(newEvent);
+
+            // 🌟 Stream directly to frontend screen IMMEDIATELY!
+            sendSSE({
+              type: 'event',
+              data: newEvent,
+              isDuplicate: false,
+              message: `✓ Added: ${newEvent.event_name} (Fit ${newEvent.fit_score}/5)`,
+            });
+          } else {
+            console.log(`[Deduplication] Duplicate recognized: ${newEvent.event_name} -> ${dupCheck.reason}`);
+            sendSSE({
+              type: 'event',
+              data: newEvent,
+              isDuplicate: true,
+              message: `⚠️ Duplicate detected: ${newEvent.event_name} (${dupCheck.reason})`,
+            });
+          }
         }
 
-        // Delay between page crawls to respect remote servers
-        await sleep(2000);
-      } catch (err) {
-        console.error(`Failed to process ${targetUrl}:`, err.message);
+        // Brief safety pause for Gemini RPM
+        await sleep(1000);
+      } catch (itemErr) {
+        console.error(`Error processing ${targetUrl}:`, itemErr.message);
       }
     }
 
-    res.json({
+    const uniqueCount = eventsList.filter((e) => !e.is_duplicate).length;
+    const dupCount = eventsList.filter((e) => e.is_duplicate).length;
+    console.log(`Pipeline complete! Verified ${uniqueCount} unique events (${dupCount} duplicates recognized).`);
+
+    if (isStream) {
+      sendSSE({
+        type: 'done',
+        count: eventsList.length,
+        uniqueCount,
+        dupCount,
+        data: eventsList,
+        message: `Pipeline complete! Verified ${uniqueCount} unique events (${dupCount} duplicate(s) recognized & flagged).`,
+      });
+      return res.end();
+    }
+
+    return res.json({
       success: true,
       count: eventsList.length,
+      uniqueCount,
+      dupCount,
       data: eventsList,
     });
   } catch (err) {
     console.error('Fatal Pipeline Error:', err);
-    res.status(500).json({ success: false, error: err.message });
+    if (isStream) {
+      sendSSE({ type: 'error', error: err.message });
+      return res.end();
+    }
+    return res.status(500).json({ success: false, error: err.message });
   }
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Pipeline backend running on http://localhost:${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Optimized Pipeline backend running on http://localhost:${PORT}`);
+});
+

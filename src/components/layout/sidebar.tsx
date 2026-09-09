@@ -17,7 +17,6 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  ShieldAlert,
 } from "lucide-react";
 import { useLocaleStore } from "@/stores/locale-store";
 
@@ -106,21 +105,21 @@ export function Sidebar() {
       {/* Top Header & Logo */}
       <div>
         <div className="p-2.5 flex flex-col items-start gap-2 border-b border-[#133020]/10">
-        <div className="relative w-full h-5">
-        <Image
-            src="/logo.png"
-            alt="Lifewood logo"
-            fill
-            className="object-contain object-left"
-        />
-        </div>
-        {!collapsed && (
-        <div className="text-center">
-            <p className="text-[10px] text-[#133020]/60 uppercase tracking-wider font-bold">
-                Exhibition Intelligence
-            </p>
-        </div>
-        )}
+          <div className="relative w-full h-5">
+            <Image
+              src="/logo.png"
+              alt="Lifewood logo"
+              fill
+              className="object-contain object-left"
+            />
+          </div>
+          {!collapsed && (
+            <div>
+              <p className="text-[10px] text-[#133020]/60 uppercase tracking-wider font-bold">
+                {locale === "en" ? "Exhibition Intelligence" : "全球展会智能平台"}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Navigation Items */}
