@@ -12,7 +12,7 @@ export default function ScraperPage() {
   const [engineMode, setEngineMode] = useState<"apify_gemini" | "standard">("apify_gemini");
   const [running, setRunning] = useState(false);
   const [results, setResults] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const { locale } = useLocaleStore();
 
   const frequencyOptions = [
@@ -45,8 +45,10 @@ export default function ScraperPage() {
   });
 
   useEffect(() => {
-    fetchResults();
-  }, []);
+    if (engineMode === "standard" && results.length === 0) {
+      fetchResults();
+    }
+  }, [engineMode]);
 
   const fetchResults = async () => {
     setLoading(true);

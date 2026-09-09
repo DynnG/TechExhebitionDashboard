@@ -38,8 +38,8 @@ export function Topbar() {
         <span className="text-[#133020] font-semibold">{title}</span>
       </nav>
 
-      {/* Right Actions */}
-      <div className="flex items-center gap-4">
+      {/* Right Actions: Improved Language Toggle */}
+      <div className="flex items-center gap-3">
         <LangToggle />
       </div>
     </header>

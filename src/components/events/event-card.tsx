@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { PriorityIndicator } from "./priority-indicator";
 import { BusinessLineChip } from "./business-line-chip";
 import { BUSINESS_LINES } from "@/lib/constants/business-lines";

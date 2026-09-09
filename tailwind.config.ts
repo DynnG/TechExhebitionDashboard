@@ -1,7 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
-  darkMode: ["class"],
+  darkMode: "class",
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -10,8 +10,8 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        paper: "#F5EEDB",
-        "sea-salt": "#F9F7F7",
+        paper: "var(--bg-main)",
+        "sea-salt": "var(--bg-card-hover)",
         "dark-serpent": "#133020",
         castleton: "#046241",
         saffron: "#FFB347",
@@ -36,27 +36,28 @@ const config: Config = {
         "bl-edge": "#417256",
 
         // Standard UI mappings
-        border: "#D8D2C8",
-        input: "#D8D2C8",
+        border: "var(--border-color)",
+        input: "var(--border-color)",
         ring: "#046241",
-        background: "#F5EEDB",
-        foreground: "#133020",
+        background: "var(--bg-main)",
+        card: "var(--bg-card)",
+        foreground: "var(--text-primary)",
         primary: {
           DEFAULT: "#FFB347",
           foreground: "#133020",
           hover: "#FFC370",
         },
         secondary: {
-          DEFAULT: "#133020",
-          foreground: "#FFFFFF",
+          DEFAULT: "var(--bg-card)",
+          foreground: "var(--text-primary)",
         },
         destructive: {
           DEFAULT: "#B91C1C",
           foreground: "#FFFFFF",
         },
         muted: {
-          DEFAULT: "#F9F7F7",
-          foreground: "#666666",
+          DEFAULT: "var(--bg-card-hover)",
+          foreground: "var(--text-muted)",
         },
         accent: {
           DEFAULT: "#FFB347",

@@ -9,14 +9,14 @@ export function CoverageGapsWidget({ gaps }: CoverageGapsProps) {
   return (
     <div className="bg-white p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] shadow-[0_2px_16px_rgba(0,0,0,0.05)] flex flex-col justify-between font-manrope">
       <div>
-        <div className="flex items-center justify-between mb-4 border-b border-[#D8D2C8] pb-3">
+        <div className="flex items-center justify-between mb-4 border-b border-[#D8D2C8] dark:border-[#1E4830] pb-3">
           <div className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-[#C17110] shrink-0" />
             <div>
               <h3 className="text-[14px] font-semibold text-[#133020]">
                 Coverage gap assessment
               </h3>
-              <p className="text-[11px] text-[#666666]">
+              <p className="text-[11px] text-emerald-800/70 dark:text-slate-400">
                 Months with &lt; 5 high-fit exhibition entries requiring sourcing
               </p>
             </div>
@@ -46,7 +46,7 @@ export function CoverageGapsWidget({ gaps }: CoverageGapsProps) {
                   <span className="text-xs font-semibold text-[#133020] block">
                     {g.month}
                   </span>
-                  <span className="text-[10px] text-[#666666] font-medium">
+                  <span className="text-[10px] text-emerald-800/70 dark:text-slate-400 font-medium">
                     {g.count} listed
                   </span>
                 </div>

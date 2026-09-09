@@ -156,7 +156,7 @@ function LoginForm() {
           </button>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

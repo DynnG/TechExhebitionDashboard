@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { Skeleton } from "@/components/shared/skeleton";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { EventsByMonthChart } from "@/components/dashboard/events-by-month";
@@ -55,7 +56,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="space-y-8 font-manrope">
-        <div className="flex items-center justify-between pb-4 border-b border-[#D8D2C8]">
+        <div className="flex items-center justify-between pb-4 border-b border-[#D8D2C8] dark:border-[#1E4830]">
           <div className="space-y-2">
             <Skeleton className="h-8 w-64" />
             <Skeleton className="h-4 w-96" />
@@ -120,7 +121,7 @@ export default function DashboardPage() {
             <span>{locale === "en" ? "Add event" : "+ 添加展会"}</span>
           </Link>
         </div>
-      </div>
+      </motion.div>
 
       {/* Row 1 — Stat Cards (4 across) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -148,7 +149,7 @@ export default function DashboardPage() {
           subtitle={locale === "en" ? "APAC, NA, Europe & ME" : "亚太、北美、欧洲及中东"}
           icon={Globe}
         />
-      </div>
+      </motion.div>
 
       {/* Row 2 — Charts (Events by Month & Events by Region) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -158,7 +159,7 @@ export default function DashboardPage() {
         <div className="lg:col-span-4">
           <EventsByRegionChart data={eventsByRegion} />
         </div>
-      </div>
+      </motion.div>
 
       {/* Row 3 — Charts (Business Line Distribution & Fit Score Distribution) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

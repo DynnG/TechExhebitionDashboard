@@ -6,7 +6,7 @@ interface EventsByRegionProps {
   data: { region: string; count: number }[];
 }
 
-const COLORS = ["#133020", "#046241", "#C17110", "#E89131", "#417256", "#708E7C", "#9CAFA4"];
+const COLORS = ["#FFB347", "#046241", "#C17110", "#E89131", "#417256", "#708E7C", "#FFC370"];
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
@@ -62,7 +62,7 @@ export function EventsByRegionChart({ data }: EventsByRegionProps) {
               verticalAlign="bottom"
               height={36}
               iconType="circle"
-              wrapperStyle={{ fontSize: "11px", color: "#133020" }}
+              wrapperStyle={{ fontSize: "11px" }}
             />
           </PieChart>
         </ResponsiveContainer>

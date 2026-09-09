@@ -124,7 +124,7 @@ export function EventFilters({ filters, onChange, onClear }: EventFiltersProps) 
           {filters.search && (
             <button
               onClick={() => onChange("search", "")}
-              className="absolute right-2.5 top-2.5 text-[#999999] hover:text-[#133020]"
+              className="absolute right-2.5 top-2.5 text-slate-400 hover:text-white"
             >
               <X className="w-3.5 h-3.5" />
             </button>
