@@ -113,12 +113,12 @@ export default function EventScraperDashboard() {
           onChange={(e) => setQuery(e.target.value)}
           disabled={loading}
           placeholder="e.g. tech exhibition 2027 Singapore OR Hong Kong OR United States"
-          className="flex-1 px-4 py-2.5 rounded-[8px] border-[1.5px] border-[#D8D2C8] bg-white text-xs text-[#133020] placeholder-[#999999] focus:outline-none focus:border-[#046241] focus:ring-2 focus:ring-[#046241]/15 transition disabled:opacity-50"
+          className="flex-1 px-4 py-2.5 rounded-[8px] border border-[#E6E6E6] bg-white text-xs text-[#133020] placeholder-[#999999] focus:outline-none focus:border-[#046241] focus:ring-2 focus:ring-[#046241]/15 transition disabled:opacity-50"
         />
         <button
           onClick={handleCrawl}
           disabled={loading}
-          className="px-5 py-2.5 rounded-[8px] bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] font-medium text-xs shadow-2xs transition-all duration-180 flex items-center gap-2 shrink-0 disabled:opacity-50 cursor-pointer"
+          className="px-5 py-2.5 rounded-[8px] bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] font-medium text-xs shadow-xs transition-all duration-180 flex items-center gap-2 shrink-0 disabled:opacity-50 cursor-pointer"
         >
           <Play className="w-3.5 h-3.5 fill-[#133020]" />
           <span>{loading ? "Processing pipeline..." : "Start discovery & crawl"}</span>
@@ -127,14 +127,14 @@ export default function EventScraperDashboard() {
 
       {/* Loading Status Alert */}
       {loading && (
-        <div className="p-3.5 bg-[#F0F5F2] border-[1.5px] border-[#046241]/30 rounded-[8px] flex items-center gap-2.5 text-xs text-[#046241] font-medium animate-pulse">
+        <div className="p-3.5 bg-[#F0F5F2] border border-[#046241]/30 rounded-[8px] flex items-center gap-2.5 text-xs text-[#046241] font-medium animate-pulse">
           <Sparkles className="w-4 h-4 text-[#046241] shrink-0" />
           <span>{statusText}</span>
         </div>
       )}
 
-      {/* Results Table adhering to Section 6.7 */}
-      <div className="overflow-x-auto rounded-[8px] border-[1.5px] border-[#D8D2C8] bg-white">
+      {/* Results Table adhering to Section 6.7 with seamless editorial flow */}
+      <div className="overflow-x-auto rounded-[8px] border border-[#E6E6E6] bg-white">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
             <tr className="bg-[#133020] text-white text-[10.5px] uppercase tracking-[0.08em] font-semibold border-b border-[#133020]">
@@ -149,7 +149,7 @@ export default function EventScraperDashboard() {
               <th className="py-3 px-3.5 text-right w-20">Link</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#D8D2C8] text-[#133020]">
+          <tbody className="divide-y divide-[#E6E6E6] text-[#133020]">
             {events.length === 0 && !loading ? (
               <tr>
                 <td colSpan={9} className="text-center py-12 px-4 text-[#666666]">
