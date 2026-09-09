@@ -2,6 +2,11 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
+import {
+  checkRateLimit,
+  recordFailedAttempt,
+  resetRateLimit,
+} from "@/lib/rate-limit";
 
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET || "lifewood-secret-key-super-secure-2026",
@@ -24,17 +29,31 @@ export const authOptions: NextAuthOptions = {
         }
 
         const normalizedEmail = credentials.email.toLowerCase().trim();
+
+        // 1. Check rate limit before running database operations (1 MINUTE COOLDOWN)
+        const rateCheck = checkRateLimit(normalizedEmail, 5, 1 * 60 * 1000);
+        if (!rateCheck.success) {
+          throw new Error(`TOO_MANY_ATTEMPTS:${rateCheck.retryAfterSeconds}`);
+        }
+
         const user = await db.user.findUnique({
           where: { email: normalizedEmail },
         });
 
         if (!user || !user.passwordHash) {
-          throw new Error("No user found with this email");
+          // 2. Record failed attempt (1 MINUTE COOLDOWN)
+          const failed = recordFailedAttempt(normalizedEmail, 5, 1 * 60 * 1000);
+          if (failed.remaining === 0) {
+            throw new Error(`TOO_MANY_ATTEMPTS:${failed.retryAfterSeconds}`);
+          }
+          throw new Error(
+            `No user found with this email (${failed.remaining} attempts left)`,
+          );
         }
 
         let isPasswordValid = await bcrypt.compare(
           credentials.password,
-          user.passwordHash
+          user.passwordHash,
         );
 
         if (!isPasswordValid && credentials.password === user.passwordHash) {
@@ -42,8 +61,18 @@ export const authOptions: NextAuthOptions = {
         }
 
         if (!isPasswordValid) {
-          throw new Error("Incorrect password");
+          // 3. Record failed attempt (1 MINUTE COOLDOWN)
+          const failed = recordFailedAttempt(normalizedEmail, 5, 1 * 60 * 1000);
+          if (failed.remaining === 0) {
+            throw new Error(`TOO_MANY_ATTEMPTS:${failed.retryAfterSeconds}`);
+          }
+          throw new Error(
+            `Incorrect password (${failed.remaining} attempts left)`,
+          );
         }
+
+        // On successful sign in, clear failed attempt records
+        resetRateLimit(normalizedEmail);
 
         return {
           id: user.id.toString(),
