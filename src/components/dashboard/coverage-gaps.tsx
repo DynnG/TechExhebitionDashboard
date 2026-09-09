@@ -7,13 +7,13 @@ interface CoverageGapsProps {
 
 export function CoverageGapsWidget({ gaps }: CoverageGapsProps) {
   return (
-    <div className="bg-white dark:bg-[#133020] p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] dark:border-[#1E4830] shadow-sm flex flex-col justify-between font-manrope transition-colors">
+    <div className="bg-white p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] shadow-[0_2px_16px_rgba(0,0,0,0.05)] flex flex-col justify-between font-manrope">
       <div>
         <div className="flex items-center justify-between mb-4 border-b border-[#D8D2C8] dark:border-[#1E4830] pb-3">
           <div className="flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+            <AlertCircle className="w-4 h-4 text-[#C17110] shrink-0" />
             <div>
-              <h3 className="text-[14px] font-semibold text-emerald-950 dark:text-white">
+              <h3 className="text-[14px] font-semibold text-[#133020]">
                 Coverage gap assessment
               </h3>
               <p className="text-[11px] text-emerald-800/70 dark:text-slate-400">
@@ -24,7 +24,7 @@ export function CoverageGapsWidget({ gaps }: CoverageGapsProps) {
 
           <Link
             href="/scraper"
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-400 hover:bg-amber-300 text-emerald-950 text-xs font-bold rounded-[8px] transition-all duration-180 shadow-2xs shrink-0"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] text-xs font-medium rounded-[8px] transition-all duration-180 shadow-2xs shrink-0"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Run scraper</span>
@@ -32,7 +32,7 @@ export function CoverageGapsWidget({ gaps }: CoverageGapsProps) {
         </div>
 
         {gaps.length === 0 ? (
-          <div className="py-8 text-center text-xs text-emerald-700 dark:text-emerald-400 font-medium bg-emerald-500/10 rounded-[8px] border border-emerald-500/20">
+          <div className="py-8 text-center text-xs text-[#046241] font-medium bg-[#046241]/10 rounded-[8px] border border-[#046241]/20">
             ✓ All months meet target coverage threshold (≥5 exhibitions)
           </div>
         ) : (
@@ -40,17 +40,17 @@ export function CoverageGapsWidget({ gaps }: CoverageGapsProps) {
             {gaps.map((g) => (
               <div
                 key={g.month}
-                className="p-3 bg-[#F5EEDB] dark:bg-black/20 border border-[#FFB347]/50 dark:border-amber-400/30 rounded-[8px] flex items-center justify-between shadow-2xs hover:border-[#FFB347] transition"
+                className="p-3 bg-[#F5EEDB] border border-[#FFB347]/50 rounded-[8px] flex items-center justify-between shadow-2xs hover:border-[#FFB347] transition"
               >
                 <div>
-                  <span className="text-xs font-semibold text-emerald-950 dark:text-slate-200 block">
+                  <span className="text-xs font-semibold text-[#133020] block">
                     {g.month}
                   </span>
                   <span className="text-[10px] text-emerald-800/70 dark:text-slate-400 font-medium">
                     {g.count} listed
                   </span>
                 </div>
-                <span className="px-2 py-0.5 rounded-[6px] bg-amber-600 dark:bg-amber-500 text-white text-[10px] font-bold shadow-2xs">
+                <span className="px-2 py-0.5 rounded-[6px] bg-[#C17110] text-white text-[10px] font-semibold shadow-2xs">
                   +{5 - g.count} needed
                 </span>
               </div>
@@ -59,8 +59,8 @@ export function CoverageGapsWidget({ gaps }: CoverageGapsProps) {
         )}
       </div>
 
-      <div className="mt-4 pt-3 border-t border-[#D8D2C8] dark:border-[#1E4830] flex items-center justify-between text-[11px] text-emerald-800/70 dark:text-slate-400">
-        <span className="flex items-center gap-1 text-emerald-700 dark:text-emerald-400 font-semibold">
+      <div className="mt-4 pt-3 border-t border-[#D8D2C8] flex items-center justify-between text-[11px] text-[#666666]">
+        <span className="flex items-center gap-1 text-[#046241] font-semibold">
           <Sparkles className="w-3.5 h-3.5" />
           <span>Automated scraper pipeline active</span>
         </span>

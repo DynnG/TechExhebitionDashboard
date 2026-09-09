@@ -105,8 +105,8 @@ export function Sidebar() {
 
       {/* Top Header & Logo */}
       <div>
-        <div className="p-3 flex flex-col items-start gap-2 border-b border-[#133020]/10">
-          <div className="relative w-full h-7">
+        <div className="p-1.5 flex flex-col items-start gap-2 border-b border-[#133020]/10">
+          <div className="relative w-full h-5">
             <Image
               src="/logo.png"
               alt="Lifewood logo"
@@ -114,19 +114,13 @@ export function Sidebar() {
               className="object-contain object-left"
             />
           </div>
-          <AnimatePresence>
-            {!collapsed && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <p className="text-[10px] text-[#133020]/60 uppercase tracking-widest font-bold">
-                  {locale === "en" ? "Exhibition Intelligence" : "全球展会智能平台"}
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {!collapsed && (
+            <div>
+              <p className="text-[10px] text-[#133020]/60 uppercase tracking-wider font-bold">
+                {locale === "en" ? "Exhibition Intelligence" : "全球展会智能平台"}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Navigation Items */}

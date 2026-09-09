@@ -5,34 +5,8 @@ import { REGIONS, BUSINESS_LINES } from "@/lib/constants/business-lines";
 import { Bot, Play, Check, X, RefreshCw, Sparkles, Sliders, Calendar, ShieldCheck, Edit, Search } from "lucide-react";
 import { toast } from "sonner";
 import { useLocaleStore } from "@/stores/locale-store";
-import dynamic from "next/dynamic";
-import { Skeleton } from "@/components/shared/skeleton";
-
-const EventScraperDashboard = dynamic(
-  () => import("@/components/events/EventScraperDashboard"),
-  {
-    loading: () => (
-      <div className="p-6 font-manrope space-y-5 bg-white">
-        <div className="flex items-start justify-between flex-wrap gap-4 border-b border-[#D8D2C8] pb-4">
-          <div className="space-y-2">
-            <Skeleton className="h-5 w-64 rounded" />
-            <Skeleton className="h-3.5 w-96 rounded" />
-          </div>
-          <Skeleton className="h-7 w-32 rounded-full" />
-        </div>
-        <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
-          <Skeleton className="h-10 flex-1 rounded-[8px]" />
-          <Skeleton className="h-10 w-44 rounded-[8px]" />
-        </div>
-        <div className="border border-[#D8D2C8] rounded-[10px] p-6 space-y-4">
-          {[...Array(5)].map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full rounded-md" />
-          ))}
-        </div>
-      </div>
-    ),
-  }
-);
+import EventScraperDashboard from "@/components/events/EventScraperDashboard";
+import { LifewoodDropdown } from "@/components/shared/lifewood-dropdown";
 
 export default function ScraperPage() {
   const [engineMode, setEngineMode] = useState<"apify_gemini" | "standard">("apify_gemini");
@@ -40,6 +14,18 @@ export default function ScraperPage() {
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const { locale } = useLocaleStore();
+
+  const frequencyOptions = [
+    { value: "Daily", label: "Daily Execution" },
+    { value: "Weekly", label: "Weekly (Recommended)" },
+    { value: "Monthly", label: "Monthly" },
+  ];
+
+  const dayOptions = [
+    { value: "Monday", label: "Monday" },
+    { value: "Wednesday", label: "Wednesday" },
+    { value: "Friday", label: "Friday" },
+  ];
 
   const [config, setConfig] = useState({
     startDate: "2026-09-01",
@@ -279,15 +265,12 @@ export default function ScraperPage() {
             <label className="block text-xs font-bold text-[#133020] uppercase tracking-wider mb-1">
               Frequency
             </label>
-            <select
+            <LifewoodDropdown
               value={schedule.frequency}
-              onChange={(e) => setSchedule({ ...schedule, frequency: e.target.value })}
-              className="w-full px-3 py-2 rounded-lg border border-[#D8D2C8] text-xs text-[#133020] bg-white"
-            >
-              <option value="Daily">Daily Execution</option>
-              <option value="Weekly">Weekly (Recommended)</option>
-              <option value="Monthly">Monthly</option>
-            </select>
+              onChange={(val) => setSchedule({ ...schedule, frequency: val })}
+              options={frequencyOptions}
+              aria-label="Frequency"
+            />
           </div>
 
           <div>
@@ -295,15 +278,12 @@ export default function ScraperPage() {
               Execution Day & Time
             </label>
             <div className="grid grid-cols-2 gap-2 text-xs">
-              <select
+              <LifewoodDropdown
                 value={schedule.day}
-                onChange={(e) => setSchedule({ ...schedule, day: e.target.value })}
-                className="px-3 py-2 rounded-lg border border-[#D8D2C8] bg-white text-[#133020]"
-              >
-                <option value="Monday">Monday</option>
-                <option value="Wednesday">Wednesday</option>
-                <option value="Friday">Friday</option>
-              </select>
+                onChange={(val) => setSchedule({ ...schedule, day: val })}
+                options={dayOptions}
+                aria-label="Execution Day"
+              />
               <input
                 type="text"
                 value={schedule.time}

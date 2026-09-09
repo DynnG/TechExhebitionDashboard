@@ -24,7 +24,6 @@ import { PriorityIndicator } from "./priority-indicator";
 import { BusinessLineChip } from "./business-line-chip";
 import { toast } from "sonner";
 import { sanitizeEventUrl } from "@/lib/url";
-import { Skeleton } from "@/components/shared/skeleton";
 
 export interface EventRecord {
   no: number;
@@ -61,7 +60,6 @@ export interface EventRecord {
 
 export default function EventScraperDashboard() {
   const [loading, setLoading] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [statusText, setStatusText] = useState("");
   const [candidateUrls, setCandidateUrls] = useState<string[]>([]);
@@ -88,7 +86,7 @@ export default function EventScraperDashboard() {
   useEffect(() => {
     async function loadCache() {
       try {
-        const res = await fetch("/api/crawl-events/cache");
+        const res = await fetch("http://localhost:5000/api/crawl-events/cache");
         if (res.ok) {
           const json = await res.json();
           if (json.success && json.data?.length > 0) {
@@ -97,8 +95,6 @@ export default function EventScraperDashboard() {
         }
       } catch {
         // Silent catch if engine is not running yet
-      } finally {
-        setInitialLoading(false);
       }
     }
     loadCache();
@@ -145,15 +141,29 @@ export default function EventScraperDashboard() {
     abortControllerRef.current = controller;
 
     try {
-      const res = await fetch("/api/crawl-events", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "text/event-stream",
-        },
-        body: JSON.stringify({ query }),
-        signal: controller.signal,
-      });
+      // Prefer proxy /api/crawl-events with streaming Accept header
+      let res: Response;
+      try {
+        res = await fetch("http://localhost:5000/api/crawl-events?stream=true", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "text/event-stream",
+          },
+          body: JSON.stringify({ query }),
+          signal: controller.signal,
+        });
+      } catch {
+        res = await fetch("/api/crawl-events", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "text/event-stream",
+          },
+          body: JSON.stringify({ query }),
+          signal: controller.signal,
+        });
+      }
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
@@ -256,7 +266,7 @@ export default function EventScraperDashboard() {
   // Clear crawler disk cache
   const handleClearCache = async () => {
     try {
-      const res = await fetch("/api/crawl-events/cache", {
+      const res = await fetch("http://localhost:5000/api/crawl-events/cache", {
         method: "DELETE",
       });
       if (res.ok) {
@@ -266,7 +276,7 @@ export default function EventScraperDashboard() {
         toast.error("Could not clear crawler cache.");
       }
     } catch {
-      toast.error("Failed to clear crawler cache.");
+      toast.error("Failed to reach crawler on port 5000.");
     }
   };
 
@@ -317,7 +327,7 @@ export default function EventScraperDashboard() {
 
         // Also remove from crawler cache file so it does not reappear on reload
         try {
-          fetch("/api/crawl-events/cache/item", {
+          fetch("http://localhost:5000/api/crawl-events/cache/item", {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ eventName: event.event_name }),
@@ -355,7 +365,7 @@ export default function EventScraperDashboard() {
     );
 
     try {
-      fetch("/api/crawl-events/cache/item", {
+      fetch("http://localhost:5000/api/crawl-events/cache/item", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ eventName: event.event_name }),
@@ -657,43 +667,7 @@ export default function EventScraperDashboard() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#D8D2C8] text-[#133020]">
-            {initialLoading ? (
-              [...Array(5)].map((_, i) => (
-                <tr key={i} className="animate-pulse">
-                  <td className="py-3.5 px-3.5 text-center">
-                    <Skeleton className="h-4 w-5 mx-auto rounded" />
-                  </td>
-                  <td className="py-3.5 px-3.5">
-                    <Skeleton className="h-4 w-48 mb-1.5 rounded" />
-                    <Skeleton className="h-3 w-32 rounded" />
-                  </td>
-                  <td className="py-3.5 px-3.5">
-                    <Skeleton className="h-4 w-24 rounded" />
-                  </td>
-                  <td className="py-3.5 px-3.5">
-                    <Skeleton className="h-4 w-28 rounded" />
-                  </td>
-                  <td className="py-3.5 px-3.5">
-                    <Skeleton className="h-5 w-24 rounded-full" />
-                  </td>
-                  <td className="py-3.5 px-3.5 text-center">
-                    <Skeleton className="h-6 w-8 mx-auto rounded" />
-                  </td>
-                  <td className="py-3.5 px-3.5 text-center">
-                    <Skeleton className="h-5 w-16 mx-auto rounded-full" />
-                  </td>
-                  <td className="py-3.5 px-3.5">
-                    <Skeleton className="h-4 w-20 rounded" />
-                  </td>
-                  <td className="py-3.5 px-3.5 text-right">
-                    <Skeleton className="h-4 w-12 ml-auto rounded" />
-                  </td>
-                  <td className="py-3.5 px-3.5 text-right">
-                    <Skeleton className="h-7 w-20 ml-auto rounded-md" />
-                  </td>
-                </tr>
-              ))
-            ) : displayedEvents.length === 0 && !loading ? (
+            {displayedEvents.length === 0 && !loading ? (
               <tr>
                 <td colSpan={10} className="text-center py-12 px-4 text-[#666666]">
                   <div className="max-w-xs mx-auto space-y-1">

@@ -19,7 +19,7 @@ export function EventTable({ events, onDelete }: EventTableProps) {
   }
 
   return (
-    <div className="w-full overflow-x-auto rounded-[12px] border-[1.5px] border-[#D8D2C8] dark:border-[#1E4830] bg-white dark:bg-[#133020] shadow-sm font-manrope transition-colors">
+    <div className="w-full overflow-x-auto rounded-[12px] border-[1.5px] border-[#D8D2C8] bg-white shadow-[0_2px_16px_rgba(0,0,0,0.05)] font-manrope">
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="bg-emerald-950 dark:bg-black/50 text-white text-[10.5px] uppercase tracking-[0.08em] font-semibold border-b border-emerald-900 dark:border-[#1E4830]">
