@@ -279,6 +279,7 @@ Audit and extract event information strictly against these parameters:
    - 1-2: Low fit or irrelevant industrial expo (mark is_in_scope: false).
 4. Non-negotiable Honesty Rule:
    If any commercial, deadline, or contact field is missing or not publicly listed, output exactly "Not publicly disclosed". NEVER estimate or guess.
+   IMPORTANT EXCEPTION: "official_website" MUST be an actual HTTP or HTTPS URL to the event or its canonical domain, NEVER "Not publicly disclosed". If no specific homepage URL is found, use the source page URL.
 5. Location: "city" must be a clean city name (e.g. "Singapore", "San Francisco"). Never output ZIP codes.
 
 Return a JSON object conforming exactly to this schema:
@@ -293,7 +294,7 @@ Return a JSON object conforming exactly to this schema:
     "dates": "Mmm DD-DD, YYYY or QX 2027 (dates TBA)",
     "venue": "Venue name or Not publicly disclosed",
     "location_address": "Street address or Not publicly disclosed",
-    "official_website": "Direct event URL",
+    "official_website": "Direct event website URL (must start with https:// or http://)",
     "organizer": "Organizer name",
     "event_category": "Short descriptor",
     "business_lines": "e.g. 2. Global AI Data, 3. AIGC",
@@ -558,11 +559,30 @@ app.post('/api/crawl-events', scrapeLimiter, async (req, res) => {
           // Check for duplicate against database records, local cache, and current batch
           const dupCheck = checkIsDuplicate(parsed.data, [...allKnownEvents, ...eventsList]);
 
+          // Clean and resolve official_website: never allow "Not publicly disclosed" as a link
+          const rawWebsite = (parsed.data.official_website || '').trim();
+          const isInvalidWebsite =
+            !rawWebsite ||
+            rawWebsite.toLowerCase().includes('not publicly') ||
+            rawWebsite.toLowerCase().includes('tba') ||
+            rawWebsite.toLowerCase().includes('unknown') ||
+            rawWebsite.toLowerCase().includes('n/a') ||
+            rawWebsite === 'https://' ||
+            rawWebsite === 'http://';
+
+          let resolvedWebsite = targetUrl;
+          if (!isInvalidWebsite) {
+            resolvedWebsite =
+              rawWebsite.startsWith('http://') || rawWebsite.startsWith('https://')
+                ? rawWebsite
+                : `https://${rawWebsite.replace(/^\/+/, '')}`;
+          }
+
           const newEvent = {
             no: eventsList.length + 1,
             ...parsed.data,
             fit_score: parsed.fit_score,
-            official_website: parsed.data.official_website || targetUrl,
+            official_website: resolvedWebsite,
             source_links: targetUrl,
             is_duplicate: dupCheck.isDuplicate,
             duplicate_reason: dupCheck.reason || null,

@@ -8,6 +8,7 @@ import { ListTodo, CheckCircle, XCircle, Clock, ShieldAlert, ExternalLink, Loade
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { useLocaleStore } from "@/stores/locale-store";
+import { sanitizeEventUrl } from "@/lib/url";
 
 export default function QueuesPage() {
   const { data: session } = useSession();
@@ -185,17 +186,31 @@ export default function QueuesPage() {
                     Submission Rationale & Source:
                   </span>
                   <p>{item.reason}</p>
-                  {item.event?.officialWebsite && (
-                    <a
-                      href={item.event.officialWebsite}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 font-bold text-[#046241] hover:underline pt-1"
-                    >
-                      <Globe className="w-3.5 h-3.5" />
-                      <span>Inspect Official Scraped Site ↗</span>
-                    </a>
-                  )}
+                  {(() => {
+                    let firstSource: string | null = null;
+                    try {
+                      const parsed = JSON.parse(item.event?.sourceLinks || "[]");
+                      firstSource = Array.isArray(parsed) ? parsed[0] : null;
+                    } catch {
+                      firstSource = item.event?.sourceLinks || null;
+                    }
+                    const validUrl = sanitizeEventUrl(
+                      item.event?.officialWebsite,
+                      firstSource
+                    );
+                    if (!validUrl) return null;
+                    return (
+                      <a
+                        href={validUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 font-bold text-[#046241] hover:underline pt-1"
+                      >
+                        <Globe className="w-3.5 h-3.5" />
+                        <span>Inspect Official Scraped Site ↗</span>
+                      </a>
+                    );
+                  })()}
                 </div>
               </div>
 
