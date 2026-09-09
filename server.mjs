@@ -46,6 +46,19 @@ const AGGREGATOR_DOMAINS = [
   'facebook.com',
   'techinasia.com',
   'google.com',
+  'eventseye.com',
+  'exposale.net',
+  'tradefairdates.com',
+  'cantonfair.net',
+  'eventsinamerica.com',
+  'b2bmap.com',
+  'worldconferencealerts.com',
+  'oceansciencetechnology.com',
+  'allconfs.com',
+  'conferenceindex.org',
+  'tsnn.com',
+  'clocate.com',
+  'eventslink.com',
 ];
 
 function normalizeDomain(urlStr) {
@@ -157,6 +170,62 @@ function checkIsDuplicate(candidate, existingEventsList) {
   }
 
   return { isDuplicate: false };
+}
+
+// Automatically resolve dedicated official exhibition homepage, bypassing aggregators
+async function resolveOfficialEventWebsite(eventName, currentUrl, candidateModelsList) {
+  const currentDomain = normalizeDomain(currentUrl);
+  const isAggregator =
+    !currentDomain ||
+    AGGREGATOR_DOMAINS.some(
+      (d) => currentDomain.includes(d) || d.includes(currentDomain)
+    );
+
+  const isValidHttp =
+    currentUrl &&
+    (currentUrl.startsWith('http://') || currentUrl.startsWith('https://')) &&
+    !currentUrl.toLowerCase().includes('not publicly') &&
+    !currentUrl.toLowerCase().includes('tba');
+
+  if (!isAggregator && isValidHttp) {
+    return currentUrl;
+  }
+
+  // If the extracted URL is an aggregator, directory, or placeholder, resolve the true dedicated event homepage
+  try {
+    const modelsToTry = candidateModelsList || ['gemini-2.5-flash-lite', 'gemini-flash-latest'];
+    const prompt = `What is the exact official primary website homepage URL for the tech exhibition "${eventName}"?
+Rules:
+1. Return ONLY the dedicated event website URL starting with https:// (e.g. https://www.geoconnectasia.com/ or https://www.asiatechx.com/).
+2. NEVER return directory, fair listing, or ticketing sites like Eventseye, Exposale, Eventbrite, 10times, or LinkedIn.
+3. Output strictly the single URL, with no markdown formatting, no explanations, and no quotes.`;
+
+    for (const model of modelsToTry) {
+      try {
+        const res = await ai.models.generateContent({
+          model,
+          contents: prompt,
+          config: { temperature: 0.0 },
+        });
+
+        const firstLine = (res.text || '').trim().split('\n')[0].trim().replace(/^[`'"]+|[`'"]+$/g, '');
+        if (
+          firstLine &&
+          (firstLine.startsWith('http://') || firstLine.startsWith('https://')) &&
+          !AGGREGATOR_DOMAINS.some((d) => firstLine.toLowerCase().includes(d))
+        ) {
+          console.log(`[Website Resolver] Resolved "${eventName}" -> ${firstLine} (source was: ${currentUrl})`);
+          return firstLine;
+        }
+      } catch (err) {
+        // Try next model candidate
+      }
+    }
+  } catch (err) {
+    console.warn(`[Website Resolver] Could not resolve official domain for ${eventName}:`, err.message);
+  }
+
+  return isValidHttp ? currentUrl : 'https://';
 }
 
 function loadFromCache() {
@@ -279,7 +348,11 @@ Audit and extract event information strictly against these parameters:
    - 1-2: Low fit or irrelevant industrial expo (mark is_in_scope: false).
 4. Non-negotiable Honesty Rule:
    If any commercial, deadline, or contact field is missing or not publicly listed, output exactly "Not publicly disclosed". NEVER estimate or guess.
-   IMPORTANT EXCEPTION: "official_website" MUST be an actual HTTP or HTTPS URL to the event or its canonical domain, NEVER "Not publicly disclosed". If no specific homepage URL is found, use the source page URL.
+   CRITICAL REQUIREMENT FOR "official_website":
+   - "official_website" MUST be the actual dedicated official website URL of the exhibition itself (e.g. https://www.asiatechx.com/, https://www.geoconnectasia.com/, https://www.gitex.com/).
+   - DO NOT output directory, aggregator, or fair calendar URLs (e.g. eventseye.com, 10times.com, exposale.net, tradefairdates.com, etc.) as official_website.
+   - You MUST identify the event's actual dedicated homepage URL.
+   - Put the directory or crawled page URL into "source_links".
 5. Location: "city" must be a clean city name (e.g. "Singapore", "San Francisco"). Never output ZIP codes.
 
 Return a JSON object conforming exactly to this schema:
@@ -577,6 +650,13 @@ app.post('/api/crawl-events', scrapeLimiter, async (req, res) => {
                 ? rawWebsite
                 : `https://${rawWebsite.replace(/^\/+/, '')}`;
           }
+
+          // Ensure official_website leads to the actual exhibition homepage, bypassing aggregator/directory sources
+          resolvedWebsite = await resolveOfficialEventWebsite(
+            parsed.data.event_name,
+            resolvedWebsite,
+            candidateModels
+          );
 
           const newEvent = {
             no: eventsList.length + 1,
