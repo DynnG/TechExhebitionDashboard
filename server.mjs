@@ -422,6 +422,27 @@ app.delete('/api/crawl-events/cache', (req, res) => {
   }
 });
 
+// Endpoint to remove single accepted/dismissed event from crawler cache
+app.delete('/api/crawl-events/cache/item', (req, res) => {
+  try {
+    const { eventName } = req.body;
+    if (!eventName) {
+      return res.status(400).json({ success: false, error: 'eventName is required' });
+    }
+    const existing = loadFromCache();
+    const updated = existing.filter(
+      (e) => (e.event_name || e.eventName || '').toLowerCase().trim() !== eventName.toLowerCase().trim()
+    );
+    updated.forEach((e, i) => {
+      e.no = i + 1;
+    });
+    fs.writeFileSync(CACHE_FILE, JSON.stringify(updated, null, 2), 'utf-8');
+    res.json({ success: true, count: updated.length });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // ==========================================
 // 4. API PIPELINE ROUTE (WITH REAL-TIME STREAMING & PARALLEL BATCHING)
 // ==========================================
