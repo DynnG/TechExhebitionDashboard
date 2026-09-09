@@ -88,18 +88,18 @@ export function Sidebar() {
     <motion.aside
       animate={{ width: collapsed ? 80 : 256 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      className="bg-white text-[#133020] flex flex-col justify-between relative z-30 h-screen sticky top-0 shadow-xl border-r border-[#133020]/10 font-manrope"
+      className="bg-white text-[#133020] flex flex-col justify-between relative z-50 h-screen sticky top-0 shadow-xl border-r border-[#133020]/10 font-manrope"
     >
-      {/* Collapse Toggle Button */}
+      {/* Collapse Toggle Button (Prominent & Always Visible above Header) */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-7 w-6 h-6 bg-[#FFB347] text-[#133020] rounded-full flex items-center justify-center shadow-md hover:bg-[#FFC370] hover:scale-110 transition z-40"
+        className="absolute -right-3.5 top-5 w-7 h-7 bg-[#FFB347] text-[#133020] border border-[#133020]/20 rounded-full flex items-center justify-center shadow-lg hover:bg-[#FFC370] hover:scale-110 transition z-[60] cursor-pointer"
         title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
         {collapsed ? (
-          <ChevronRight className="w-4 h-4" />
+          <ChevronRight className="w-4.5 h-4.5" />
         ) : (
-          <ChevronLeft className="w-4 h-4" />
+          <ChevronLeft className="w-4.5 h-4.5" />
         )}
       </button>
 
