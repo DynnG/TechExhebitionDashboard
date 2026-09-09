@@ -107,53 +107,53 @@ export default function EventsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-manrope">
       {/* Top Section */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
+      <div className="flex items-center justify-between flex-wrap gap-4 border-b border-[#D8D2C8] pb-4">
         <div>
-          <h2 className="text-2xl font-bold text-[#133020]">
-            {locale === "en" ? "Exhibition Records" : "展会记录库"}
+          <h2 className="text-[28px] font-semibold text-[#133020] tracking-tight leading-tight">
+            {locale === "en" ? "Exhibition records" : "展会记录库"}
           </h2>
           <p className="text-xs text-[#666666] mt-0.5">
             {locale === "en"
-              ? `Showing ${pagination.totalCount} strategic tech exhibition records (Fit Score 3+)`
+              ? `Showing ${pagination.totalCount} strategic tech exhibition records (fit score 3+)`
               : `显示 ${pagination.totalCount} 条战略科技展会记录（适配分 3+）`}
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           {/* View Toggle */}
-          <div className="flex items-center p-1 bg-white border border-[#D8D2C8] rounded-lg shadow-xs">
+          <div className="flex items-center p-1 bg-white border-[1.5px] border-[#D8D2C8] rounded-[8px] shadow-2xs">
             <button
               onClick={() => setViewMode("card")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] text-xs font-medium transition ${
                 viewMode === "card"
-                  ? "bg-[#133020] text-white shadow-xs"
+                  ? "bg-[#133020] text-white shadow-2xs"
                   : "text-[#666666] hover:text-[#133020]"
               }`}
             >
-              <LayoutGrid className="w-4 h-4" />
+              <LayoutGrid className="w-3.5 h-3.5" />
               <span>{locale === "en" ? "Cards" : "卡片视图"}</span>
             </button>
             <button
               onClick={() => setViewMode("table")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] text-xs font-medium transition ${
                 viewMode === "table"
-                  ? "bg-[#133020] text-white shadow-xs"
+                  ? "bg-[#133020] text-white shadow-2xs"
                   : "text-[#666666] hover:text-[#133020]"
               }`}
             >
-              <TableIcon className="w-4 h-4" />
+              <TableIcon className="w-3.5 h-3.5" />
               <span>{locale === "en" ? "Table" : "表格视图"}</span>
             </button>
           </div>
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-1.5 px-4 py-2 bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] font-semibold text-xs rounded-lg transition shadow-sm"
+            className="flex items-center gap-1.5 px-4 py-2 bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] font-medium text-xs rounded-[8px] transition-all duration-180 shadow-2xs cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            <span>{locale === "en" ? "Add event" : "添加展会"}</span>
+            <span>{locale === "en" ? "+ Add event" : "+ 添加展会"}</span>
           </button>
         </div>
       </div>
@@ -169,16 +169,16 @@ export default function EventsPage() {
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, i) => (
-            <Skeleton key={i} className="h-72 w-full rounded-xl" />
+            <Skeleton key={i} className="h-72 w-full rounded-[12px]" />
           ))}
         </div>
       ) : events.length === 0 ? (
         /* Empty State */
-        <div className="bg-white border-2 border-dashed border-[#D8D2C8] rounded-xl p-12 text-center max-w-lg mx-auto my-8">
-          <div className="w-16 h-16 bg-[#F5EEDB] rounded-full flex items-center justify-center mx-auto mb-4 text-[#046241]">
-            <LayoutGrid className="w-8 h-8" />
+        <div className="bg-white border-[1.5px] border-dashed border-[#D8D2C8] rounded-[12px] p-12 text-center max-w-lg mx-auto my-8 font-manrope">
+          <div className="w-14 h-14 bg-[#F5EEDB] rounded-[10px] flex items-center justify-center mx-auto mb-4 text-[#046241]">
+            <LayoutGrid className="w-7 h-7" />
           </div>
-          <h3 className="text-lg font-semibold text-[#133020] mb-1">
+          <h3 className="text-base font-semibold text-[#133020] mb-1">
             No exhibition events found
           </h3>
           <p className="text-xs text-[#666666] mb-6">
@@ -186,7 +186,7 @@ export default function EventsPage() {
           </p>
           <button
             onClick={handleClearFilters}
-            className="px-4 py-2 bg-[#133020] text-white text-xs font-semibold rounded-lg hover:bg-[#046241] transition"
+            className="px-4 py-2 bg-[#133020] text-white text-xs font-medium rounded-[8px] hover:bg-[#046241] transition"
           >
             Clear all filters
           </button>
@@ -206,7 +206,7 @@ export default function EventsPage() {
 
           {/* Pagination Controls */}
           {pagination.totalPages > 1 && (
-            <div className="mt-8 flex items-center justify-between text-xs text-[#666666]">
+            <div className="mt-8 flex items-center justify-between text-xs text-[#666666] font-manrope">
               <span>
                 Page {pagination.page} of {pagination.totalPages}
               </span>
@@ -216,7 +216,7 @@ export default function EventsPage() {
                   onClick={() =>
                     setPagination((prev) => ({ ...prev, page: prev.page - 1 }))
                   }
-                  className="px-3 py-1.5 rounded border border-[#D8D2C8] bg-white font-medium disabled:opacity-50 hover:bg-[#F9F7F7]"
+                  className="px-3.5 py-1.5 rounded-[8px] border-[1.5px] border-[#D8D2C8] bg-white font-medium disabled:opacity-50 hover:bg-[#F9F7F7] transition"
                 >
                   Previous
                 </button>
@@ -225,7 +225,7 @@ export default function EventsPage() {
                   onClick={() =>
                     setPagination((prev) => ({ ...prev, page: prev.page + 1 }))
                   }
-                  className="px-3 py-1.5 rounded border border-[#D8D2C8] bg-white font-medium disabled:opacity-50 hover:bg-[#F9F7F7]"
+                  className="px-3.5 py-1.5 rounded-[8px] border-[1.5px] border-[#D8D2C8] bg-white font-medium disabled:opacity-50 hover:bg-[#F9F7F7] transition"
                 >
                   Next
                 </button>
