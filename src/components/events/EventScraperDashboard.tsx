@@ -17,6 +17,7 @@ import {
   ArrowRight,
   Trash2,
   Filter,
+  X,
 } from "lucide-react";
 import { FitScoreBadge } from "./fit-score-badge";
 import { PriorityIndicator } from "./priority-indicator";
@@ -315,11 +316,33 @@ export default function EventScraperDashboard() {
 
       const data = await res.json();
       if (res.ok) {
-        setAcceptedEvents((prev) => ({ ...prev, [event.event_name]: true }));
+        // Automatically remove the accepted event from the scraped list!
+        setEvents((prev) =>
+          prev.filter(
+            (item) =>
+              item.event_name.toLowerCase().trim() !==
+              event.event_name.toLowerCase().trim()
+          )
+        );
+
+        // Also remove from crawler cache file so it does not reappear on reload
+        try {
+          fetch("http://localhost:5000/api/crawl-events/cache/item", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ eventName: event.event_name }),
+          }).catch(() => {});
+        } catch {}
+
         if (data.isDuplicate) {
-          toast.info(data.message || `"${event.event_name}" already exists in the database.`);
+          toast.info(
+            data.message ||
+              `"${event.event_name}" already exists in the database and was removed from scraped queue.`
+          );
         } else {
-          toast.success(`"${event.event_name}" accepted and added to Review Queue!`);
+          toast.success(
+            `"${event.event_name}" accepted and transferred to Review Queue!`
+          );
         }
       } else {
         toast.error(data.error || "Failed to accept event");
@@ -331,18 +354,37 @@ export default function EventScraperDashboard() {
     }
   };
 
+  // Dismiss / Remove event from scraped list without queuing
+  const handleDismissEvent = (event: EventRecord) => {
+    setEvents((prev) =>
+      prev.filter(
+        (item) =>
+          item.event_name.toLowerCase().trim() !==
+          event.event_name.toLowerCase().trim()
+      )
+    );
+
+    try {
+      fetch("http://localhost:5000/api/crawl-events/cache/item", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eventName: event.event_name }),
+      }).catch(() => {});
+    } catch {}
+
+    toast.info(`Removed "${event.event_name}" from scraped list.`);
+  };
+
   // Bulk Accept All Unique
   const handleAcceptAll = async () => {
-    const unaccepted = events.filter(
-      (e) => !acceptedEvents[e.event_name] && !e.is_duplicate
-    );
-    if (unaccepted.length === 0) {
-      toast.info("All unique events have already been accepted!");
+    const uniqueToAccept = events.filter((e) => !e.is_duplicate);
+    if (uniqueToAccept.length === 0) {
+      toast.info("No unique events to transfer.");
       return;
     }
 
-    toast.info(`Adding ${unaccepted.length} unique events to Review Queue...`);
-    for (const evt of unaccepted) {
+    toast.info(`Transferring ${uniqueToAccept.length} unique events to Review Queue...`);
+    for (const evt of uniqueToAccept) {
       await handleAcceptEvent(evt);
     }
   };
@@ -758,26 +800,39 @@ export default function EventScraperDashboard() {
                       })()}
                     </td>
                     <td className="py-3 px-3.5 text-right whitespace-nowrap">
-                      {isAccepted ? (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#046241] bg-[#046241]/10 px-2 py-0.5 rounded-full">
-                          <CheckCircle2 className="w-3 h-3" />
-                          <span>Accepted ✓</span>
-                        </span>
-                      ) : isDuplicate ? (
-                        <span
-                          className="inline-flex items-center gap-1 text-[11px] font-medium text-[#777777] bg-[#F0ECE1] px-2.5 py-1 rounded-full border border-[#D8D2C8]"
-                          title={e.duplicate_reason || "Event already recorded in system"}
-                        >
-                          <span>Existing Record</span>
-                        </span>
+                      {isDuplicate ? (
+                        <div className="inline-flex items-center gap-1.5 justify-end">
+                          <span
+                            className="inline-flex items-center gap-1 text-[11px] font-medium text-[#777777] bg-[#F0ECE1] px-2.5 py-1 rounded-full border border-[#D8D2C8]"
+                            title={e.duplicate_reason || "Event already recorded in system"}
+                          >
+                            <span>Existing Record</span>
+                          </span>
+                          <button
+                            onClick={() => handleDismissEvent(e)}
+                            title="Dismiss from list"
+                            className="p-1 text-[#777777] hover:text-red-600 hover:bg-red-50 rounded transition cursor-pointer"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       ) : (
-                        <button
-                          onClick={() => handleAcceptEvent(e)}
-                          disabled={isAccepting}
-                          className="px-2.5 py-1 bg-[#046241] hover:bg-[#133020] text-white rounded-[6px] text-[11px] font-semibold transition cursor-pointer disabled:opacity-50"
-                        >
-                          {isAccepting ? "Saving..." : "+ Accept"}
-                        </button>
+                        <div className="inline-flex items-center gap-1.5 justify-end">
+                          <button
+                            onClick={() => handleAcceptEvent(e)}
+                            disabled={isAccepting}
+                            className="px-2.5 py-1 bg-[#046241] hover:bg-[#133020] text-white rounded-[6px] text-[11px] font-semibold transition cursor-pointer disabled:opacity-50"
+                          >
+                            {isAccepting ? "Moving..." : "+ Accept"}
+                          </button>
+                          <button
+                            onClick={() => handleDismissEvent(e)}
+                            title="Dismiss from list"
+                            className="p-1 text-[#777777] hover:text-red-600 hover:bg-red-50 rounded transition cursor-pointer"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       )}
                     </td>
                   </tr>
