@@ -109,7 +109,7 @@ export default function EventsPage() {
   return (
     <div className="space-y-6 font-manrope">
       {/* Top Section */}
-      <div className="flex items-center justify-between flex-wrap gap-4 border-b border-[#E6E6E6] pb-4">
+      <div className="flex items-center justify-between flex-wrap gap-4 border-b border-[#D8D2C8] pb-4">
         <div>
           <h2 className="text-[28px] font-semibold text-[#133020] tracking-tight leading-tight">
             {locale === "en" ? "Exhibition records" : "展会记录库"}
@@ -123,7 +123,7 @@ export default function EventsPage() {
 
         <div className="flex items-center gap-3">
           {/* View Toggle */}
-          <div className="flex items-center p-1 bg-white border border-[#E6E6E6] rounded-[8px] shadow-2xs">
+          <div className="flex items-center p-1 bg-white border-[1.5px] border-[#D8D2C8] rounded-[8px] shadow-2xs">
             <button
               onClick={() => setViewMode("card")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] text-xs font-medium transition ${
@@ -225,7 +225,7 @@ export default function EventsPage() {
                   onClick={() =>
                     setPagination((prev) => ({ ...prev, page: prev.page + 1 }))
                   }
-                  className="px-3.5 py-1.5 rounded-[8px] border border-[#E6E6E6] bg-white font-medium disabled:opacity-50 hover:bg-[#F9F7F7] transition"
+                  className="px-3.5 py-1.5 rounded-[8px] border-[1.5px] border-[#D8D2C8] bg-white font-medium disabled:opacity-50 hover:bg-[#F9F7F7] transition"
                 >
                   Next
                 </button>

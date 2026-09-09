@@ -48,7 +48,7 @@ export function BorderGlow({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       style={{ borderRadius }}
-      className={`relative p-[1px] bg-[#E6E6E6] transition-colors duration-200 overflow-hidden ${className}`}
+      className={`relative p-[1.5px] bg-[#D8D2C8] transition-colors duration-200 overflow-hidden ${className}`}
     >
       {/* Dynamic Cursor Border Glow */}
       <div

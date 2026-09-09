@@ -6,17 +6,17 @@
 
 @layer base {
   :root {
-    --bg-sea-salt: #F9F7F7;
     --bg-paper: #F5EEDB;
     --bg-white: #FFFFFF;
-    --dark-serpent: #133020;
-    --castleton-green: #046241;
-    --saffron: #FFB347;
-    --earth-yellow: #FFC370;
+    --bg-light: #F9F7F7;
+    --bg-dark: #133020;
+    --green-accent: #046241;
+    --accent: #FFB347;
+    --accent-soft: #FFC370;
 
-    --fit-5: #FFB347;
-    --fit-4: #FFC370;
-    --fit-3: #046241;
+    --fit-5: #133020;
+    --fit-4: #046241;
+    --fit-3: #708E7C;
 
     --priority-high: #C17110;
     --priority-medium: #FFB347;
@@ -24,8 +24,8 @@
   }
 
   body {
-    background-color: var(--bg-sea-salt);
-    color: var(--dark-serpent);
+    background-color: var(--bg-paper);
+    color: var(--bg-dark);
     font-family: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     -webkit-font-smoothing: antialiased;
   }

@@ -66,7 +66,7 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6 max-w-4xl mx-auto font-manrope">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-[#E6E6E6] pb-4">
+      <div className="flex items-center justify-between border-b border-[#D8D2C8] pb-4">
         <div>
           <div className="flex items-center gap-2">
             <Settings className="w-6 h-6 text-[#046241]" />
@@ -83,7 +83,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Tabs Switcher */}
-      <div className="flex items-center gap-2 border-b border-[#E6E6E6] pb-1">
+      <div className="flex items-center gap-2 border-b border-[#D8D2C8] pb-1">
         <button
           onClick={() => setActiveTab("general")}
           className={`px-4 py-2 text-xs font-semibold transition border-b-2 ${
@@ -116,8 +116,8 @@ export default function SettingsPage() {
       {activeTab === "general" ? (
         <div className="space-y-6">
           {/* Account Info */}
-          <div className="bg-white p-6 rounded-xl border border-[#E6E6E6] shadow-xs space-y-4">
-            <div className="flex items-center gap-2 border-b border-[#E6E6E6] pb-3">
+          <div className="bg-white p-6 rounded-xl border border-[#D8D2C8] shadow-xs space-y-4">
+            <div className="flex items-center gap-2 border-b border-[#D8D2C8] pb-3">
               <User className="w-5 h-5 text-[#046241]" />
               <h3 className="text-base font-bold text-[#133020]">
                 {locale === "en" ? "User Profile Information" : "用户档案信息"}
@@ -151,8 +151,8 @@ export default function SettingsPage() {
           </div>
 
           {/* Role Access Matrix */}
-          <div className="bg-white p-6 rounded-xl border border-[#E6E6E6] shadow-xs space-y-4">
-            <div className="flex items-center gap-2 border-b border-[#E6E6E6] pb-3">
+          <div className="bg-white p-6 rounded-xl border border-[#D8D2C8] shadow-xs space-y-4">
+            <div className="flex items-center gap-2 border-b border-[#D8D2C8] pb-3">
               <Shield className="w-5 h-5 text-[#046241]" />
               <h3 className="text-base font-bold text-[#133020]">
                 {locale === "en" ? "System Role Access Control Matrix" : "系统角色权限矩阵"}
@@ -169,7 +169,7 @@ export default function SettingsPage() {
                     <th className="p-2.5 text-center">Intern</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#E6E6E6]">
+                <tbody className="divide-y divide-[#D8D2C8]">
                   <tr>
                     <td className="p-2.5 font-semibold text-[#133020]">View Dashboard & Exhibition Records</td>
                     <td className="p-2.5 text-center text-[#046241] font-bold">✅</td>
@@ -207,8 +207,8 @@ export default function SettingsPage() {
         </div>
       ) : (
         /* Security Tab: Dedicated Change Password Section */
-        <div className="bg-white p-6 sm:p-8 rounded-xl border border-[#E6E6E6] shadow-xs space-y-6">
-          <div className="flex items-center gap-2 border-b border-[#E6E6E6] pb-3">
+        <div className="bg-white p-6 sm:p-8 rounded-xl border border-[#D8D2C8] shadow-xs space-y-6">
+          <div className="flex items-center gap-2 border-b border-[#D8D2C8] pb-3">
             <Lock className="w-5 h-5 text-[#046241]" />
             <div>
               <h3 className="text-base font-bold text-[#133020]">
@@ -233,7 +233,7 @@ export default function SettingsPage() {
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-3.5 py-2.5 rounded-lg border border-[#E6E6E6] text-xs text-[#133020] bg-white focus:outline-none focus:border-[#046241] focus:ring-2 focus:ring-[#046241]/20 transition"
+                className="w-full px-3.5 py-2.5 rounded-lg border border-[#D8D2C8] text-xs text-[#133020] bg-white focus:outline-none focus:border-[#046241] focus:ring-2 focus:ring-[#046241]/20 transition"
               />
             </div>
 
@@ -248,7 +248,7 @@ export default function SettingsPage() {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-3.5 py-2.5 rounded-lg border border-[#E6E6E6] text-xs text-[#133020] bg-white focus:outline-none focus:border-[#046241] focus:ring-2 focus:ring-[#046241]/20 transition"
+                className="w-full px-3.5 py-2.5 rounded-lg border border-[#D8D2C8] text-xs text-[#133020] bg-white focus:outline-none focus:border-[#046241] focus:ring-2 focus:ring-[#046241]/20 transition"
               />
             </div>
 
@@ -263,7 +263,7 @@ export default function SettingsPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-3.5 py-2.5 rounded-lg border border-[#E6E6E6] text-xs text-[#133020] bg-white focus:outline-none focus:border-[#046241] focus:ring-2 focus:ring-[#046241]/20 transition"
+                className="w-full px-3.5 py-2.5 rounded-lg border border-[#D8D2C8] text-xs text-[#133020] bg-white focus:outline-none focus:border-[#046241] focus:ring-2 focus:ring-[#046241]/20 transition"
               />
             </div>
 

@@ -17,10 +17,10 @@ const config: Config = {
         saffron: "#FFB347",
         "earth-yellow": "#FFC370",
 
-        // Fit Scores (Fix1.md Spec)
-        "fit-5": "#FFB347",
-        "fit-4": "#FFC370",
-        "fit-3": "#046241",
+        // Fit Scores
+        "fit-5": "#133020",
+        "fit-4": "#046241",
+        "fit-3": "#708E7C",
 
         // Priority Levels
         "priority-high": "#C17110",

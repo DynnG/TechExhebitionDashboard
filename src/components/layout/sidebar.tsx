@@ -16,7 +16,6 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  ShieldAlert,
 } from "lucide-react";
 import { useLocaleStore } from "@/stores/locale-store";
 
@@ -85,49 +84,44 @@ export function Sidebar() {
 
   return (
     <aside
-      className={`bg-[#F9F7F7] text-[#133020] border-r border-[rgba(19,48,32,0.08)] flex flex-col justify-between transition-all duration-200 ease-in-out relative z-30 h-screen sticky top-0 shadow-[0_4px_20px_-2px_rgba(19,48,32,0.05)] ${
+      className={`bg-[#F9F7F7] text-[#133020] border-r border-[#D8D2C8] flex flex-col justify-between transition-all duration-200 ease-in-out relative z-30 h-screen sticky top-0 shadow-sm ${
         collapsed ? "w-20" : "w-64"
       }`}
     >
       {/* Collapse Toggle Button */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-7 w-6 h-6 bg-white border border-[rgba(19,48,32,0.12)] text-[#133020] rounded-full flex items-center justify-center shadow-sm hover:bg-[#F5EEDB] hover:text-[#046241] transition z-40"
+        className="absolute -right-3 top-7 w-6 h-6 bg-[#FFB347] text-[#133020] rounded-full flex items-center justify-center shadow-md hover:bg-[#FFC370] transition z-40"
         title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
         {collapsed ? (
-          <ChevronRight className="w-3.5 h-3.5" />
+          <ChevronRight className="w-4 h-4" />
         ) : (
-          <ChevronLeft className="w-3.5 h-3.5" />
+          <ChevronLeft className="w-4 h-4" />
         )}
       </button>
 
       {/* Top Header & Logo */}
       <div>
-        <div className="p-5 flex items-center gap-3 border-b border-[rgba(19,48,32,0.08)]">
-          <div className="w-9 h-9 bg-[#133020] rounded-lg flex items-center justify-center shrink-0 shadow-sm transform rotate-45">
-            <span className="transform -rotate-45 font-black text-base text-[#FFB347]">
+        <div className="p-5 flex items-center gap-3 border-b border-[#D8D2C8]">
+          <div className="w-9 h-9 bg-[#133020] rounded-lg flex items-center justify-center shrink-0 shadow-inner transform rotate-45">
+            <span className="transform -rotate-45 font-black text-lg text-[#FFB347]">
               ❖
             </span>
           </div>
           {!collapsed && (
             <div>
-              <div className="flex items-baseline gap-1.5">
-                <h1 className="font-bold text-base text-[#133020] tracking-tight leading-tight">
-                  lifewood
-                </h1>
-                <span className="font-bold text-sm text-[#046241]">
-                  活树
-                </span>
-              </div>
-              <p className="text-[10px] text-[#666666] tracking-normal font-medium mt-0.5">
+              <h1 className="font-semibold text-lg text-[#133020] tracking-tight leading-tight">
+                Lifewood
+              </h1>
+              <p className="text-[10px] text-[#666666] uppercase tracking-wider font-medium">
                 {locale === "en" ? "Exhibition Intelligence" : "全球展会智能平台"}
               </p>
             </div>
           )}
         </div>
 
-        {/* Navigation Items — Minimalist inline indicator, 2px bottom border underline, no bulky pills */}
+        {/* Navigation Items */}
         <nav className="p-3 space-y-1.5 mt-2">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -139,16 +133,16 @@ export function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2 text-xs transition-colors duration-150 relative bg-transparent ${
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-medium transition-all duration-150 relative ${
                   isActive
-                    ? "text-[#133020] font-semibold border-b-2 border-[#133020]"
-                    : "text-[#666666] hover:text-[#046241] font-normal border-b-2 border-transparent"
+                    ? "bg-[#FFB347]/25 text-[#133020] border-l-4 border-[#FFB347] pl-2.5 font-semibold"
+                    : "text-[#666666] hover:bg-black/5 hover:text-[#133020]"
                 }`}
                 title={collapsed ? item.label : undefined}
               >
                 <Icon
-                  className={`w-4 h-4 shrink-0 transition-colors ${
-                    isActive ? "text-[#133020]" : "text-[#666666] group-hover:text-[#046241]"
+                  className={`w-5 h-5 shrink-0 ${
+                    isActive ? "text-[#133020]" : "text-[#666666]"
                   }`}
                 />
                 {!collapsed && <span>{item.label}</span>}
@@ -159,7 +153,7 @@ export function Sidebar() {
       </div>
 
       {/* Footer / User Profile & Role */}
-      <div className="p-4 border-t border-[rgba(19,48,32,0.08)] bg-white/50">
+      <div className="p-4 border-t border-[#D8D2C8] bg-black/[0.02]">
         {!collapsed ? (
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5 overflow-hidden">
@@ -182,7 +176,7 @@ export function Sidebar() {
             <button
               onClick={() => signOut({ callbackUrl: "/login" })}
               title="Sign Out"
-              className="p-2 text-[#666666] hover:text-[#046241] hover:bg-white rounded-lg transition"
+              className="p-2 text-[#666666] hover:text-[#133020] hover:bg-black/5 rounded-lg transition"
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -191,9 +185,9 @@ export function Sidebar() {
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
             title={`Sign Out (${userName})`}
-            className="w-full flex justify-center p-2 text-[#666666] hover:text-[#046241] hover:bg-white rounded-lg transition"
+            className="w-full flex justify-center p-2 text-[#666666] hover:text-[#133020] hover:bg-black/5 rounded-lg transition"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-5 h-5" />
           </button>
         )}
       </div>

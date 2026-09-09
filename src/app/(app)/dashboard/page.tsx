@@ -176,9 +176,9 @@ export default function DashboardPage() {
           <CoverageGapsWidget gaps={gaps} />
         </div>
 
-        <div className="lg:col-span-7 bg-white p-5 rounded-[12px] border border-[#E6E6E6] shadow-[0_2px_16px_rgba(0,0,0,0.03)] hover:border-[#046241]/40 transition-colors duration-200 flex flex-col justify-between">
+        <div className="lg:col-span-7 bg-white p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] shadow-[0_2px_16px_rgba(0,0,0,0.05)] flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between border-b border-[#E6E6E6] pb-3 mb-4">
+            <div className="flex items-center justify-between border-b border-[#D8D2C8] pb-3 mb-4">
               <div>
                 <h3 className="text-[14px] font-semibold text-[#133020]">
                   {locale === "en" ? "Recently added exhibitions" : "最新录入展会记录"}
@@ -198,7 +198,7 @@ export default function DashboardPage() {
             </div>
 
             {/* High-density structured recent events list */}
-            <div className="divide-y divide-[#E6E6E6]">
+            <div className="divide-y divide-[#D8D2C8]">
               {(recentEvents || []).slice(0, 4).map((evt: any) => {
                 let businessLines: string[] = [];
                 try {
@@ -257,7 +257,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="pt-3 border-t border-[#E6E6E6] flex items-center justify-between text-[11px] text-[#666666] mt-3">
+          <div className="pt-3 border-t border-[#D8D2C8] flex items-center justify-between text-[11px] text-[#666666] mt-3">
             <span>All entries reviewed for Lifewood buyer alignment</span>
             <Link href="/events/new" className="text-[#046241] font-semibold hover:underline">
               + Add new record

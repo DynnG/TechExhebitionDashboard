@@ -135,13 +135,13 @@ export default function ScraperPage() {
       </div>
 
       {/* Mode Switcher Tabs */}
-      <div className="flex items-center gap-2 pb-2">
+      <div className="flex items-center gap-2 border-b border-[#D8D2C8] pb-2">
         <button
           onClick={() => setEngineMode("apify_gemini")}
           className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 ${
             engineMode === "apify_gemini"
               ? "bg-[#046241] text-white shadow-xs"
-              : "bg-white text-[#133020] border border-[#E6E6E6] hover:bg-[#F5EEDB]"
+              : "bg-white text-[#133020] border border-[#D8D2C8] hover:bg-[#F5EEDB]"
           }`}
         >
           <Sparkles className="w-3.5 h-3.5" />
@@ -152,7 +152,7 @@ export default function ScraperPage() {
           className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 ${
             engineMode === "standard"
               ? "bg-[#046241] text-white shadow-xs"
-              : "bg-white text-[#133020] border border-[#E6E6E6] hover:bg-[#F5EEDB]"
+              : "bg-white text-[#133020] border border-[#D8D2C8] hover:bg-[#F5EEDB]"
           }`}
         >
           <Sliders className="w-3.5 h-3.5" />
@@ -161,7 +161,7 @@ export default function ScraperPage() {
       </div>
 
       {engineMode === "apify_gemini" ? (
-        <div className="bg-white rounded-xl border border-[#E6E6E6] shadow-xs overflow-hidden">
+        <div className="bg-white rounded-xl border border-[#D8D2C8] shadow-xs overflow-hidden">
           <EventScraperDashboard />
         </div>
       ) : (
@@ -169,8 +169,8 @@ export default function ScraperPage() {
           {/* Grid: Config Panel & Schedule Panel */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Config Panel */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-[#E6E6E6] shadow-xs space-y-5">
-          <div className="flex items-center justify-between border-b border-[#E6E6E6] pb-3">
+        <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-[#D8D2C8] shadow-xs space-y-5">
+          <div className="flex items-center justify-between border-b border-[#D8D2C8] pb-3">
             <div className="flex items-center gap-2">
               <Sliders className="w-4 h-4 text-[#046241]" />
               <h3 className="text-sm font-bold text-[#133020]">
@@ -247,8 +247,8 @@ export default function ScraperPage() {
         </div>
 
         {/* Schedule Panel */}
-        <div className="bg-white p-6 rounded-xl border border-[#E6E6E6] shadow-xs space-y-4">
-          <div className="flex items-center justify-between border-b border-[#E6E6E6] pb-3">
+        <div className="bg-white p-6 rounded-xl border border-[#D8D2C8] shadow-xs space-y-4">
+          <div className="flex items-center justify-between border-b border-[#D8D2C8] pb-3">
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-[#046241]" />
               <h3 className="text-sm font-bold text-[#133020]">
@@ -270,7 +270,7 @@ export default function ScraperPage() {
             <select
               value={schedule.frequency}
               onChange={(e) => setSchedule({ ...schedule, frequency: e.target.value })}
-              className="w-full px-3 py-2 rounded-lg border border-[#E6E6E6] text-xs text-[#133020] bg-white"
+              className="w-full px-3 py-2 rounded-lg border border-[#D8D2C8] text-xs text-[#133020] bg-white"
             >
               <option value="Daily">Daily Execution</option>
               <option value="Weekly">Weekly (Recommended)</option>
@@ -286,7 +286,7 @@ export default function ScraperPage() {
               <select
                 value={schedule.day}
                 onChange={(e) => setSchedule({ ...schedule, day: e.target.value })}
-                className="px-3 py-2 rounded-lg border border-[#E6E6E6] bg-white text-[#133020]"
+                className="px-3 py-2 rounded-lg border border-[#D8D2C8] bg-white text-[#133020]"
               >
                 <option value="Monday">Monday</option>
                 <option value="Wednesday">Wednesday</option>
@@ -296,7 +296,7 @@ export default function ScraperPage() {
                 type="text"
                 value={schedule.time}
                 onChange={(e) => setSchedule({ ...schedule, time: e.target.value })}
-                className="px-3 py-2 rounded-lg border border-[#E6E6E6] bg-white text-[#133020]"
+                className="px-3 py-2 rounded-lg border border-[#D8D2C8] bg-white text-[#133020]"
               />
             </div>
           </div>
@@ -311,8 +311,8 @@ export default function ScraperPage() {
       </div>
 
       {/* Scraped Results Review Table */}
-      <div className="bg-white p-6 rounded-xl border border-[#E6E6E6] shadow-xs space-y-4">
-        <div className="flex items-center justify-between border-b border-[#E6E6E6] pb-3">
+      <div className="bg-white p-6 rounded-xl border border-[#D8D2C8] shadow-xs space-y-4">
+        <div className="flex items-center justify-between border-b border-[#D8D2C8] pb-3">
           <div>
             <h3 className="text-base font-bold text-[#133020]">
               Scraper Extracted Results ({results.length})
@@ -335,7 +335,7 @@ export default function ScraperPage() {
             No pending scraped records awaiting review. Click "Run Scraper Now" above to crawl target sources.
           </div>
         ) : (
-          <div className="divide-y divide-[#E6E6E6]">
+          <div className="divide-y divide-[#D8D2C8]/60">
             {results.map((item) => (
               <div
                 key={item.id}
