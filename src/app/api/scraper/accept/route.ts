@@ -12,6 +12,53 @@ export async function POST(req: Request) {
 
     const body = await req.json();
 
+    // 1. Deduplication Guard: Check if event already exists in database
+    const normalizedWebsite = body.officialWebsite
+      ? body.officialWebsite.trim().replace(/\/+$/, "").toLowerCase()
+      : "";
+    const cleanName = (body.eventName || "").trim().toLowerCase();
+    const cleanCity = (body.city || "").trim().toLowerCase();
+
+    const allDbEvents = await db.event.findMany({
+      select: {
+        id: true,
+        eventNumber: true,
+        eventName: true,
+        city: true,
+        dates: true,
+        officialWebsite: true,
+      },
+    });
+
+    const existingMatch = allDbEvents.find((e) => {
+      const exWebsite = e.officialWebsite
+        ? e.officialWebsite.trim().replace(/\/+$/, "").toLowerCase()
+        : "";
+      if (
+        normalizedWebsite &&
+        normalizedWebsite !== "https://" &&
+        exWebsite &&
+        exWebsite !== "https://"
+      ) {
+        if (exWebsite === normalizedWebsite) return true;
+      }
+      const exName = (e.eventName || "").trim().toLowerCase();
+      const exCity = (e.city || "").trim().toLowerCase();
+      if (exName === cleanName) {
+        if (!cleanCity || !exCity || cleanCity === exCity) return true;
+      }
+      return false;
+    });
+
+    if (existingMatch) {
+      return NextResponse.json({
+        success: true,
+        isDuplicate: true,
+        event: existingMatch,
+        message: `Event "${existingMatch.eventName}" is already recorded in the database (#${existingMatch.eventNumber}).`,
+      });
+    }
+
     // Get next eventNumber
     const maxEvent = await db.event.findFirst({
       orderBy: { eventNumber: "desc" },
