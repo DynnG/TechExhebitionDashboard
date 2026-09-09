@@ -238,7 +238,12 @@ app.post('/api/crawl-events', scrapeLimiter, async (req, res) => {
   }
 
   const eventsList = [];
-  const geminiModel = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+  const candidateModels = [
+    process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite',
+    'gemini-flash-latest',
+    'gemini-3.5-flash',
+    'gemini-2.0-flash',
+  ].filter((m, i, arr) => Boolean(m) && arr.indexOf(m) === i);
 
   try {
     // ----------------------------------------------------
@@ -346,21 +351,11 @@ app.post('/api/crawl-events', scrapeLimiter, async (req, res) => {
         });
 
         const response = await callWithRetry(async () => {
-          try {
-            return await ai.models.generateContent({
-              model: geminiModel,
-              contents: `Source URL: ${targetUrl}\n\nPage Text:\n${rawText}`,
-              config: {
-                systemInstruction: PROMPT_SYSTEM,
-                responseMimeType: 'application/json',
-                temperature: 0.1,
-              },
-            });
-          } catch (modelErr) {
-            if (geminiModel !== 'gemini-2.0-flash' && modelErr.message?.includes('not found')) {
-              console.warn(`[Model Fallback] Falling back from ${geminiModel} to gemini-2.0-flash`);
+          let lastErr = null;
+          for (const modelName of candidateModels) {
+            try {
               return await ai.models.generateContent({
-                model: 'gemini-2.0-flash',
+                model: modelName,
                 contents: `Source URL: ${targetUrl}\n\nPage Text:\n${rawText}`,
                 config: {
                   systemInstruction: PROMPT_SYSTEM,
@@ -368,9 +363,14 @@ app.post('/api/crawl-events', scrapeLimiter, async (req, res) => {
                   temperature: 0.1,
                 },
               });
+            } catch (modelErr) {
+              lastErr = modelErr;
+              console.warn(
+                `[Gemini Fallback] Model "${modelName}" failed (${modelErr.message?.slice(0, 100)}...). Trying fallback model...`
+              );
             }
-            throw modelErr;
           }
+          throw lastErr;
         });
 
         const parsed = JSON.parse(response.text);
