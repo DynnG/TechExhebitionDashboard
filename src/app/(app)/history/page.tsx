@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { History, CheckCircle2, Calendar, ExternalLink, Loader2, Sparkles, Award, Eye, X, MapPin, Building, Globe, Trash2, Ticket, Mail, User as UserIcon, DollarSign, Clock } from "lucide-react";
+import { History, CheckCircle2, Calendar, Loader2, Sparkles, Eye, X, MapPin, Building, Globe, Trash2, User as UserIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useLocaleStore } from "@/stores/locale-store";
 import { FitScoreBadge } from "@/components/events/fit-score-badge";
@@ -10,6 +10,7 @@ import { BusinessLineChip } from "@/components/events/business-line-chip";
 import { ModalPortal } from "@/components/shared/modal-portal";
 import { sanitizeEventUrl } from "@/lib/url";
 import { useSession } from "next-auth/react";
+import { localizeEvent } from "@/lib/i18n/event-localization";
 
 export default function HistoryPage() {
   const { locale } = useLocaleStore();
@@ -53,7 +54,7 @@ export default function HistoryPage() {
         setAttendedEvents(attended);
       }
     } catch {
-      toast.error("Failed to load history log");
+      toast.error(locale === "zh" ? "加载历史记录失败" : "Failed to load history log");
     } finally {
       setLoading(false);
     }
@@ -65,7 +66,11 @@ export default function HistoryPage() {
 
   const handleDeleteAttended = async (id: number, eventName: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm(`Are you sure you want to remove/delete "${eventName}" from the attended log?`)) return;
+    const confirmMsg =
+      locale === "zh"
+        ? `确定要从已参展档案中移除/删除“${eventName}”吗？`
+        : `Are you sure you want to remove/delete "${eventName}" from the attended log?`;
+    if (!confirm(confirmMsg)) return;
 
     try {
       // Unmark attended or delete if admin
@@ -76,13 +81,13 @@ export default function HistoryPage() {
       });
 
       if (res.ok) {
-        toast.success(`"${eventName}" removed from attended log.`);
+        toast.success(locale === "zh" ? `已从参展记录中移除“${eventName}”。` : `"${eventName}" removed from attended log.`);
         fetchHistory();
       } else {
-        toast.error("Failed to update record");
+        toast.error(locale === "zh" ? "更新记录失败" : "Failed to update record");
       }
     } catch {
-      toast.error("Error removing record");
+      toast.error(locale === "zh" ? "移除记录出错" : "Error removing record");
     }
   };
 
@@ -100,7 +105,9 @@ export default function HistoryPage() {
                 {locale === "en" ? "Governance & Attendance History" : "审核与参展历史记录"}
               </h2>
               <p className="text-xs text-[#333333] mt-0.5">
-                Historical audit log for supervisor queue decisions (30-day retention) and permanent attended exhibition records
+                {locale === "zh"
+                  ? "主管审核决策历史审计日志（保留 30 天）与已参展展会档案记录"
+                  : "Historical audit log for supervisor queue decisions (30-day retention) and permanent attended exhibition records"}
               </p>
             </div>
           </div>
@@ -117,7 +124,7 @@ export default function HistoryPage() {
               : "border-transparent text-[#666666] hover:text-[#133020]"
           }`}
         >
-          <span>Queue Decisions (30-Day Retention)</span>
+          <span>{locale === "zh" ? "审核决策记录（保留 30 天）" : "Queue Decisions (30-Day Retention)"}</span>
           <span className="px-2 py-0.5 rounded-full bg-[#133020] text-white text-[10px] font-extrabold">
             {historyItems.length}
           </span>
@@ -131,7 +138,7 @@ export default function HistoryPage() {
               : "border-transparent text-[#666666] hover:text-[#133020]"
           }`}
         >
-          <span>Attended Exhibitions Log (View & Delete Only)</span>
+          <span>{locale === "zh" ? "已参展展会档案（仅查看与删除）" : "Attended Exhibitions Log (View & Delete Only)"}</span>
           <span className="px-2 py-0.5 rounded-full bg-[#046241] text-white text-[10px] font-extrabold">
             {attendedEvents.length}
           </span>
@@ -143,7 +150,7 @@ export default function HistoryPage() {
         <div className="py-20 flex flex-col items-center justify-center text-[#046241]">
           <Loader2 className="w-8 h-8 animate-spin mb-2" />
           <span className="text-xs font-semibold text-[#133020]">
-            Loading history records...
+            {locale === "zh" ? "正在加载历史记录..." : "Loading history records..."}
           </span>
         </div>
       ) : activeTab === "DECISIONS" ? (
@@ -152,7 +159,15 @@ export default function HistoryPage() {
             <div className="flex items-center gap-2">
               <ClockIcon className="w-4 h-4 text-[#C17110] shrink-0" />
               <span>
-                <strong>30-Day Auto-Clear Policy:</strong> Decisions clear automatically after 30 days. Click any item to inspect full specifications in popup modal.
+                {locale === "zh" ? (
+                  <>
+                    <strong>30天自动归档机制：</strong>审核决策记录将在 30 天后自动清理。点击任意记录可在弹窗中查看完整参数规格。
+                  </>
+                ) : (
+                  <>
+                    <strong>30-Day Auto-Clear Policy:</strong> Decisions clear automatically after 30 days. Click any item to inspect full specifications in popup modal.
+                  </>
+                )}
               </span>
             </div>
 
@@ -166,7 +181,7 @@ export default function HistoryPage() {
                     : "text-[#666666] hover:text-[#133020]"
                 }`}
               >
-                All Decisions
+                {locale === "zh" ? "全部决策" : "All Decisions"}
               </button>
               <button
                 onClick={() => setDecisionFilter("APPROVED")}
@@ -176,7 +191,7 @@ export default function HistoryPage() {
                     : "text-[#666666] hover:text-[#133020]"
                 }`}
               >
-                Approved
+                {locale === "zh" ? "已批准" : "Approved"}
               </button>
               <button
                 onClick={() => setDecisionFilter("REJECTED")}
@@ -186,7 +201,7 @@ export default function HistoryPage() {
                     : "text-[#666666] hover:text-[#133020]"
                 }`}
               >
-                Rejected
+                {locale === "zh" ? "已驳回" : "Rejected"}
               </button>
             </div>
           </div>
@@ -195,10 +210,12 @@ export default function HistoryPage() {
             <div className="bg-white border-2 border-dashed border-[#D8D2C8] rounded-xl p-12 text-center max-w-md mx-auto my-6 font-manrope">
               <History className="w-12 h-12 text-[#666666] mx-auto mb-3" />
               <h3 className="text-base font-bold text-[#133020] mb-1">
-                No decision records found
+                {locale === "zh" ? "未找到审核决策记录" : "No decision records found"}
               </h3>
               <p className="text-xs text-[#666666]">
-                No matching queue decisions found for this filter within the past 30 days.
+                {locale === "zh"
+                  ? "在过去 30 天内未找到符合此筛选条件的决策记录。"
+                  : "No matching queue decisions found for this filter within the past 30 days."}
               </p>
             </div>
           ) : (
@@ -206,55 +223,65 @@ export default function HistoryPage() {
             <div className="divide-y divide-[#D8D2C8] bg-white rounded-xl border border-[#D8D2C8] overflow-hidden shadow-xs">
               {historyItems
                 .filter((i) => decisionFilter === "ALL" || i.status === decisionFilter)
-                .map((item) => (
-                <div
-                  key={item.id}
-                  onClick={() => setSelectedModalEvent(item.event)}
-                  className="p-3.5 px-4 flex items-center justify-between gap-4 hover:bg-[#F9F7F7] cursor-pointer transition group"
-                >
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <span
-                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider shrink-0 ${
-                        item.status === "APPROVED"
-                          ? "bg-[#046241] text-white"
-                          : "bg-[#B91C1C] text-white"
-                      }`}
-                    >
-                      {item.status}
-                    </span>
+                .map((item) => {
+                  const locEvt = localizeEvent(item.event, locale);
+                  const statusLabel =
+                    item.status === "APPROVED"
+                      ? (locale === "zh" ? "已批准" : "APPROVED")
+                      : (locale === "zh" ? "已驳回" : "REJECTED");
 
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-xs text-[#133020] group-hover:text-[#046241] truncate">
-                          #{item.event?.eventNumber} — {item.event?.eventName}
+                  return (
+                    <div
+                      key={item.id}
+                      onClick={() => setSelectedModalEvent(item.event)}
+                      className="p-3.5 px-4 flex items-center justify-between gap-4 hover:bg-[#F9F7F7] cursor-pointer transition group"
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <span
+                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider shrink-0 ${
+                            item.status === "APPROVED"
+                              ? "bg-[#046241] text-white"
+                              : "bg-[#B91C1C] text-white"
+                          }`}
+                        >
+                          {statusLabel}
                         </span>
-                        <span className="text-[11px] text-[#666666] shrink-0">
-                          · {item.event?.city}, {item.event?.country}
-                        </span>
+
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-xs text-[#133020] group-hover:text-[#046241] truncate">
+                              #{locEvt?.eventNumber} — {locEvt?.eventName}
+                            </span>
+                            <span className="text-[11px] text-[#666666] shrink-0">
+                              · {locEvt?.city}, {locEvt?.country}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-[#666666] truncate mt-0.5">
+                            {locale === "zh" ? "审核依据：" : "Rationale: "} {item.reason}
+                          </p>
+                        </div>
                       </div>
-                      <p className="text-[11px] text-[#666666] truncate mt-0.5">
-                        Rationale: {item.reason}
-                      </p>
-                    </div>
-                  </div>
 
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-[11px] text-[#666666] hidden sm:inline font-medium">
-                      {new Date(item.resolvedAt || item.createdAt).toLocaleDateString()}
-                    </span>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedModalEvent(item.event);
-                      }}
-                      className="p-1.5 rounded-lg bg-[#F5EEDB] text-[#046241] hover:bg-[#046241] hover:text-white transition cursor-pointer"
-                      title="Inspect Record Specifications"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className="text-[11px] text-[#666666] hidden sm:inline font-medium">
+                          {new Date(item.resolvedAt || item.createdAt).toLocaleDateString(
+                            locale === "zh" ? "zh-CN" : "en-US"
+                          )}
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedModalEvent(item.event);
+                          }}
+                          className="p-1.5 rounded-lg bg-[#F5EEDB] text-[#046241] hover:bg-[#046241] hover:text-white transition cursor-pointer"
+                          title={locale === "zh" ? "查看记录参数详情" : "Inspect Record Specifications"}
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
             </div>
           )}
         </div>
@@ -265,23 +292,32 @@ export default function HistoryPage() {
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-[#046241] shrink-0" />
               <span>
-                <strong>Attended Registry (View & Delete Only):</strong> Click any exhibition card to view full specifications in popup modal.
+                {locale === "zh" ? (
+                  <>
+                    <strong>已参展档案库（仅支持查看与删除）：</strong>点击任意展会卡片可在弹窗中查看完整参数规格。
+                  </>
+                ) : (
+                  <>
+                    <strong>Attended Registry (View & Delete Only):</strong> Click any exhibition card to view full specifications in popup modal.
+                  </>
+                )}
               </span>
             </div>
             <span className="text-[11px] font-bold text-[#046241] bg-white px-2.5 py-1 rounded-full border border-[#046241]/30">
-              {attendedEvents.length} Verified Logged
+              {attendedEvents.length} {locale === "zh" ? "场已核验归档" : "Verified Logged"}
             </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {attendedEvents.map((evt) => {
+              const localizedEvt = localizeEvent(evt, locale);
               let businessLines: string[] = [];
               try {
-                businessLines = JSON.parse(evt.businessLines || "[]");
+                businessLines = JSON.parse(localizedEvt.businessLines || "[]");
               } catch {
-                businessLines = Array.isArray(evt.businessLines)
-                  ? evt.businessLines
-                  : [evt.businessLines];
+                businessLines = Array.isArray(localizedEvt.businessLines)
+                  ? localizedEvt.businessLines
+                  : [localizedEvt.businessLines];
               }
 
               return (
@@ -294,27 +330,27 @@ export default function HistoryPage() {
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <div className="flex items-center gap-1.5 text-xs text-[#666666]">
-                          <span className="font-bold text-[#133020]">#{evt.eventNumber}</span>
+                          <span className="font-bold text-[#133020]">#{localizedEvt.eventNumber}</span>
                           <span>·</span>
-                          <span className="font-medium">{evt.dates}</span>
+                          <span className="font-medium">{localizedEvt.dates}</span>
                         </div>
                         <span className="text-[11px] text-[#666666] font-medium block mt-0.5">
-                          {evt.region} · {evt.country}
+                          {localizedEvt.region} · {localizedEvt.country}
                         </span>
                       </div>
 
                       <div className="flex items-center gap-2 shrink-0">
-                        <FitScoreBadge score={evt.fitScore} size="lg" showLevel />
+                        <FitScoreBadge score={localizedEvt.fitScore} size="lg" showLevel />
                       </div>
                     </div>
 
                     <h3 className="font-bold text-base text-[#133020] group-hover:text-[#046241] transition line-clamp-2 leading-snug">
-                      {evt.eventName}
+                      {localizedEvt.eventName}
                     </h3>
 
                     <div className="flex items-center gap-1.5 text-xs text-[#666666] truncate">
                       <MapPin className="w-3.5 h-3.5 text-[#046241] shrink-0" />
-                      <span className="truncate">{evt.city}, {evt.country}</span>
+                      <span className="truncate">{localizedEvt.city}, {localizedEvt.country}</span>
                     </div>
 
                     <div className="flex items-center gap-1.5 flex-wrap pt-1">
@@ -328,7 +364,7 @@ export default function HistoryPage() {
                   <div className="pt-4 mt-4 border-t border-[#D8D2C8] flex items-center justify-between text-xs">
                     <div className="flex items-center gap-1 text-[#046241] font-bold">
                       <CheckCircle2 className="w-4 h-4 text-[#046241]" />
-                      <span>Attended</span>
+                      <span>{locale === "zh" ? "已参展" : "Attended"}</span>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -338,20 +374,20 @@ export default function HistoryPage() {
                           setSelectedModalEvent(evt);
                         }}
                         className="px-3 py-1.5 bg-[#F5EEDB] text-[#046241] hover:bg-[#046241] hover:text-white rounded-lg font-bold transition flex items-center gap-1 text-[11px]"
-                        title="View Full Specifications"
+                        title={locale === "zh" ? "查看完整参数规格" : "View Full Specifications"}
                       >
                         <Eye className="w-3.5 h-3.5" />
-                        <span>View</span>
+                        <span>{locale === "zh" ? "查看" : "View"}</span>
                       </button>
 
                       {(userRole === "ADMIN" || userRole === "SUPERVISOR") && (
                         <button
                           onClick={(e) => handleDeleteAttended(evt.id, evt.eventName, e)}
                           className="px-3 py-1.5 bg-[#B91C1C]/10 text-[#B91C1C] hover:bg-[#B91C1C] hover:text-white rounded-lg font-bold transition flex items-center gap-1 text-[11px]"
-                          title="Delete from Attended Registry"
+                          title={locale === "zh" ? "从参展档案库中移除" : "Delete from Attended Registry"}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
-                          <span>Delete</span>
+                          <span>{locale === "zh" ? "删除" : "Delete"}</span>
                         </button>
                       )}
                     </div>
@@ -365,174 +401,221 @@ export default function HistoryPage() {
 
       {/* Full Specifications Popup Modal */}
       <ModalPortal isOpen={!!selectedModalEvent} onClose={() => setSelectedModalEvent(null)}>
-        <div className="bg-[#133020] text-white p-5 px-7 flex items-center justify-between shrink-0 shadow-sm border-b border-white/10 font-manrope">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-[#FFB347] text-[#133020] flex items-center justify-center font-bold shadow-xs">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="font-bold text-base text-white">
-                Full Exhibition Specifications
-              </h3>
-              <p className="text-[10px] text-[#F5EEDB]/70 uppercase tracking-wider">
-                Record #{selectedModalEvent?.eventNumber} · {selectedModalEvent?.eventName}
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={() => setSelectedModalEvent(null)}
-            className="p-2 rounded-xl bg-white/10 text-white/80 hover:text-white hover:bg-white/20 transform hover:rotate-90 transition duration-200"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="p-6 sm:p-8 bg-white max-h-[82vh] overflow-y-auto space-y-6 text-xs font-manrope">
-          {selectedModalEvent && (
+        {(() => {
+          const locModalEvt = selectedModalEvent ? localizeEvent(selectedModalEvent, locale) : null;
+          return (
             <>
-              {/* Header Title & Score */}
-              <div className="flex items-start justify-between gap-4 border-b border-[#D8D2C8] pb-4">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-[#133020]">
-                      Record #{selectedModalEvent.eventNumber} · {selectedModalEvent.region}
-                    </span>
-                    {selectedModalEvent.isAttended && (
-                      <span className="px-2.5 py-0.5 rounded-full bg-[#046241] text-white font-extrabold text-[10px]">
-                        ✓ Attended
-                      </span>
-                    )}
+              <div className="bg-[#133020] text-white p-5 px-7 flex items-center justify-between shrink-0 shadow-sm border-b border-white/10 font-manrope">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-[#FFB347] text-[#133020] flex items-center justify-center font-bold shadow-xs">
+                    <Sparkles className="w-5 h-5" />
                   </div>
-                  <h4 className="text-2xl font-bold text-[#133020] leading-tight">
-                    {selectedModalEvent.eventName}
-                  </h4>
-                  <p className="text-xs text-[#666666]">
-                    📍 {selectedModalEvent.city}, {selectedModalEvent.country}
-                  </p>
+                  <div>
+                    <h3 className="font-bold text-base text-white">
+                      {locale === "zh" ? "展会完整参数规格" : "Full Exhibition Specifications"}
+                    </h3>
+                    <p className="text-[10px] text-[#F5EEDB]/70 uppercase tracking-wider">
+                      {locale === "zh"
+                        ? `记录 #${locModalEvt?.eventNumber} · ${locModalEvt?.eventName}`
+                        : `Record #${locModalEvt?.eventNumber} · ${locModalEvt?.eventName}`}
+                    </p>
+                  </div>
                 </div>
-
-                <div className="flex items-center gap-3 shrink-0">
-                  <PriorityIndicator priority={selectedModalEvent.priorityLevel} />
-                  <FitScoreBadge score={selectedModalEvent.fitScore} size="xl" showLevel />
-                </div>
+                <button
+                  onClick={() => setSelectedModalEvent(null)}
+                  className="p-2 rounded-xl bg-white/10 text-white/80 hover:text-white hover:bg-white/20 transform hover:rotate-90 transition duration-200"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
 
-              {/* Logistics & Primary Specs Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-[#F9F7F7] p-5 rounded-2xl border border-[#D8D2C8]">
-                <div className="space-y-1">
-                  <span className="text-[10px] text-[#666666] font-bold uppercase tracking-wider block">Dates</span>
-                  <div className="flex items-center gap-1.5 font-bold text-sm text-[#133020]">
-                    <Calendar className="w-4 h-4 text-[#046241]" />
-                    <span>{selectedModalEvent.dates}</span>
-                  </div>
-                </div>
+              <div className="p-6 sm:p-8 bg-white max-h-[82vh] overflow-y-auto space-y-6 text-xs font-manrope">
+                {locModalEvt && (
+                  <>
+                    {/* Header Title & Score */}
+                    <div className="flex items-start justify-between gap-4 border-b border-[#D8D2C8] pb-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-[#133020]">
+                            {locale === "zh"
+                              ? `记录 #${locModalEvt.eventNumber} · ${locModalEvt.region}`
+                              : `Record #${locModalEvt.eventNumber} · ${locModalEvt.region}`}
+                          </span>
+                          {locModalEvt.isAttended && (
+                            <span className="px-2.5 py-0.5 rounded-full bg-[#046241] text-white font-extrabold text-[10px]">
+                              {locale === "zh" ? "✓ 已参展" : "✓ Attended"}
+                            </span>
+                          )}
+                        </div>
+                        <h4 className="text-2xl font-bold text-[#133020] leading-tight">
+                          {locModalEvt.eventName}
+                        </h4>
+                        <p className="text-xs text-[#666666]">
+                          📍 {locModalEvt.city}, {locModalEvt.country}
+                        </p>
+                      </div>
 
-                <div className="space-y-1">
-                  <span className="text-[10px] text-[#666666] font-bold uppercase tracking-wider block">Venue Name</span>
-                  <div className="flex items-center gap-1.5 font-bold text-sm text-[#133020]">
-                    <Building className="w-4 h-4 text-[#046241]" />
-                    <span>{selectedModalEvent.venue || "Not disclosed"}</span>
-                  </div>
-                </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <PriorityIndicator priority={locModalEvt.priorityLevel} />
+                        <FitScoreBadge score={locModalEvt.fitScore} size="xl" showLevel />
+                      </div>
+                    </div>
 
-                <div className="space-y-1">
-                  <span className="text-[10px] text-[#666666] font-bold uppercase tracking-wider block">Organizer</span>
-                  <div className="flex items-center gap-1.5 font-bold text-sm text-[#133020]">
-                    <UserIcon className="w-4 h-4 text-[#046241]" />
-                    <span>{selectedModalEvent.organizer || "Not disclosed"}</span>
-                  </div>
-                </div>
-              </div>
+                    {/* Logistics & Primary Specs Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-[#F9F7F7] p-5 rounded-2xl border border-[#D8D2C8]">
+                      <div className="space-y-1">
+                        <span className="text-[10px] text-[#666666] font-bold uppercase tracking-wider block">
+                          {locale === "zh" ? "展会日期" : "Dates"}
+                        </span>
+                        <div className="flex items-center gap-1.5 font-bold text-sm text-[#133020]">
+                          <Calendar className="w-4 h-4 text-[#046241]" />
+                          <span>{locModalEvt.dates}</span>
+                        </div>
+                      </div>
 
-              {/* Business Lines & Official Website CTA */}
-              <div className="flex items-center justify-between flex-wrap gap-4 p-4 rounded-xl border border-[#D8D2C8] bg-white">
-                <div>
-                  <span className="text-[10px] text-[#666666] font-bold uppercase tracking-wider block mb-1.5">Business Lines Alignment</span>
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    {(() => {
-                      let lines: string[] = [];
-                      try {
-                        lines = JSON.parse(selectedModalEvent.businessLines || "[]");
-                      } catch {
-                        lines = Array.isArray(selectedModalEvent.businessLines)
-                          ? selectedModalEvent.businessLines
-                          : [selectedModalEvent.businessLines];
-                      }
-                      return lines.map((bl) => <BusinessLineChip key={bl} name={bl} />);
-                    })()}
-                  </div>
-                </div>
+                      <div className="space-y-1">
+                        <span className="text-[10px] text-[#666666] font-bold uppercase tracking-wider block">
+                          {locale === "zh" ? "展馆场地" : "Venue Name"}
+                        </span>
+                        <div className="flex items-center gap-1.5 font-bold text-sm text-[#133020]">
+                          <Building className="w-4 h-4 text-[#046241]" />
+                          <span>{locModalEvt.venue || (locale === "zh" ? "未公开披露" : "Not disclosed")}</span>
+                        </div>
+                      </div>
 
-                {(() => {
-                  let firstSource: string | null = null;
-                  try {
-                    const parsed = JSON.parse(selectedModalEvent.sourceLinks || "[]");
-                    firstSource = Array.isArray(parsed) ? parsed[0] : null;
-                  } catch {
-                    firstSource = selectedModalEvent.sourceLinks || null;
-                  }
+                      <div className="space-y-1">
+                        <span className="text-[10px] text-[#666666] font-bold uppercase tracking-wider block">
+                          {locale === "zh" ? "主办机构" : "Organizer"}
+                        </span>
+                        <div className="flex items-center gap-1.5 font-bold text-sm text-[#133020]">
+                          <UserIcon className="w-4 h-4 text-[#046241]" />
+                          <span>{locModalEvt.organizer || (locale === "zh" ? "未公开披露" : "Not disclosed")}</span>
+                        </div>
+                      </div>
+                    </div>
 
-                  const validUrl = sanitizeEventUrl(selectedModalEvent.officialWebsite, firstSource);
-                  if (!validUrl) return null;
+                    {/* Business Lines & Official Website CTA */}
+                    <div className="flex items-center justify-between flex-wrap gap-4 p-4 rounded-xl border border-[#D8D2C8] bg-white">
+                      <div>
+                        <span className="text-[10px] text-[#666666] font-bold uppercase tracking-wider block mb-1.5">
+                          {locale === "zh" ? "对齐业务线" : "Business Lines Alignment"}
+                        </span>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {(() => {
+                            let lines: string[] = [];
+                            try {
+                              lines = JSON.parse(locModalEvt.businessLines || "[]");
+                            } catch {
+                              lines = Array.isArray(locModalEvt.businessLines)
+                                ? locModalEvt.businessLines
+                                : [locModalEvt.businessLines];
+                            }
+                            return lines.map((bl) => <BusinessLineChip key={bl} name={bl} />);
+                          })()}
+                        </div>
+                      </div>
 
-                  return (
-                    <a
-                      href={validUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-4 py-2 bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] font-bold text-xs rounded-xl transition flex items-center gap-2 shadow-xs"
-                    >
-                      <Globe className="w-4 h-4" />
-                      <span>Visit Official Website ↗</span>
-                    </a>
-                  );
-                })()}
-              </div>
+                      {(() => {
+                        let firstSource: string | null = null;
+                        try {
+                          const parsed = JSON.parse(locModalEvt.sourceLinks || "[]");
+                          firstSource = Array.isArray(parsed) ? parsed[0] : null;
+                        } catch {
+                          firstSource = locModalEvt.sourceLinks || null;
+                        }
 
-              {/* Strategic Analysis & Relevance */}
-              <div className="space-y-3">
-                <div className="bg-[#F0F5F2] p-4 rounded-xl border border-[#046241]/20 space-y-1">
-                  <span className="text-[10px] text-[#046241] font-extrabold uppercase tracking-wider block">Relevance to Lifewood</span>
-                  <p className="text-xs text-[#133020] leading-relaxed font-medium">{selectedModalEvent.relevanceToLifewood || selectedModalEvent.strategicFocus || "Strategic buyer alignment"}</p>
-                </div>
+                        const validUrl = sanitizeEventUrl(locModalEvt.officialWebsite, firstSource);
+                        if (!validUrl) return null;
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="bg-[#F9F7F7] p-4 rounded-xl border border-[#D8D2C8] space-y-1">
-                    <span className="text-[10px] text-[#666666] font-bold uppercase tracking-wider block">Target Audience</span>
-                    <p className="text-xs font-semibold text-[#133020]">{selectedModalEvent.targetAudience || "Enterprise buyers"}</p>
-                  </div>
+                        return (
+                          <a
+                            href={validUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-4 py-2 bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] font-bold text-xs rounded-xl transition flex items-center gap-2 shadow-xs"
+                          >
+                            <Globe className="w-4 h-4" />
+                            <span>{locale === "zh" ? "访问官方网站 ↗" : "Visit Official Website ↗"}</span>
+                          </a>
+                        );
+                      })()}
+                    </div>
 
-                  <div className="bg-[#F9F7F7] p-4 rounded-xl border border-[#D8D2C8] space-y-1">
-                    <span className="text-[10px] text-[#666666] font-bold uppercase tracking-wider block">Participation Recommendation</span>
-                    <span className="inline-block px-3 py-1 bg-[#FFB347] text-[#133020] font-bold text-xs rounded-lg">
-                      {selectedModalEvent.participationRec || "Exhibit"}
-                    </span>
-                  </div>
-                </div>
-              </div>
+                    {/* Strategic Analysis & Relevance */}
+                    <div className="space-y-3">
+                      <div className="bg-[#F0F5F2] p-4 rounded-xl border border-[#046241]/20 space-y-1">
+                        <span className="text-[10px] text-[#046241] font-extrabold uppercase tracking-wider block">
+                          {locale === "zh" ? "与 Lifewood 的相关性" : "Relevance to Lifewood"}
+                        </span>
+                        <p className="text-xs text-[#133020] leading-relaxed font-medium">
+                          {locModalEvt.relevanceToLifewood ||
+                            locModalEvt.strategicFocus ||
+                            (locale === "zh" ? "契合企业级买家战略需求" : "Strategic buyer alignment")}
+                        </p>
+                      </div>
 
-              {/* Secondary Details Table */}
-              <div className="bg-[#F9F7F7] p-4 rounded-xl border border-[#D8D2C8] grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
-                <div>
-                  <span className="text-[10px] text-[#666666] font-bold uppercase block">Attendees</span>
-                  <span className="font-bold text-[#133020]">{selectedModalEvent.estimatedAttendees || "Not disclosed"}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-[#666666] font-bold uppercase block">Booth Cost</span>
-                  <span className="font-bold text-[#133020]">{selectedModalEvent.boothCost || "Not disclosed"}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-[#666666] font-bold uppercase block">Opportunity</span>
-                  <span className="font-bold text-[#133020]">{selectedModalEvent.exhibitorOpportunity || "Not disclosed"}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-[#666666] font-bold uppercase block">Deadline</span>
-                  <span className="font-bold text-[#133020]">{selectedModalEvent.registrationDeadline || "Not disclosed"}</span>
-                </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="bg-[#F9F7F7] p-4 rounded-xl border border-[#D8D2C8] space-y-1">
+                          <span className="text-[10px] text-[#666666] font-bold uppercase tracking-wider block">
+                            {locale === "zh" ? "目标受众与买家画像" : "Target Audience"}
+                          </span>
+                          <p className="text-xs font-semibold text-[#133020]">
+                            {locModalEvt.targetAudience || (locale === "zh" ? "企业级采购决策者" : "Enterprise buyers")}
+                          </p>
+                        </div>
+
+                        <div className="bg-[#F9F7F7] p-4 rounded-xl border border-[#D8D2C8] space-y-1">
+                          <span className="text-[10px] text-[#666666] font-bold uppercase tracking-wider block">
+                            {locale === "zh" ? "参会建议" : "Participation Recommendation"}
+                          </span>
+                          <span className="inline-block px-3 py-1 bg-[#FFB347] text-[#133020] font-bold text-xs rounded-lg">
+                            {locModalEvt.participationRec || (locale === "zh" ? "参展" : "Exhibit")}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Secondary Details Table */}
+                    <div className="bg-[#F9F7F7] p-4 rounded-xl border border-[#D8D2C8] grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+                      <div>
+                        <span className="text-[10px] text-[#666666] font-bold uppercase block">
+                          {locale === "zh" ? "参会人数" : "Attendees"}
+                        </span>
+                        <span className="font-bold text-[#133020]">
+                          {locModalEvt.estimatedAttendees || (locale === "zh" ? "未公开披露" : "Not disclosed")}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-[#666666] font-bold uppercase block">
+                          {locale === "zh" ? "展位费用" : "Booth Cost"}
+                        </span>
+                        <span className="font-bold text-[#133020]">
+                          {locModalEvt.boothCost || (locale === "zh" ? "未公开披露" : "Not disclosed")}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-[#666666] font-bold uppercase block">
+                          {locale === "zh" ? "参展合作权益" : "Opportunity"}
+                        </span>
+                        <span className="font-bold text-[#133020]">
+                          {locModalEvt.exhibitorOpportunity || (locale === "zh" ? "未公开披露" : "Not disclosed")}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-[#666666] font-bold uppercase block">
+                          {locale === "zh" ? "报名截止" : "Deadline"}
+                        </span>
+                        <span className="font-bold text-[#133020]">
+                          {locModalEvt.registrationDeadline || (locale === "zh" ? "未公开披露" : "Not disclosed")}
+                        </span>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </>
-          )}
-        </div>
+          );
+        })()}
       </ModalPortal>
     </div>
   );

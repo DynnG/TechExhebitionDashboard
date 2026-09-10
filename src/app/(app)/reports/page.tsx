@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { REGIONS } from "@/lib/constants/business-lines";
-import { FileSpreadsheet, Download, Eye, FileText, Sparkles, CheckCircle, RefreshCw } from "lucide-react";
+import { FileSpreadsheet, Download, Eye, Sparkles, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { useLocaleStore } from "@/stores/locale-store";
 import { LifewoodDropdown } from "@/components/shared/lifewood-dropdown";
+import { localizeRegionName } from "@/lib/i18n/event-localization";
 
 export default function ReportsPage() {
   const { locale } = useLocaleStore();
@@ -14,19 +15,40 @@ export default function ReportsPage() {
   const [format, setFormat] = useState<"html" | "csv">("html");
 
   const reportTypeOptions = [
-    { value: "regional", label: "Regional Summary Report" },
-    { value: "businessLine", label: "Business Line Summary Report" },
-    { value: "full", label: "Full Database Export" },
+    {
+      value: "regional",
+      label: locale === "zh" ? "区域汇总报告" : "Regional Summary Report",
+    },
+    {
+      value: "businessLine",
+      label: locale === "zh" ? "业务线汇总报告" : "Business Line Summary Report",
+    },
+    {
+      value: "full",
+      label: locale === "zh" ? "完整数据库导出" : "Full Database Export",
+    },
   ];
 
   const regionOptions = [
-    { value: "ALL", label: "All Regions (Global Summary)" },
-    ...REGIONS.map((r) => ({ value: r, label: r })),
+    {
+      value: "ALL",
+      label: locale === "zh" ? "全部区域（全球汇总）" : "All Regions (Global Summary)",
+    },
+    ...REGIONS.map((r) => ({
+      value: r,
+      label: localizeRegionName(r, locale),
+    })),
   ];
 
   const formatOptions = [
-    { value: "html", label: "Lifewood Branded HTML (HK Report Style)" },
-    { value: "csv", label: "Raw CSV Spreadsheet Data" },
+    {
+      value: "html",
+      label: locale === "zh" ? "Lifewood 品牌定制 HTML（香港报告风格）" : "Lifewood Branded HTML (HK Report Style)",
+    },
+    {
+      value: "csv",
+      label: locale === "zh" ? "原始 CSV 表格数据" : "Raw CSV Spreadsheet Data",
+    },
   ];
 
   const [generatedHtml, setGeneratedHtml] = useState<string>("");
@@ -41,7 +63,7 @@ export default function ReportsPage() {
         const res = await fetch("/api/reports/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ reportType, region, format: "csv" }),
+          body: JSON.stringify({ reportType, region, format: "csv", locale }),
         });
         const blob = await res.blob();
         const url = window.URL.createObjectURL(blob);
@@ -49,25 +71,25 @@ export default function ReportsPage() {
         a.href = url;
         a.download = `Lifewood_Exhibition_Report_${region}.csv`;
         a.click();
-        toast.success("CSV report downloaded!");
+        toast.success(locale === "zh" ? "CSV 报告已成功下载！" : "CSV report downloaded!");
       } else {
         // Generate HTML preview
         const res = await fetch("/api/reports/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ reportType, region, format: "html" }),
+          body: JSON.stringify({ reportType, region, format: "html", locale }),
         });
         const data = await res.json();
         if (res.ok) {
           setGeneratedHtml(data.html);
           setCount(data.count);
-          toast.success("Branded HTML report generated successfully!");
+          toast.success(locale === "zh" ? "品牌 HTML 报告已成功生成！" : "Branded HTML report generated successfully!");
         } else {
-          toast.error(data.error || "Failed to generate report");
+          toast.error(data.error || (locale === "zh" ? "生成报告失败" : "Failed to generate report"));
         }
       }
     } catch {
-      toast.error("Error generating report");
+      toast.error(locale === "zh" ? "生成报告出错" : "Error generating report");
     } finally {
       setLoading(false);
     }
@@ -81,7 +103,7 @@ export default function ReportsPage() {
     a.href = url;
     a.download = `Lifewood_Exhibition_Report_${region}.html`;
     a.click();
-    toast.success("HTML report downloaded!");
+    toast.success(locale === "zh" ? "HTML 报告已成功下载！" : "HTML report downloaded!");
   };
 
   return (
@@ -96,7 +118,9 @@ export default function ReportsPage() {
             </h2>
           </div>
           <p className="text-xs text-[#333333] mt-0.5">
-            Export Lifewood-branded HK report HTML documents or CSV datasets for executive presentation
+            {locale === "zh"
+              ? "导出符合 Lifewood 品牌规范的香港风格 HTML 报告或 CSV 数据集，用于高管汇报展示"
+              : "Export Lifewood-branded HK report HTML documents or CSV datasets for executive presentation"}
           </p>
         </div>
       </div>
@@ -106,37 +130,37 @@ export default function ReportsPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           <div>
             <label className="block text-xs font-bold text-[#133020] uppercase tracking-wider mb-2">
-              Report Type
+              {locale === "zh" ? "报告类型" : "Report Type"}
             </label>
             <LifewoodDropdown
               value={reportType}
               onChange={(val) => setReportType(val)}
               options={reportTypeOptions}
-              aria-label="Report Type"
+              aria-label={locale === "zh" ? "报告类型" : "Report Type"}
             />
           </div>
 
           <div>
             <label className="block text-xs font-bold text-[#133020] uppercase tracking-wider mb-2">
-              Region Selection
+              {locale === "zh" ? "选择区域" : "Region Selection"}
             </label>
             <LifewoodDropdown
               value={region}
               onChange={(val) => setRegion(val)}
               options={regionOptions}
-              aria-label="Region Selection"
+              aria-label={locale === "zh" ? "选择区域" : "Region Selection"}
             />
           </div>
 
           <div>
             <label className="block text-xs font-bold text-[#133020] uppercase tracking-wider mb-2">
-              Export Format
+              {locale === "zh" ? "导出格式" : "Export Format"}
             </label>
             <LifewoodDropdown
               value={format}
               onChange={(val) => setFormat(val as any)}
               options={formatOptions}
-              aria-label="Export Format"
+              aria-label={locale === "zh" ? "导出格式" : "Export Format"}
             />
           </div>
         </div>
@@ -150,12 +174,12 @@ export default function ReportsPage() {
             {loading ? (
               <>
                 <RefreshCw className="w-4 h-4 animate-spin" />
-                <span>Generating...</span>
+                <span>{locale === "zh" ? "生成中..." : "Generating..."}</span>
               </>
             ) : (
               <>
                 <Sparkles className="w-4 h-4" />
-                <span>Generate Report</span>
+                <span>{locale === "zh" ? "生成报告" : "Generate Report"}</span>
               </>
             )}
           </button>
@@ -170,10 +194,10 @@ export default function ReportsPage() {
               <Eye className="w-5 h-5 text-[#046241]" />
               <div>
                 <h3 className="text-sm font-bold text-[#133020]">
-                  Live Report Preview ({count} Records)
+                  {locale === "zh" ? `实时报告预览（共 ${count} 条记录）` : `Live Report Preview (${count} Records)`}
                 </h3>
                 <p className="text-[11px] text-[#666666]">
-                  Rendered in official HK Report design language
+                  {locale === "zh" ? "按官方香港报告视觉规范渲染" : "Rendered in official HK Report design language"}
                 </p>
               </div>
             </div>
@@ -183,7 +207,7 @@ export default function ReportsPage() {
               className="flex items-center gap-1.5 px-4 py-2 bg-[#133020] hover:bg-[#046241] text-white text-xs font-bold rounded-lg transition shadow-xs"
             >
               <Download className="w-4 h-4" />
-              <span>Download HTML File</span>
+              <span>{locale === "zh" ? "下载 HTML 文件" : "Download HTML File"}</span>
             </button>
           </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { FitScoreBadge } from "@/components/events/fit-score-badge";
@@ -35,7 +35,8 @@ import {
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
-import { useLocaleStore } from "@/stores/locale-store";
+import { useTranslation } from "@/lib/i18n/use-translation";
+import { localizeEvent } from "@/lib/i18n/event-localization";
 
 export default function EventDetailPage() {
   const params = useParams();
@@ -43,7 +44,7 @@ export default function EventDetailPage() {
   const id = params.id as string;
   const { data: session } = useSession();
   const userRole = (session?.user as any)?.role || "INTERN";
-  const { locale } = useLocaleStore();
+  const { locale, t } = useTranslation();
 
   const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -57,31 +58,31 @@ export default function EventDetailPage() {
         if (res.ok) {
           setEvent(data.event);
         } else {
-          toast.error(data.error || "Event not found");
+          toast.error(data.error || (locale === "zh" ? "未找到展会" : "Event not found"));
         }
       } catch (err) {
-        toast.error("Failed to load event details");
+        toast.error(locale === "zh" ? "加载展会详情失败" : "Failed to load event details");
       } finally {
         setLoading(false);
       }
     }
     fetchEvent();
-  }, [id]);
+  }, [id, locale]);
 
   const handleDelete = async () => {
-    if (!confirm("Are you sure you want to permanently delete this event record?")) return;
+    const confirmMsg = locale === "zh" ? "确定要永久删除该展会记录吗？" : "Are you sure you want to permanently delete this event record?";
+    if (!confirm(confirmMsg)) return;
 
     try {
       const res = await fetch(`/api/events/${id}`, { method: "DELETE" });
       if (res.ok) {
-        toast.success("Event record deleted");
+        toast.success(locale === "zh" ? "展会记录已删除" : "Event record deleted");
         router.push("/events");
       } else {
-        const data = await res.json();
-        toast.error(data.error || "Failed to delete");
+        toast.error(locale === "zh" ? "删除展会失败" : "Failed to delete event");
       }
     } catch {
-      toast.error("Error deleting event");
+      toast.error(locale === "zh" ? "删除展会出错" : "Error deleting event");
     }
   };
 
@@ -90,7 +91,7 @@ export default function EventDetailPage() {
       <div className="py-20 flex flex-col items-center justify-center text-[#046241]">
         <Loader2 className="w-8 h-8 animate-spin mb-2" />
         <span className="text-xs font-semibold text-[#133020]">
-          Loading exhibition specifications...
+          {locale === "zh" ? "正在加载展会详细规格..." : "Loading exhibition specifications..."}
         </span>
       </div>
     );
@@ -99,18 +100,20 @@ export default function EventDetailPage() {
   if (!event) {
     return (
       <div className="py-12 text-center text-[#B91C1C] font-semibold text-sm">
-        Event not found.
+        {locale === "zh" ? "未找到相关展会记录。" : "Event not found."}
       </div>
     );
   }
 
+  const localized = useMemo(() => (event ? localizeEvent(event, locale) : null), [event, locale]);
+
   let businessLines: string[] = [];
   try {
-    businessLines = JSON.parse(event.businessLines || "[]");
+    businessLines = JSON.parse(localized?.businessLines || "[]");
   } catch {
-    businessLines = Array.isArray(event.businessLines)
-      ? event.businessLines
-      : [event.businessLines];
+    businessLines = Array.isArray(localized?.businessLines)
+      ? localized?.businessLines
+      : [localized?.businessLines || "Global AI Data"];
   }
 
   let sourceLinks: string[] = [];
@@ -124,7 +127,9 @@ export default function EventDetailPage() {
 
   const primaryBL = businessLines[0] || "Global AI Data";
   const blConfig = BUSINESS_LINES.find(
-    (b) => b.name.toLowerCase() === primaryBL.toLowerCase()
+    (b) =>
+      b.name.toLowerCase() === primaryBL.toLowerCase() ||
+      primaryBL.includes(b.name)
   );
   const accentColor = blConfig ? blConfig.colorHex : "#046241";
 
@@ -142,10 +147,10 @@ export default function EventDetailPage() {
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#046241] hover:text-[#133020] transition"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>{locale === "en" ? "Back to All Events" : "返回展会列表"}</span>
+          <span>{locale === "zh" ? "返回展会列表" : "Back to All Events"}</span>
         </Link>
         <span className="text-xs font-bold uppercase tracking-wider text-[#666666]">
-          {locale === "en" ? "Exhibition Details" : "展会详细信息"}
+          {locale === "zh" ? "展会详细信息" : "Exhibition Details"}
         </span>
       </div>
 
@@ -162,7 +167,9 @@ export default function EventDetailPage() {
           <div className="flex items-center justify-between gap-4 flex-wrap mb-2">
             <div className="flex items-center gap-2">
               <span className="text-[12px] font-semibold text-[#133020]">
-                Record #{event.eventNumber} · {event.region}
+                {locale === "zh"
+                  ? `记录编号 #${localized?.eventNumber} · ${localized?.region}`
+                  : `Record #${localized?.eventNumber} · ${localized?.region}`}
               </span>
               <span
                 className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium tracking-tight ${
@@ -172,7 +179,13 @@ export default function EventDetailPage() {
                 }`}
               >
                 <Ticket className="w-3 h-3" />
-                {isFree ? "Free entry" : "Paid / Ticketed"}
+                {locale === "zh"
+                  ? isFree
+                    ? "免费入场"
+                    : "付费 / 需购票"
+                  : isFree
+                  ? "Free entry"
+                  : "Paid / Ticketed"}
               </span>
             </div>
 
@@ -191,12 +204,20 @@ export default function EventDetailPage() {
                       setEvent({ ...event, isAttended: newAttended });
                       toast.success(
                         newAttended
-                          ? "Event marked as Attended!"
+                          ? locale === "zh"
+                            ? "展会已标记为已参展！"
+                            : "Event marked as Attended!"
+                          : locale === "zh"
+                          ? "已取消展会参展标记"
                           : "Event attendance removed"
                       );
                     }
                   } catch {
-                    toast.error("Failed to update attendance status");
+                    toast.error(
+                      locale === "zh"
+                        ? "更新参展状态失败"
+                        : "Failed to update attendance status"
+                    );
                   }
                 }}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs border ${
@@ -206,16 +227,24 @@ export default function EventDetailPage() {
                 }`}
               >
                 <CheckCircle2 className="w-4 h-4 text-[#FFB347]" />
-                <span>{event.isAttended ? "Already Attended ✓" : "Mark as Attended"}</span>
+                <span>
+                  {event.isAttended
+                    ? locale === "zh"
+                      ? "已参展 ✓"
+                      : "Already Attended ✓"
+                    : locale === "zh"
+                    ? "标记为已参展"
+                    : "Mark as Attended"}
+                </span>
               </button>
 
-              <PriorityIndicator priority={event.priorityLevel} />
-              <FitScoreBadge score={event.fitScore} size="xl" showLevel />
+              <PriorityIndicator priority={localized?.priorityLevel} />
+              <FitScoreBadge score={localized?.fitScore} size="xl" showLevel />
             </div>
           </div>
 
           <h1 className="text-[28px] font-semibold text-[#133020] tracking-tight leading-tight mb-3">
-            {event.eventName}
+            {localized?.eventName}
           </h1>
 
           <div className="flex items-center gap-2 flex-wrap mb-4">
@@ -231,9 +260,9 @@ export default function EventDetailPage() {
                 <Calendar className="w-4 h-4 text-emerald-600 dark:text-amber-400 shrink-0" />
                 <div>
                   <span className="text-[10px] text-[#666666] block uppercase font-medium">
-                    Dates
+                    {locale === "zh" ? "展会日期" : "Dates"}
                   </span>
-                  <span className="font-semibold text-sm">{event.dates}</span>
+                  <span className="font-semibold text-sm">{localized?.dates}</span>
                 </div>
               </div>
 
@@ -241,10 +270,10 @@ export default function EventDetailPage() {
                 <MapPin className="w-4 h-4 text-emerald-600 dark:text-amber-400 shrink-0" />
                 <div>
                   <span className="text-[10px] text-[#666666] block uppercase font-medium">
-                    Location
+                    {locale === "zh" ? "地点" : "Location"}
                   </span>
                   <span className="font-semibold text-sm">
-                    {event.city}, {event.country}
+                    {localized?.city}, {localized?.country}
                   </span>
                 </div>
               </div>
@@ -253,10 +282,10 @@ export default function EventDetailPage() {
                 <Building className="w-4 h-4 text-emerald-600 dark:text-amber-400 shrink-0" />
                 <div>
                   <span className="text-[10px] text-[#666666] block uppercase font-medium">
-                    Venue
+                    {locale === "zh" ? "展馆场地" : "Venue"}
                   </span>
                   <span className="font-semibold text-sm truncate block max-w-[200px]">
-                    {event.venue}
+                    {localized?.venue}
                   </span>
                 </div>
               </div>
@@ -283,7 +312,9 @@ export default function EventDetailPage() {
                   className="flex items-center gap-2 px-4 py-2 bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] font-medium text-xs rounded-[8px] transition-all duration-180 shadow-2xs"
                 >
                   <Globe className="w-3.5 h-3.5" />
-                  <span>Visit official website</span>
+                  <span>
+                    {locale === "zh" ? "访问官方网站" : "Visit official website"}
+                  </span>
                   <ExternalLink className="w-3 h-3" />
                 </a>
               );
@@ -298,49 +329,66 @@ export default function EventDetailPage() {
             <div>
               <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#046241] mb-1.5 flex items-center gap-1.5">
                 <FileCheck className="w-3.5 h-3.5 text-[#046241]" />
-                <span>Strategic focus & purpose</span>
+                <span>
+                  {locale === "zh"
+                    ? "战略侧重点与展会定位"
+                    : "Strategic focus & purpose"}
+                </span>
               </h3>
               <p className="text-xs text-[#133020] leading-relaxed bg-[#F9F7F7] p-3.5 rounded-[8px] border border-[#D8D2C8]">
-                {event.strategicFocus || "Strategic industrial intelligence event"}
+                {localized?.strategicFocus ||
+                  (locale === "zh"
+                    ? "重点产业科技情报展会"
+                    : "Strategic industrial intelligence event")}
               </p>
             </div>
 
             <div>
               <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#046241] mb-1.5">
-                Relevance to Lifewood
+                {locale === "zh" ? "与 Lifewood 的相关性" : "Relevance to Lifewood"}
               </h3>
               <p className="text-xs font-medium text-[#133020] leading-relaxed bg-[#F0F5F2] p-3.5 rounded-[8px] border border-[#046241]/20">
-                {event.relevanceToLifewood || "High alignment with Lifewood target buyers"}
+                {localized?.relevanceToLifewood ||
+                  (locale === "zh"
+                    ? "与 Lifewood 目标买家群体高度契合"
+                    : "High alignment with Lifewood target buyers")}
               </p>
             </div>
 
             <div>
               <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#666666] mb-1.5">
-                Target audience & buyers
+                {locale === "zh" ? "目标受众与买家画像" : "Target audience & buyers"}
               </h3>
               <p className="text-xs text-[#133020] bg-white p-3 rounded-[8px] border border-[#D8D2C8]">
-                {event.targetAudience || "Enterprise buyers, AI leaders, procurement teams"}
+                {localized?.targetAudience ||
+                  (locale === "zh"
+                    ? "企业买家、AI 技术负责人、战略采购团队"
+                    : "Enterprise buyers, AI leaders, procurement teams")}
               </p>
             </div>
 
             {/* Location card */}
             <div className="bg-[#F5EEDB] p-3.5 rounded-[8px] border border-[#D8D2C8] space-y-1.5 text-xs text-[#133020]">
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-[13px]">{event.venue}</span>
-                {event.locationAddress && event.locationAddress !== "Not publicly disclosed" && (
-                  <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${event.venue}, ${event.locationAddress}, ${event.city}, ${event.country}`)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-[11px] text-[#046241] hover:underline font-semibold"
-                  >
-                    <span>Google Maps</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                )}
+                <span className="font-semibold text-[13px]">{localized?.venue}</span>
+                {localized?.locationAddress &&
+                  localized.locationAddress !== "Not publicly disclosed" &&
+                  localized.locationAddress !== "未公开披露" && (
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                        `${event.venue}, ${event.locationAddress}, ${event.city}, ${event.country}`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-[11px] text-[#046241] hover:underline font-semibold"
+                    >
+                      <span>{locale === "zh" ? "谷歌地图" : "Google Maps"}</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  )}
               </div>
               <p className="text-[#666666] text-[11.5px]">
-                {event.locationAddress || `${event.city}, ${event.country}`}
+                {localized?.locationAddress || `${localized?.city}, ${localized?.country}`}
               </p>
             </div>
           </div>
@@ -348,70 +396,75 @@ export default function EventDetailPage() {
           {/* Right Column: Commercial & Organizer Specs */}
           <div className="space-y-4 bg-[#F9F7F7] p-5 rounded-[8px] border border-[#D8D2C8] text-xs">
             <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#133020] border-b border-[#D8D2C8] pb-2">
-              Commercial & organizer detail
+              {locale === "zh" ? "商业规格与主办方信息" : "Commercial & organizer detail"}
             </h3>
 
             <div className="grid grid-cols-2 gap-3.5">
               <div className="col-span-2">
                 <span className="text-[10px] uppercase font-medium text-[#666666] block">
-                  Organizer
+                  {locale === "zh" ? "主办机构" : "Organizer"}
                 </span>
                 <span className="font-semibold text-[#133020] text-sm">
-                  {event.organizer || "Not publicly disclosed"}
+                  {localized?.organizer || (locale === "zh" ? "未公开披露" : "Not publicly disclosed")}
                 </span>
               </div>
 
               <div>
                 <span className="text-[10px] uppercase font-medium text-[#666666] block">
-                  Estimated attendees
+                  {locale === "zh" ? "参会规模预估" : "Estimated attendees"}
                 </span>
                 <span className="font-semibold text-[#046241]">
-                  {event.estimatedAttendees || "Not publicly disclosed"}
+                  {localized?.estimatedAttendees ||
+                    (locale === "zh" ? "未公开披露" : "Not publicly disclosed")}
                 </span>
               </div>
 
               <div>
                 <span className="text-[10px] uppercase font-medium text-[#666666] block">
-                  Booth / sponsorship cost
+                  {locale === "zh" ? "展位 / 赞助费用" : "Booth / sponsorship cost"}
                 </span>
                 <span className="font-semibold text-[#133020]">
-                  {event.boothCost || "Not publicly disclosed"}
+                  {localized?.boothCost || (locale === "zh" ? "未公开披露" : "Not publicly disclosed")}
                 </span>
               </div>
 
               <div>
                 <span className="text-[10px] uppercase font-medium text-[#666666] block">
-                  Registration deadline
+                  {locale === "zh" ? "报名截止日期" : "Registration deadline"}
                 </span>
                 <span className="font-medium text-[#133020]">
-                  {event.registrationDeadline || "Not publicly disclosed"}
+                  {localized?.registrationDeadline ||
+                    (locale === "zh" ? "未公开披露" : "Not publicly disclosed")}
                 </span>
               </div>
 
               <div>
                 <span className="text-[10px] uppercase font-medium text-[#666666] block">
-                  Contact person
+                  {locale === "zh" ? "联络人" : "Contact person"}
                 </span>
                 <span className="font-medium text-[#133020]">
-                  {event.contactPerson || "Not publicly disclosed"}
+                  {localized?.contactPerson ||
+                    (locale === "zh" ? "未公开披露" : "Not publicly disclosed")}
                 </span>
               </div>
 
               <div className="col-span-2">
                 <span className="text-[10px] uppercase font-medium text-[#666666] block">
-                  Contact email
+                  {locale === "zh" ? "联络邮箱" : "Contact email"}
                 </span>
                 <span className="font-medium text-[#046241]">
-                  {event.contactEmail || "Not publicly disclosed"}
+                  {localized?.contactEmail ||
+                    (locale === "zh" ? "未公开披露" : "Not publicly disclosed")}
                 </span>
               </div>
 
               <div className="col-span-2">
                 <span className="text-[10px] uppercase font-medium text-[#666666] block">
-                  Exhibitor opportunities
+                  {locale === "zh" ? "参展与赞助商合作权益" : "Exhibitor opportunities"}
                 </span>
                 <span className="text-[#133020]">
-                  {event.exhibitorOpportunity || "Not publicly disclosed"}
+                  {localized?.exhibitorOpportunity ||
+                    (locale === "zh" ? "未公开披露" : "Not publicly disclosed")}
                 </span>
               </div>
             </div>
@@ -422,10 +475,10 @@ export default function EventDetailPage() {
         <div className="p-5 pl-8 bg-[#133020] text-white flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-3">
             <span className="text-[11px] uppercase tracking-wider text-[#FFB347] font-semibold">
-              Recommendation:
+              {locale === "zh" ? "建议：" : "Recommendation:"}
             </span>
             <span className="px-3 py-1 rounded-[6px] text-xs font-semibold bg-[#FFB347] text-[#133020]">
-              {event.participationRec || "Exhibit"}
+              {localized?.participationRec || (locale === "zh" ? "参展" : "Exhibit")}
             </span>
           </div>
 
@@ -436,7 +489,7 @@ export default function EventDetailPage() {
                 className="flex items-center gap-1.5 px-4 py-2 bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] font-medium text-xs rounded-[8px] transition shadow-2xs"
               >
                 <Edit className="w-3.5 h-3.5" />
-                <span>Edit record</span>
+                <span>{locale === "zh" ? "编辑记录" : "Edit record"}</span>
               </button>
             )}
 
@@ -446,7 +499,7 @@ export default function EventDetailPage() {
                 className="flex items-center gap-1.5 px-4 py-2 bg-[#B91C1C] hover:bg-[#B91C1C]/90 text-white font-medium text-xs rounded-[8px] transition"
               >
                 <Trash2 className="w-3.5 h-3.5" />
-                <span>Delete</span>
+                <span>{locale === "zh" ? "删除" : "Delete"}</span>
               </button>
             )}
           </div>
