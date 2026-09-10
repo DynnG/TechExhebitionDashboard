@@ -152,9 +152,9 @@ export default function EventsPage() {
       {/* Top Section */}
       <div className="flex items-center justify-between flex-wrap gap-4 border-b border-[#D8D2C8] pb-4">
         <div>
-          <h2 className="text-[28px] font-semibold text-[#FFB347] tracking-tight leading-tight">
+          <h2 className="text-2xl font-bold text-[#133020] dark:text-white tracking-tight leading-tight">
             {locale === "en" ? "Exhibition records" : "展会记录库"}
-          </h2>
+            </h2>
           <p className="text-xs text-black dark:text-white/60 mt-0.5">
             {locale === "en"
               ? `Showing ${pagination.totalCount} strategic tech exhibition records (fit score 3+)`

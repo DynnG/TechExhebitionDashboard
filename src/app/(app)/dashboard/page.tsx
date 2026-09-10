@@ -87,18 +87,18 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen -m-8 p-8 space-y-8 font-manrope bg-[#F5EEDB] dark:bg-[#133020] text-[#133020] dark:text-white transition-colors duration-300">
       {/* Top Bar / Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4 border-b border-[#D8D2C8] pb-4">
+        <div className="flex items-center justify-between flex-wrap gap-4 border-b border-[#D8D2C8] pb-4">
         <div>
-          <h2 className="text-[28px] font-semibold text-[#046241] dark:text-[#2EA87A] tracking-tight leading-tight">
+            <h2 className="text-2xl font-bold text-[#133020] dark:text-white">
             {locale === "en" ? "Lifewood intelligence overview" : "Lifewood 展会情报总览"}
-          </h2>
-          <p className="text-xs text-black dark:text-white/60 mt-0.5">
+            </h2>
+            <p className="text-xs text-black dark:text-white/60 mt-0.5">
             {locale === "en"
-              ? "Real-time exhibition pipeline tracking, strategic alignment, and coverage gap intelligence"
-              : "实时展会追踪、战略适配评估与覆盖空缺分析"}
-          </p>
+                ? "Real-time exhibition pipeline tracking, strategic alignment, and coverage gap intelligence"
+                : "实时展会追踪、战略适配评估与覆盖空缺分析"}
+            </p>
         </div>
-      </div>
+        </div>
 
       {/* Row 1 — Stat Cards (4 across) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
