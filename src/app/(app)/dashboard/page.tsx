@@ -51,8 +51,8 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="space-y-8 font-manrope">
-        <div className="flex items-center justify-between pb-4 border-b border-[#D8D2C8]">
+      <div className="min-h-screen -m-8 p-8 space-y-8 font-manrope bg-[#F5EEDB] dark:bg-[#0B1712] text-[#133020] dark:text-white transition-colors duration-300">
+        <div className="flex items-center justify-between pb-4 border-b border-[#D8D2C8] dark:border-[#1E4830]">
           <div className="space-y-2">
             <Skeleton className="h-8 w-64" />
             <Skeleton className="h-4 w-96" />
@@ -85,14 +85,14 @@ export default function DashboardPage() {
   const { stats, eventsByMonth, eventsByRegion, businessLineDist, fitScoreDist, gaps, recentEvents } = data;
 
   return (
-    <div className="space-y-8 font-manrope">
+    <div className="min-h-screen -m-8 p-8 space-y-8 font-manrope bg-[#F5EEDB] dark:bg-[#133020] text-[#133020] dark:text-white transition-colors duration-300">
       {/* Top Bar / Header */}
       <div className="flex items-center justify-between flex-wrap gap-4 border-b border-[#D8D2C8] pb-4">
         <div>
-          <h2 className="text-[28px] font-semibold text-[#133020] tracking-tight leading-tight">
+          <h2 className="text-[28px] font-semibold text-[#FFB347] tracking-tight leading-tight">
             {locale === "en" ? "Lifewood intelligence overview" : "Lifewood 展会情报总览"}
           </h2>
-          <p className="text-xs text-[#333333] mt-0.5">
+          <p className="text-xs text-black dark:text-white/60 mt-0.5">
             {locale === "en"
               ? "Real-time exhibition pipeline tracking, strategic alignment, and coverage gap intelligence"
               : "实时展会追踪、战略适配评估与覆盖空缺分析"}
@@ -102,7 +102,7 @@ export default function DashboardPage() {
         <div className="flex items-center gap-3">
           <Link
             href="/scraper"
-            className="flex items-center gap-1.5 px-4 py-2 border-[1.5px] border-[#133020] bg-transparent text-[#133020] hover:bg-[#F5EEDB] text-xs font-medium rounded-[8px] transition-all duration-180"
+            className="flex items-center gap-1.5 px-4 py-2 border-[1.5px] border-[#133020] bg-[#FFB347] text-[#133020] hover:bg-[#F5EEDB] text-xs font-medium rounded-[8px] transition-all duration-180"
           >
             <Bot className="w-4 h-4 text-[#046241]" />
             <span>{locale === "en" ? "AI scraper engine" : "AI 抓取引擎"}</span>
