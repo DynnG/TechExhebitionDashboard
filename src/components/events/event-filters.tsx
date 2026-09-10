@@ -1,7 +1,7 @@
 "use client";
 
 import { REGIONS, BUSINESS_LINES, PRIORITIES } from "@/lib/constants/business-lines";
-import { Search, X, Filter } from "lucide-react";
+import { Search, X, Filter, Plus } from "lucide-react";
 import { useTranslation } from "@/lib/i18n/use-translation";
 import { REGIONS_MAP, BUSINESS_LINES_MAP, PRIORITIES_MAP } from "@/lib/i18n/event-localization";
 import { LifewoodDropdown } from "@/components/shared/lifewood-dropdown";
@@ -16,9 +16,10 @@ interface EventFiltersProps {
   };
   onChange: (key: string, value: string) => void;
   onClear: () => void;
+  onAddEvent?: () => void;
 }
 
-export function EventFilters({ filters, onChange, onClear }: EventFiltersProps) {
+export function EventFilters({ filters, onChange, onClear, onAddEvent }: EventFiltersProps) {
   const { locale, t } = useTranslation();
 
   const isFiltered =
@@ -123,25 +124,37 @@ export function EventFilters({ filters, onChange, onClear }: EventFiltersProps) 
           )}
         </div>
 
-        {/* Search Input */}
-        <div className="relative min-w-[260px] flex-1 max-w-sm">
-          <Search className="w-4 h-4 text-[#999999] absolute left-3.5 top-2.5" />
-          <input
-            type="text"
-            value={filters.search}
-            onChange={(e) => onChange("search", e.target.value)}
-            placeholder={t(
-              "events.searchPlaceholder",
-              "Search event name, city, organizer..."
+        {/* Search Input + Add Event (same bar) */}
+        <div className="flex items-center gap-2.5 flex-1 min-w-[260px] max-w-lg">
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 text-[#999999] absolute left-3.5 top-2.5" />
+            <input
+              type="text"
+              value={filters.search}
+              onChange={(e) => onChange("search", e.target.value)}
+              placeholder={t(
+                "events.searchPlaceholder",
+                "Search event name, city, organizer..."
+              )}
+              className="w-full pl-9 pr-8 py-2 rounded-[8px] border-[1.5px] border-[#D8D2C8] bg-white text-xs text-[#133020] placeholder-[#999999] focus:outline-none focus:border-[#046241] focus:ring-2 focus:ring-[#046241]/15 transition"
+            />
+            {filters.search && (
+              <button
+                onClick={() => onChange("search", "")}
+                className="absolute right-2.5 top-2.5 text-slate-400 hover:text-[#133020]"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
             )}
-            className="w-full pl-9 pr-8 py-2 rounded-[8px] border-[1.5px] border-[#D8D2C8] bg-white text-xs text-[#133020] placeholder-[#999999] focus:outline-none focus:border-[#046241] focus:ring-2 focus:ring-[#046241]/15 transition"
-          />
-          {filters.search && (
+          </div>
+
+          {onAddEvent && (
             <button
-              onClick={() => onChange("search", "")}
-              className="absolute right-2.5 top-2.5 text-slate-400 hover:text-[#133020]"
+              onClick={onAddEvent}
+              className="flex items-center gap-1.5 px-4 py-2 bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] font-medium text-xs rounded-[8px] transition-all duration-180 shadow-2xs cursor-pointer shrink-0"
             >
-              <X className="w-3.5 h-3.5" />
+              <Plus className="w-4 h-4" />
+              <span>{t("common.addEvent", "Add event")}</span>
             </button>
           )}
         </div>

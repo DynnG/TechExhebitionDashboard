@@ -138,8 +138,8 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Row 2 — Charts (Events by Month & Events by Region) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Row 2 — Charts (Events by Month & Events by Region) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         <div className="lg:col-span-8">
           <EventsByMonthChart data={eventsByMonth} />
         </div>
