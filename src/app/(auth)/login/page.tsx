@@ -5,10 +5,19 @@ import { Sparkles, Globe, BarChart3 } from "lucide-react";
 import { LivingWoodNetwork } from "@/components/ui/LivingWoodNetwork";
 import { TypewriterText } from "@/components/ui/TypewriterText";
 import { LoginForm } from "@/components/ui/LoginForm";
+import { LangToggle } from "@/components/shared/lang-toggle";
+import { useLocaleStore } from "@/stores/locale-store";
 
 export default function LoginPage() {
+  const { locale } = useLocaleStore();
+
   return (
     <div className="min-h-screen font-manrope grid grid-cols-1 lg:grid-cols-2 bg-[#F9F7F7] relative overflow-hidden">
+      {/* Top right language switcher */}
+      <div className="absolute top-5 right-5 z-50">
+        <LangToggle />
+      </div>
+
       {/* Left Panel */}
       <div className="hidden lg:flex flex-col p-12 lg:p-16 bg-[#133020] text-white relative overflow-hidden">
         {/* Backdrop Image */}
@@ -34,43 +43,67 @@ export default function LoginPage() {
               className="h-12 sm:h-20 w-auto object-contain drop-shadow-md"
             />
             <p className="text-[11px] text-[#F5EEDB]/70 tracking-widest font-semibold uppercase">
-              Global Tech Exhibition Intelligence Platform
+              {locale === "zh"
+                ? "全球科技展会情报与参展战略平台"
+                : "Global Tech Exhibition Intelligence Platform"}
             </p>
           </div>
 
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#046241]/40 border border-[#046241] text-[#FFB347] text-xs font-semibold">
               <Sparkles className="w-3.5 h-3.5 text-[#FFB347]" />
-              <span>Enterprise Intelligence 2026–2027</span>
+              <span>{locale === "zh" ? "企业级智能决策 2026–2027" : "Enterprise Intelligence 2026–2027"}</span>
             </div>
 
             <h2 className="text-3xl font-extrabold text-white tracking-tight leading-tight min-h-[4rem]">
-              <TypewriterText text="Curated strategic technology exhibition tracking." speed={40} />
+              <TypewriterText
+                key={locale}
+                text={
+                  locale === "zh"
+                    ? "精选全球战略科技展会情报追踪与参展决策。"
+                    : "Curated strategic technology exhibition tracking."
+                }
+                speed={40}
+              />
             </h2>
 
             <p className="text-xs text-[#F5EEDB]/80 leading-relaxed max-w-md">
-              High-precision 27-column audit, automated AI crawler discovery engine, and Fit Score alignment across 6 core business lines.
+              {locale === "zh"
+                ? "高精度 27 项审核维度、自动化 AI 爬虫发现引擎、紧扣 6 大核心业务线的契合度评估体系。"
+                : "High-precision 27-column audit, automated AI crawler discovery engine, and Fit Score alignment across 6 core business lines."}
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-3 pt-2">
             <div className="p-4 bg-white/5 border border-white/10 rounded-xl backdrop-blur-xs space-y-1">
               <Globe className="w-5 h-5 text-[#FFB347] mb-2" />
-              <div className="text-lg font-bold text-white">4 Major Regions</div>
-              <div className="text-[11px] text-[#F5EEDB]/60">APAC, North America, Europe, ME</div>
+              <div className="text-lg font-bold text-white">
+                {locale === "zh" ? "全球 4 大核心区域" : "4 Major Regions"}
+              </div>
+              <div className="text-[11px] text-[#F5EEDB]/60">
+                {locale === "zh" ? "亚太、北美、欧洲、中东" : "APAC, North America, Europe, ME"}
+              </div>
             </div>
 
             <div className="p-4 bg-white/5 border border-white/10 rounded-xl backdrop-blur-xs space-y-1">
               <BarChart3 className="w-5 h-5 text-[#FFB347] mb-2" />
-              <div className="text-lg font-bold text-white">Fit 3+ Verified</div>
-              <div className="text-[11px] text-[#F5EEDB]/60">Enterprise buyer alignment</div>
+              <div className="text-lg font-bold text-white">
+                {locale === "zh" ? "契合度 3+ 严格准入" : "Fit 3+ Verified"}
+              </div>
+              <div className="text-[11px] text-[#F5EEDB]/60">
+                {locale === "zh" ? "精准对标企业级买家需求" : "Enterprise buyer alignment"}
+              </div>
             </div>
           </div>
         </div>
 
         {/* Bottom Tagline */}
         <div className="relative z-10 pt-6 border-t border-white/10 flex items-center justify-between text-xs text-[#F5EEDB]/60">
-          <span>Structured Enterprise Bento Grid & Editorial Minimalism</span>
+          <span>
+            {locale === "zh"
+              ? "结构化企业级 Bento 布局与极简设计"
+              : "Structured Enterprise Bento Grid & Editorial Minimalism"}
+          </span>
           <span className="text-[#FFB347]">© 2026 Lifewood 活树</span>
         </div>
       </div>
@@ -83,7 +116,7 @@ export default function LoginPage() {
           <Suspense
             fallback={
               <div className="text-xs text-[#133020] font-semibold">
-                Loading...
+                {locale === "zh" ? "正在加载..." : "Loading..."}
               </div>
             }
           >
