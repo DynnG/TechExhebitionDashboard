@@ -150,7 +150,7 @@ export default function DashboardPage() {
 
       {/* Row 4 — Gaps & Alerts (Coverage Gaps + Recently Added Events) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-5">
+        <div className="lg:col-span-5 flex flex-col">
           <CoverageGapsWidget
             gaps={gaps}
             eventsByRegion={eventsByRegion}

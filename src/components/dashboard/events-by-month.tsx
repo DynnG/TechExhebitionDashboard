@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   BarChart,
   Bar,
@@ -37,6 +37,23 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
   const { locale } = useLocaleStore();
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+
+  // Track dark mode by watching the `dark` class on <html>
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsDark(document.documentElement.classList.contains("dark"));
+    check();
+    const observer = new MutationObserver(check);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  const axisTickColor = isDark ? "#FFFFFF" : "#133020";
+  const axisLineColor = isDark ? "#1E4830" : "#D8D2C8";
 
   const formattedData = useMemo(() => {
     if (!data || data.length === 0) return [];
@@ -129,11 +146,11 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
       <div className="flex items-center justify-end gap-3 mb-2 text-xs font-medium">
         <div className="flex items-center gap-1.5 text-[11px]">
           <span className="w-2.5 h-2.5 rounded-[2px] bg-[#046241] inline-block" />
-          <span className="text-[#133020]">{locale === "zh" ? "达标 (≥ 5 场展会)" : "Target met (≥ 5 exhibitions)"}</span>
+          <span className="text-[#133020] dark:text-white">{locale === "zh" ? "达标 (≥ 5 场展会)" : "Target met (≥ 5 exhibitions)"}</span>
         </div>
         <div className="flex items-center gap-1.5 text-[11px]">
           <span className="w-2.5 h-2.5 rounded-[2px] bg-[#FFB347] inline-block" />
-          <span className="text-[#C17110]">{locale === "zh" ? "空缺 (< 5 场展会)" : "Gap (< 5 exhibitions)"}</span>
+          <span className="text-[#C17110] dark:text-[#FFB347]">{locale === "zh" ? "空缺 (< 5 场展会)" : "Gap (< 5 exhibitions)"}</span>
         </div>
       </div>
 
@@ -142,12 +159,12 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
           <BarChart data={formattedData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <XAxis
               dataKey="month"
-              tick={{ fontSize: 10, fill: "#133020", fontWeight: 500 }}
-              axisLine={{ stroke: "#D8D2C8" }}
+              tick={{ fontSize: 10, fill: axisTickColor, fontWeight: 500 }}
+              axisLine={{ stroke: axisLineColor }}
             />
             <YAxis
-              tick={{ fontSize: 10, fill: "#133020", fontWeight: 500 }}
-              axisLine={{ stroke: "#D8D2C8" }}
+              tick={{ fontSize: 10, fill: axisTickColor, fontWeight: 500 }}
+              axisLine={{ stroke: axisLineColor }}
               allowDecimals={false}
             />
             <Tooltip content={<CustomTooltip locale={locale} />} />

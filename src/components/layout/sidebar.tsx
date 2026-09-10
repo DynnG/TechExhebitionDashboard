@@ -118,19 +118,19 @@ export function Sidebar() {
 
       {/* Top Header & Logo */}
       <div>
-        <div className="p-1.5 flex flex-col items-start gap-2 border-b border-[#133020]/10 dark:border-white/10">
-          <div className="relative w-full h-5">
+        <div className="p-2 flex flex-col items-center gap-2 border-b border-[#133020]/10 dark:border-white/10 bg-[#F9F7F7] rounded-t-md">
+          <div className="relative w-full h-6">
             <Image
               src="/logo.png"
               alt="Lifewood logo"
               fill
-              className="object-contain object-left"
+              className="object-contain object-center"
             />
           </div>
 
           {!collapsed && (
-            <div>
-              <p className="text-[10px] text-[#133020]/60 dark:text-white/60 uppercase tracking-wider font-bold">
+            <div className="text-center">
+              <p className="text-[10.5px] text-[#133020]/60 uppercase tracking-wider font-bold">
                 {locale === "en"
                   ? "Exhibition Intelligence"
                   : "全球展会智能平台"}
@@ -230,8 +230,7 @@ export function Sidebar() {
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
             title={locale === "zh" ? `退出登录 (${userName})` : `Sign Out (${userName})`}
-            className="w-full flex justify-center p-2 text-[#133020]/60 dark:text-white/60 hover:text-[#FFB347] hover:bg-[#133020]/5 dark:hover:bg-white/5 rounded-lg transition"
-          >
+            className="w-full flex justify-center p-2 text-[#133020]/60 dark:text-white/60 hover:text-[#FFB347] hover:bg-[#133020]/5 dark:hover:bg-white/5 rounded-lg transition">
             <LogOut className="w-5 h-5" />
           </button>
         )}
