@@ -1,17 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { History, CheckCircle, XCircle, Calendar, ExternalLink, Loader2, Sparkles, Award, Eye, X, CheckCircle2, MapPin, Building, Globe } from "lucide-react";
+import { History, CheckCircle2, Calendar, ExternalLink, Loader2, Sparkles, Award, Eye, X, MapPin, Building, Globe, Trash2, Ticket, Mail, User as UserIcon, DollarSign, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { useLocaleStore } from "@/stores/locale-store";
 import { FitScoreBadge } from "@/components/events/fit-score-badge";
 import { PriorityIndicator } from "@/components/events/priority-indicator";
+import { BusinessLineChip } from "@/components/events/business-line-chip";
 import { ModalPortal } from "@/components/shared/modal-portal";
-import { EventCard } from "@/components/events/event-card";
+import { sanitizeEventUrl } from "@/lib/url";
+import { useSession } from "next-auth/react";
 
 export default function HistoryPage() {
   const { locale } = useLocaleStore();
+  const { data: session } = useSession();
+  const userRole = (session?.user as any)?.role || "INTERN";
+
   const [activeTab, setActiveTab] = useState<"DECISIONS" | "ATTENDED">("DECISIONS");
   const [decisionFilter, setDecisionFilter] = useState<"ALL" | "APPROVED" | "REJECTED">("ALL");
 
@@ -59,19 +63,26 @@ export default function HistoryPage() {
     fetchHistory();
   }, []);
 
-  const handleToggleAttended = async (id: number, currentStatus: boolean) => {
+  const handleDeleteAttended = async (id: number, eventName: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm(`Are you sure you want to remove/delete "${eventName}" from the attended log?`)) return;
+
     try {
+      // Unmark attended or delete if admin
       const res = await fetch(`/api/events/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isAttended: !currentStatus }),
+        body: JSON.stringify({ isAttended: false }),
       });
+
       if (res.ok) {
-        toast.success(!currentStatus ? "Event marked as Attended!" : "Attendance updated");
+        toast.success(`"${eventName}" removed from attended log.`);
         fetchHistory();
+      } else {
+        toast.error("Failed to update record");
       }
     } catch {
-      toast.error("Error updating attendance");
+      toast.error("Error removing record");
     }
   };
 
@@ -120,7 +131,7 @@ export default function HistoryPage() {
               : "border-transparent text-[#666666] hover:text-[#133020]"
           }`}
         >
-          <span>Attended Exhibitions Log (Permanent)</span>
+          <span>Attended Exhibitions Log (View & Delete Only)</span>
           <span className="px-2 py-0.5 rounded-full bg-[#046241] text-white text-[10px] font-extrabold">
             {attendedEvents.length}
           </span>
@@ -141,7 +152,7 @@ export default function HistoryPage() {
             <div className="flex items-center gap-2">
               <ClockIcon className="w-4 h-4 text-[#C17110] shrink-0" />
               <span>
-                <strong>30-Day Auto-Clear Policy:</strong> Decisions clear automatically after 30 days. Click any item to inspect record specifications in a popup.
+                <strong>30-Day Auto-Clear Policy:</strong> Decisions clear automatically after 30 days. Click any item to inspect full specifications in popup modal.
               </span>
             </div>
 
@@ -236,7 +247,7 @@ export default function HistoryPage() {
                         e.stopPropagation();
                         setSelectedModalEvent(item.event);
                       }}
-                      className="p-1.5 rounded-lg bg-[#F5EEDB] text-[#046241] hover:bg-[#046241] hover:text-white transition"
+                      className="p-1.5 rounded-lg bg-[#F5EEDB] text-[#046241] hover:bg-[#046241] hover:text-white transition cursor-pointer"
                       title="Inspect Record Specifications"
                     >
                       <Eye className="w-4 h-4" />
@@ -248,30 +259,111 @@ export default function HistoryPage() {
           )}
         </div>
       ) : (
-        /* ATTENDED EXHIBITIONS TAB */
+        /* ATTENDED EXHIBITIONS TAB — Strictly View Only & Delete Only */
         <div className="space-y-4 font-manrope">
-          <div className="p-3.5 bg-[#046241]/10 rounded-xl border border-[#046241]/20 text-xs text-[#046241] flex items-center gap-2 font-semibold">
-            <Sparkles className="w-4 h-4 text-[#046241] shrink-0" />
-            <span>
-              <strong>Attended Exhibitions Registry:</strong> Click any event card to view full specifications in a popup modal.
+          <div className="p-3.5 bg-[#046241]/10 rounded-xl border border-[#046241]/20 text-xs text-[#046241] flex items-center justify-between font-semibold">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-[#046241] shrink-0" />
+              <span>
+                <strong>Attended Registry (View & Delete Only):</strong> Click any exhibition card to view full specifications in popup modal.
+              </span>
+            </div>
+            <span className="text-[11px] font-bold text-[#046241] bg-white px-2.5 py-1 rounded-full border border-[#046241]/30">
+              {attendedEvents.length} Verified Logged
             </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {attendedEvents.map((evt) => (
-              <div
-                key={evt.id}
-                onClick={() => setSelectedModalEvent(evt)}
-                className="cursor-pointer"
-              >
-                <EventCard event={evt} onToggleAttended={handleToggleAttended} />
-              </div>
-            ))}
+            {attendedEvents.map((evt) => {
+              let businessLines: string[] = [];
+              try {
+                businessLines = JSON.parse(evt.businessLines || "[]");
+              } catch {
+                businessLines = Array.isArray(evt.businessLines)
+                  ? evt.businessLines
+                  : [evt.businessLines];
+              }
+
+              return (
+                <div
+                  key={evt.id}
+                  onClick={() => setSelectedModalEvent(evt)}
+                  className="bg-white rounded-xl border-[1.5px] border-[#D8D2C8] shadow-sm hover:shadow-md hover:-translate-y-1 transition-all p-5 flex flex-col justify-between cursor-pointer group relative overflow-hidden"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="flex items-center gap-1.5 text-xs text-[#666666]">
+                          <span className="font-bold text-[#133020]">#{evt.eventNumber}</span>
+                          <span>·</span>
+                          <span className="font-medium">{evt.dates}</span>
+                        </div>
+                        <span className="text-[11px] text-[#666666] font-medium block mt-0.5">
+                          {evt.region} · {evt.country}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <FitScoreBadge score={evt.fitScore} size="lg" showLevel />
+                      </div>
+                    </div>
+
+                    <h3 className="font-bold text-base text-[#133020] group-hover:text-[#046241] transition line-clamp-2 leading-snug">
+                      {evt.eventName}
+                    </h3>
+
+                    <div className="flex items-center gap-1.5 text-xs text-[#666666] truncate">
+                      <MapPin className="w-3.5 h-3.5 text-[#046241] shrink-0" />
+                      <span className="truncate">{evt.city}, {evt.country}</span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                      {businessLines.slice(0, 2).map((bl) => (
+                        <BusinessLineChip key={bl} name={bl} />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* View & Delete Action Controls Only */}
+                  <div className="pt-4 mt-4 border-t border-[#D8D2C8] flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-1 text-[#046241] font-bold">
+                      <CheckCircle2 className="w-4 h-4 text-[#046241]" />
+                      <span>Attended</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedModalEvent(evt);
+                        }}
+                        className="px-3 py-1.5 bg-[#F5EEDB] text-[#046241] hover:bg-[#046241] hover:text-white rounded-lg font-bold transition flex items-center gap-1 text-[11px]"
+                        title="View Full Specifications"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>View</span>
+                      </button>
+
+                      {(userRole === "ADMIN" || userRole === "SUPERVISOR") && (
+                        <button
+                          onClick={(e) => handleDeleteAttended(evt.id, evt.eventName, e)}
+                          className="px-3 py-1.5 bg-[#B91C1C]/10 text-[#B91C1C] hover:bg-[#B91C1C] hover:text-white rounded-lg font-bold transition flex items-center gap-1 text-[11px]"
+                          title="Delete from Attended Registry"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Delete</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
 
-      {/* Details Popup Modal */}
+      {/* Full Specifications Popup Modal */}
       <ModalPortal isOpen={!!selectedModalEvent} onClose={() => setSelectedModalEvent(null)}>
         <div className="bg-[#133020] text-white p-5 px-7 flex items-center justify-between shrink-0 shadow-sm border-b border-white/10 font-manrope">
           <div className="flex items-center gap-2.5">
@@ -280,7 +372,7 @@ export default function HistoryPage() {
             </div>
             <div>
               <h3 className="font-bold text-base text-white">
-                Event Specifications Modal
+                Full Exhibition Specifications
               </h3>
               <p className="text-[10px] text-[#F5EEDB]/70 uppercase tracking-wider">
                 Record #{selectedModalEvent?.eventNumber} · {selectedModalEvent?.eventName}
@@ -295,52 +387,148 @@ export default function HistoryPage() {
           </button>
         </div>
 
-        <div className="p-6 sm:p-8 bg-white max-h-[80vh] overflow-y-auto space-y-4 text-xs font-manrope">
+        <div className="p-6 sm:p-8 bg-white max-h-[82vh] overflow-y-auto space-y-6 text-xs font-manrope">
           {selectedModalEvent && (
             <>
-              <div className="flex items-center justify-between border-b border-[#D8D2C8] pb-3">
-                <div className="space-y-0.5">
-                  <span className="text-[10px] text-[#666666] font-bold uppercase tracking-wider block">Event Title</span>
-                  <h4 className="text-xl font-bold text-[#133020]">{selectedModalEvent.eventName}</h4>
-                  <p className="text-xs text-[#666666]">📍 {selectedModalEvent.city}, {selectedModalEvent.country} ({selectedModalEvent.region})</p>
+              {/* Header Title & Score */}
+              <div className="flex items-start justify-between gap-4 border-b border-[#D8D2C8] pb-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-[#133020]">
+                      Record #{selectedModalEvent.eventNumber} · {selectedModalEvent.region}
+                    </span>
+                    {selectedModalEvent.isAttended && (
+                      <span className="px-2.5 py-0.5 rounded-full bg-[#046241] text-white font-extrabold text-[10px]">
+                        ✓ Attended
+                      </span>
+                    )}
+                  </div>
+                  <h4 className="text-2xl font-bold text-[#133020] leading-tight">
+                    {selectedModalEvent.eventName}
+                  </h4>
+                  <p className="text-xs text-[#666666]">
+                    📍 {selectedModalEvent.city}, {selectedModalEvent.country}
+                  </p>
                 </div>
-                <FitScoreBadge score={selectedModalEvent.fitScore} size="xl" showLevel />
-              </div>
 
-              <div className="grid grid-cols-2 gap-4 bg-[#F9F7F7] p-4 rounded-xl border border-[#D8D2C8]">
-                <div>
-                  <span className="text-[10px] text-[#666666] font-bold uppercase block">Organizer</span>
-                  <span className="font-bold text-[#133020]">{selectedModalEvent.organizer || "Not disclosed"}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-[#666666] font-bold uppercase block">Dates</span>
-                  <span className="font-bold text-[#133020]">{selectedModalEvent.dates}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-[#666666] font-bold uppercase block">Venue</span>
-                  <span className="font-bold text-[#133020]">{selectedModalEvent.venue || "Not disclosed"}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-[#666666] font-bold uppercase block">Attendance Status</span>
-                  <span className={`font-bold inline-block px-2 py-0.5 rounded text-[11px] ${selectedModalEvent.isAttended ? "bg-[#046241] text-white" : "bg-[#FFB347] text-[#133020]"}`}>
-                    {selectedModalEvent.isAttended ? "Attended" : "Scheduled"}
-                  </span>
+                <div className="flex items-center gap-3 shrink-0">
+                  <PriorityIndicator priority={selectedModalEvent.priorityLevel} />
+                  <FitScoreBadge score={selectedModalEvent.fitScore} size="xl" showLevel />
                 </div>
               </div>
 
-              <div className="bg-[#F0F5F2] p-4 rounded-xl border border-[#046241]/20 space-y-1">
-                <span className="text-[10px] text-[#046241] font-bold uppercase block">Relevance to Lifewood</span>
-                <p className="text-xs text-[#133020] leading-relaxed">{selectedModalEvent.relevanceToLifewood || selectedModalEvent.strategicFocus || "Strategic buyer alignment"}</p>
+              {/* Logistics & Primary Specs Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-[#F9F7F7] p-5 rounded-2xl border border-[#D8D2C8]">
+                <div className="space-y-1">
+                  <span className="text-[10px] text-[#666666] font-bold uppercase tracking-wider block">Dates</span>
+                  <div className="flex items-center gap-1.5 font-bold text-sm text-[#133020]">
+                    <Calendar className="w-4 h-4 text-[#046241]" />
+                    <span>{selectedModalEvent.dates}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <span className="text-[10px] text-[#666666] font-bold uppercase tracking-wider block">Venue Name</span>
+                  <div className="flex items-center gap-1.5 font-bold text-sm text-[#133020]">
+                    <Building className="w-4 h-4 text-[#046241]" />
+                    <span>{selectedModalEvent.venue || "Not disclosed"}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <span className="text-[10px] text-[#666666] font-bold uppercase tracking-wider block">Organizer</span>
+                  <div className="flex items-center gap-1.5 font-bold text-sm text-[#133020]">
+                    <UserIcon className="w-4 h-4 text-[#046241]" />
+                    <span>{selectedModalEvent.organizer || "Not disclosed"}</span>
+                  </div>
+                </div>
               </div>
 
-              <div className="pt-2 flex justify-end">
-                <Link
-                  href={`/events/${selectedModalEvent.id}`}
-                  className="px-4 py-2 bg-[#133020] text-white font-bold text-xs rounded-lg hover:bg-[#046241] transition flex items-center gap-1.5"
-                >
-                  <span>Open Full Specifications Page</span>
-                  <ExternalLink className="w-3.5 h-3.5 text-[#FFB347]" />
-                </Link>
+              {/* Business Lines & Official Website CTA */}
+              <div className="flex items-center justify-between flex-wrap gap-4 p-4 rounded-xl border border-[#D8D2C8] bg-white">
+                <div>
+                  <span className="text-[10px] text-[#666666] font-bold uppercase tracking-wider block mb-1.5">Business Lines Alignment</span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {(() => {
+                      let lines: string[] = [];
+                      try {
+                        lines = JSON.parse(selectedModalEvent.businessLines || "[]");
+                      } catch {
+                        lines = Array.isArray(selectedModalEvent.businessLines)
+                          ? selectedModalEvent.businessLines
+                          : [selectedModalEvent.businessLines];
+                      }
+                      return lines.map((bl) => <BusinessLineChip key={bl} name={bl} />);
+                    })()}
+                  </div>
+                </div>
+
+                {(() => {
+                  let firstSource: string | null = null;
+                  try {
+                    const parsed = JSON.parse(selectedModalEvent.sourceLinks || "[]");
+                    firstSource = Array.isArray(parsed) ? parsed[0] : null;
+                  } catch {
+                    firstSource = selectedModalEvent.sourceLinks || null;
+                  }
+
+                  const validUrl = sanitizeEventUrl(selectedModalEvent.officialWebsite, firstSource);
+                  if (!validUrl) return null;
+
+                  return (
+                    <a
+                      href={validUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] font-bold text-xs rounded-xl transition flex items-center gap-2 shadow-xs"
+                    >
+                      <Globe className="w-4 h-4" />
+                      <span>Visit Official Website ↗</span>
+                    </a>
+                  );
+                })()}
+              </div>
+
+              {/* Strategic Analysis & Relevance */}
+              <div className="space-y-3">
+                <div className="bg-[#F0F5F2] p-4 rounded-xl border border-[#046241]/20 space-y-1">
+                  <span className="text-[10px] text-[#046241] font-extrabold uppercase tracking-wider block">Relevance to Lifewood</span>
+                  <p className="text-xs text-[#133020] leading-relaxed font-medium">{selectedModalEvent.relevanceToLifewood || selectedModalEvent.strategicFocus || "Strategic buyer alignment"}</p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="bg-[#F9F7F7] p-4 rounded-xl border border-[#D8D2C8] space-y-1">
+                    <span className="text-[10px] text-[#666666] font-bold uppercase tracking-wider block">Target Audience</span>
+                    <p className="text-xs font-semibold text-[#133020]">{selectedModalEvent.targetAudience || "Enterprise buyers"}</p>
+                  </div>
+
+                  <div className="bg-[#F9F7F7] p-4 rounded-xl border border-[#D8D2C8] space-y-1">
+                    <span className="text-[10px] text-[#666666] font-bold uppercase tracking-wider block">Participation Recommendation</span>
+                    <span className="inline-block px-3 py-1 bg-[#FFB347] text-[#133020] font-bold text-xs rounded-lg">
+                      {selectedModalEvent.participationRec || "Exhibit"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Secondary Details Table */}
+              <div className="bg-[#F9F7F7] p-4 rounded-xl border border-[#D8D2C8] grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+                <div>
+                  <span className="text-[10px] text-[#666666] font-bold uppercase block">Attendees</span>
+                  <span className="font-bold text-[#133020]">{selectedModalEvent.estimatedAttendees || "Not disclosed"}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-[#666666] font-bold uppercase block">Booth Cost</span>
+                  <span className="font-bold text-[#133020]">{selectedModalEvent.boothCost || "Not disclosed"}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-[#666666] font-bold uppercase block">Opportunity</span>
+                  <span className="font-bold text-[#133020]">{selectedModalEvent.exhibitorOpportunity || "Not disclosed"}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-[#666666] font-bold uppercase block">Deadline</span>
+                  <span className="font-bold text-[#133020]">{selectedModalEvent.registrationDeadline || "Not disclosed"}</span>
+                </div>
               </div>
             </>
           )}
