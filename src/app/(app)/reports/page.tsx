@@ -183,17 +183,17 @@ export default function ReportsPage() {
   };
 
   return (
-    <div className="space-y-8 font-manrope">
+    <div className="min-h-screen -m-8 p-8 space-y-8 font-manrope bg-[#F5EEDB] dark:bg-[#133020] text-[#133020] dark:text-white transition-colors duration-300">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4 border-b border-[#D8D2C8] pb-4">
         <div>
           <div className="flex items-center gap-2">
             <FileSpreadsheet className="w-6 h-6 text-[#046241]" />
-            <h2 className="text-2xl font-bold text-[#133020]">
+            <h2 className="text-2xl font-bold text-[#FFB347]">
               {locale === "en" ? "Executive Report Generator" : "执行报告生成器"}
             </h2>
           </div>
-          <p className="text-xs text-[#333333] mt-0.5">
+          <p className="text-xs text-black dark:text-white/60 mt-0.5">
             {locale === "zh"
               ? "导出符合 Lifewood 品牌规范的香港高管风格 HTML 报告或 Excel 电子表格 (.xlsx)，支持自由选择自定义时间范围"
               : "Export Lifewood-branded HK executive HTML reports or multi-tab Excel workbooks (.xlsx) with custom date ranges"}

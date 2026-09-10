@@ -8,23 +8,24 @@ import { PriorityIndicator } from "@/components/events/priority-indicator";
 import { ModalPortal } from "@/components/shared/modal-portal";
 import { ListTodo, CheckCircle, XCircle, Clock, Globe, Eye, Sparkles, X, Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { Check, RefreshCw, X } from "lucide-react";
 import { toast } from "sonner";
 import { useLocaleStore } from "@/stores/locale-store";
 import { sanitizeEventUrl } from "@/lib/url";
 import { localizeEvent } from "@/lib/i18n/event-localization";
 
 export default function QueuesPage() {
-  const { locale } = useLocaleStore();
   const { data: session } = useSession();
-  const canReview = ["ADMIN", "SUPERVISOR"].includes(sessionRole(session?.user));
-  const [items, setItems] = useState<QueueRecord[]>([]);
+  const userRole = (session?.user as any)?.role || "INTERN";
+  const { locale } = useLocaleStore();
+
+  const [activeTab, setActiveTab] = useState<"FOR_REVIEW" | "CORRECTION">("FOR_REVIEW");
+  const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
   const [busy, setBusy] = useState<number | null>(null);
-  const [inspectEvent, setInspectEvent] = useState<EventRecord | null>(null);
-  const fetchQueues = useCallback(async () => {
-    setLoading(true); setError(false);
+  const [inspectEvent, setInspectEvent] = useState<any>(null);
+
+  const fetchQueues = async () => {
+    setLoading(true);
     try {
       const res = await fetch("/api/queues?status=PENDING");
       const data = await res.json();
@@ -41,7 +42,6 @@ export default function QueuesPage() {
   useEffect(() => {
     fetchQueues();
   }, []);
-  useEffect(() => { void fetchQueues(); }, [fetchQueues]);
 
   async function handleAction(id: number, action: "APPROVE" | "REJECT") {
     if (busy !== null) return;
@@ -72,7 +72,7 @@ export default function QueuesPage() {
   const filteredItems = items.filter((i) => i.type === activeTab);
 
   return (
-    <div className="space-y-6 font-manrope">
+    <div className="min-h-screen -m-8 p-8 space-y-8 font-manrope bg-[#F5EEDB] dark:bg-[#133020] text-[#133020] dark:text-white transition-colors duration-300">
       {/* Page Header */}
       <div className="flex items-center justify-between flex-wrap gap-4 border-b border-[#D8D2C8] pb-4">
         <div>
@@ -81,10 +81,10 @@ export default function QueuesPage() {
               <ListTodo className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-[#133020]">
+              <h2 className="text-2xl font-bold text-[#FFB347]">
                 {locale === "en" ? "Review & Governance Queues" : "审核与更正队列"}
               </h2>
-              <p className="text-xs text-[#666666] mt-0.5">
+              <p className="text-xs text-black dark:text-white/60 mt-0.5">
                 {locale === "zh"
                   ? "主管与管理员审核流水线，用于评估实习生草稿、AI 抓取记录与数据更正申请"
                   : "Supervisor & Admin approval pipeline for intern drafts, AI scraped records, and data corrections"}
@@ -95,7 +95,7 @@ export default function QueuesPage() {
 
         {userRole === "INTERN" && (
           <div className="px-3.5 py-2 bg-[#FFB347]/20 border border-[#FFB347] text-[#133020] text-xs font-bold rounded-xl flex items-center gap-2">
-            <Clock className="w-4 h-4 text-[#C17110]" />
+            <Clock className="w-4 h-4 text-[#C17110] dark:text-[#FFFFFF]" />
             <span>{locale === "zh" ? "实习生提交待主管审核" : "Intern Submissions Awaiting Supervisor Review"}</span>
           </div>
         )}

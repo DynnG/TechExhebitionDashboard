@@ -64,17 +64,17 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto font-manrope">
+    <div className="min-h-screen -m-8 p-8 space-y-8 font-manrope bg-[#F5EEDB] dark:bg-[#133020] text-[#133020] dark:text-white transition-colors duration-300">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-[#D8D2C8] pb-4">
         <div>
           <div className="flex items-center gap-2">
             <Settings className="w-6 h-6 text-[#046241]" />
-            <h2 className="text-2xl font-bold text-[#133020]">
+            <h2 className="text-2xl font-bold text-[#FFB347]">
               {locale === "en" ? "System Configuration & Account Settings" : "系统配置与账户设置"}
             </h2>
           </div>
-          <p className="text-xs text-[#333333] mt-0.5">
+          <p className="text-xs text-black dark:text-white/60 mt-0.5">
             {locale === "en"
               ? "Manage administrator profiles, RBAC governance, and credential security"
               : "管理管理员档案、权限控制与系统凭证安全"}
@@ -88,8 +88,8 @@ export default function SettingsPage() {
           onClick={() => setActiveTab("general")}
           className={`px-4 py-2 text-xs font-semibold transition border-b-2 ${
             activeTab === "general"
-              ? "text-[#133020] border-[#133020]"
-              : "text-[#666666] hover:text-[#046241] border-transparent"
+              ? "text-[#133020] dark:text-white border-[#133020] dark:border-white"
+              : "text-[#666666] dark:text-[#D1D5DB] hover:text-[#046241] dark:hover:text-white border-transparent"
           }`}
         >
           <div className="flex items-center gap-1.5">
@@ -102,8 +102,8 @@ export default function SettingsPage() {
           onClick={() => setActiveTab("security")}
           className={`px-4 py-2 text-xs font-semibold transition border-b-2 ${
             activeTab === "security"
-              ? "text-[#133020] border-[#133020]"
-              : "text-[#666666] hover:text-[#046241] border-transparent"
+              ? "text-[#133020] dark:text-white border-[#133020] dark:border-white"
+              : "text-[#666666] dark:text-[#D1D5DB] hover:text-[#046241] dark:hover:text-white border-transparent"
           }`}
         >
           <div className="flex items-center gap-1.5">

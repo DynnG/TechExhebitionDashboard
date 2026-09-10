@@ -120,17 +120,17 @@ export default function ScraperPage() {
   };
 
   return (
-    <div className="space-y-8 font-manrope">
+    <div className="min-h-screen -m-8 p-8 space-y-8 font-manrope bg-[#F5EEDB] dark:bg-[#133020] text-[#133020] dark:text-white transition-colors duration-300">
       {/* Header Bar */}
       <div className="flex items-center justify-between flex-wrap gap-4 border-b border-[#D8D2C8] pb-4">
         <div>
           <div className="flex items-center gap-2">
             <Bot className="w-6 h-6 text-[#046241]" />
-            <h2 className="text-2xl font-bold text-[#133020]">
+            <h2 className="text-2xl font-bold text-[#FFB347]">
               {locale === "en" ? "AI Event Scraper Engine" : "AI 智能抓取引擎"}
             </h2>
           </div>
-          <p className="text-xs text-[#333333] mt-0.5">
+          <p className="text-xs text-black dark:text-white/60 mt-0.5">
             {locale === "zh"
               ? "自动抓取解析官方主办方站点、会展中心与行业 AI 展会日程"
               : "Automated crawler parsing official organizer sites, convention centers & AI conference calendars"}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { History, CheckCircle2, Calendar, Loader2, Sparkles, Eye, X, MapPin, Building, Globe, Trash2, User as UserIcon } from "lucide-react";
+import { History, CheckCircle2, Calendar, Loader2, Sparkles, Eye, X, MapPin, Building, Globe, Trash2, User as UserIcon, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { useLocaleStore } from "@/stores/locale-store";
 import { FitScoreBadge } from "@/components/events/fit-score-badge";
@@ -15,18 +15,18 @@ import { localizeEvent } from "@/lib/i18n/event-localization";
 export default function HistoryPage() {
   const { locale } = useLocaleStore();
   const { data: session } = useSession();
-  const canRemove = ["ADMIN", "SUPERVISOR"].includes(sessionRole(session?.user));
-  const [tab, setTab] = useState<"DECISIONS" | "ATTENDED">("DECISIONS");
-  const [filter, setFilter] = useState<"ALL" | "APPROVED" | "REJECTED">("ALL");
-  const [decisions, setDecisions] = useState<QueueRecord[]>([]);
-  const [attended, setAttended] = useState<EventRecord[]>([]);
+  const userRole = (session?.user as any)?.role || "INTERN";
+
+  const [activeTab, setActiveTab] = useState<"DECISIONS" | "ATTENDED">("DECISIONS");
+  const [decisionFilter, setDecisionFilter] = useState<"ALL" | "APPROVED" | "REJECTED">("ALL");
+
+  const [historyItems, setHistoryItems] = useState<any[]>([]);
+  const [attendedEvents, setAttendedEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [selection, setSelection] = useState<{ event: EventRecord; decision?: QueueRecord } | null>(null);
-  const [removing, setRemoving] = useState<EventRecord | null>(null);
-  const [busy, setBusy] = useState(false);
-  const fetchHistory = useCallback(async () => {
-    setLoading(true); setError(false);
+  const [selectedModalEvent, setSelectedModalEvent] = useState<any>(null);
+
+  const fetchHistory = async () => {
+    setLoading(true);
     try {
       // Fetch queue decisions
       const resQ = await fetch("/api/queues?status=HISTORY");
@@ -63,7 +63,6 @@ export default function HistoryPage() {
   useEffect(() => {
     fetchHistory();
   }, []);
-  useEffect(() => { void fetchHistory(); }, [fetchHistory]);
 
   const handleDeleteAttended = async (id: number, eventName: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -93,7 +92,7 @@ export default function HistoryPage() {
   };
 
   return (
-    <div className="space-y-6 font-manrope">
+    <div className="min-h-screen -m-8 p-8 space-y-8 font-manrope bg-[#F5EEDB] dark:bg-[#133020] text-[#133020] dark:text-white transition-colors duration-300">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4 border-b border-[#D8D2C8] pb-4">
         <div>
@@ -102,10 +101,10 @@ export default function HistoryPage() {
               <History className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-[#133020]">
+              <h2 className="text-2xl font-bold text-[#FFB347]">
                 {locale === "en" ? "Governance & Attendance History" : "审核与参展历史记录"}
               </h2>
-              <p className="text-xs text-[#333333] mt-0.5">
+              <p className="text-xs text-black dark:text-white/60 mt-0.5">
                 {locale === "zh"
                   ? "主管审核决策历史审计日志（保留 30 天）与已参展展会档案记录"
                   : "Historical audit log for supervisor queue decisions (30-day retention) and permanent attended exhibition records"}
@@ -150,15 +149,15 @@ export default function HistoryPage() {
       {loading ? (
         <div className="py-20 flex flex-col items-center justify-center text-[#046241]">
           <Loader2 className="w-8 h-8 animate-spin mb-2" />
-          <span className="text-xs font-semibold text-[#133020]">
+          <span className="text-xs font-semibold text-[#133020] dark:text-white">
             {locale === "zh" ? "正在加载历史记录..." : "Loading history records..."}
           </span>
         </div>
       ) : activeTab === "DECISIONS" ? (
         <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-[#F5EEDB] rounded-xl border border-[#D8D2C8] text-xs text-[#133020]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-[#F5EEDB] dark:bg-[#FFFFFF] rounded-xl border border-[#D8D2C8] dark:border-[#1E4830] text-xs text-[#133020] dark:text-black transition-colors duration-300">
             <div className="flex items-center gap-2">
-              <ClockIcon className="w-4 h-4 text-[#C17110] shrink-0" />
+              <Clock className="w-4 h-4 text-[#C17110] shrink-0" />
               <span>
                 {locale === "zh" ? (
                   <>
@@ -289,7 +288,7 @@ export default function HistoryPage() {
       ) : (
         /* ATTENDED EXHIBITIONS TAB — Strictly View Only & Delete Only */
         <div className="space-y-4 font-manrope">
-          <div className="p-3.5 bg-[#046241]/10 rounded-xl border border-[#046241]/20 text-xs text-[#046241] flex items-center justify-between font-semibold">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-[#F5EEDB] dark:bg-[#FFFFFF] rounded-xl border border-[#D8D2C8] dark:border-[#1E4830] text-xs text-[#133020] dark:text-black transition-colors duration-300">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-[#046241] shrink-0" />
               <span>
@@ -619,14 +618,5 @@ export default function HistoryPage() {
         })()}
       </ModalPortal>
     </div>
-    <section className={s.card}>
-      <div className={s.toolbar}><div><p className={s.eyebrow}>{tab === "DECISIONS" ? locale === "en" ? "Last 30 days" : "最近 30 天" : locale === "en" ? "Permanent register" : "长期参展档案"}</p><p className={s.hint}>{tab === "DECISIONS" ? locale === "en" ? "Review recorded decisions and their rationale. Older decisions remain stored in the database." : "查看审核结果及其理由。更早的决定仍保留在数据库中。" : locale === "en" ? "Includes attendance marks and the existing Exhibit / Attend recommendations. View dossiers or remove attendance marks." : "包含参加标记与现有的参展/出席建议。可查看档案或取消参加标记。"}</p></div>
-      {tab === "DECISIONS" ? <div className={s.tabs} role="group" aria-label={locale === "en" ? "Decision filter" : "筛选审核结果"}>{(["ALL", "APPROVED", "REJECTED"] as const).map(value => <button key={value} aria-pressed={filter === value} onClick={() => setFilter(value)}>{locale === "en" ? { ALL: "All", APPROVED: "Approved", REJECTED: "Rejected" }[value] : { ALL: "全部", APPROVED: "已批准", REJECTED: "已拒绝" }[value]}</button>)}</div> : <span className={s.pill}>{loading || error ? "—" : count} {locale === "en" ? "Records" : "条记录"}</span>}</div>
-    </section>
-    {loading || error ? <LoadState locale={locale} error={error} retry={fetchHistory} /> : count === 0 ? <EmptyState title={tab === "DECISIONS" ? locale === "en" ? "No decisions in this view" : "暂无审核决定" : locale === "en" ? "Your participation history starts here" : "参展历史从这里开始"} description={tab === "DECISIONS" ? locale === "en" ? "Completed reviews from the last 30 days will appear here. Try another filter to explore recorded decisions." : "最近 30 天的审核结果将在此显示。可切换筛选条件查看。" : locale === "en" ? "Logged exhibitions will appear here with the same complete dossier used throughout the platform." : "已登记的展会将在此显示完整档案。"} /> : <div className={s.grid}>
-      {tab === "DECISIONS" ? filtered.map(item => item.event ? <HistoryRecordCard key={item.id} event={item.event} locale={locale} status={item.status} note={item.reason} metadata={[[locale === "en" ? "Decision date" : "决定日期", displayDate(item.resolvedAt || item.createdAt, locale)], [locale === "en" ? "Submitted by" : "提交人", item.submittedBy?.name || "—"]]} onInspect={() => setSelection({ event: item.event!, decision: item })} /> : <div key={item.id} className={s.card}><StatusPill status={item.status} locale={locale} /><p className={s.note}>{item.reason}</p><p className={s.hint}>{locale === "en" ? "The linked exhibition is unavailable." : "关联展会不可用。"}</p></div>) : attended.map(event => <HistoryRecordCard key={event.id} event={event} locale={locale} status={event.isAttended ? "ATTENDED" : locale === "en" ? "Participation recommendation" : "参与建议"} metadata={[[locale === "en" ? "Attendance marked" : "参加标记日期", displayDate(event.attendedAt, locale)], [locale === "en" ? "Participation" : "参与方式", event.participationRec || "—"]]} onInspect={() => setSelection({ event })} actions={canRemove && <button className={s.button + " " + s.danger} onClick={() => setRemoving(event)}><Trash2 size={15} />{locale === "en" ? "Remove attendance" : "取消参加标记"}</button>} />)}
-    </div>}
-    <DossierDialog locale={locale} event={selection?.event ?? null} onClose={() => setSelection(null)} context={selection?.decision && <section className={s.card}><div className={s.toolbar}><StatusPill status={selection.decision.status} locale={locale} /><span className={s.hint}>{displayDate(selection.decision.resolvedAt || selection.decision.createdAt, locale)}</span></div><p className={s.note}>{selection.decision.reason}</p><p className={s.hint}>{locale === "en" ? "Submitted by: " : "提交人："}{selection.decision.submittedBy?.name || "—"}</p></section>} />
-    <OperationDialog open={!!removing} onClose={() => { if (!busy) setRemoving(null); }} locale={locale} title={locale === "en" ? "Remove attendance mark?" : "取消参加标记？"} description={removing?.eventName || ""}><p className={s.hint}>{locale === "en" ? "The exhibition dossier will be kept. Records with an Exhibit or Attend recommendation continue to appear in this register." : "展会档案将保留。有参展或出席建议的记录仍将在此显示。"}</p><div className={s.actions}><button disabled={busy} className={s.button} onClick={() => setRemoving(null)}>{locale === "en" ? "Cancel" : "取消"}</button><button disabled={busy} className={s.button + " " + s.danger} onClick={removeAttendance}>{busy ? locale === "en" ? "Updating…" : "正在更新…" : locale === "en" ? "Remove mark" : "取消标记"}</button></div></OperationDialog>
-  </div>;
+  );
 }
