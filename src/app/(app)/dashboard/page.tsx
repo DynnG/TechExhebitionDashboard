@@ -98,16 +98,6 @@ export default function DashboardPage() {
               : "实时展会追踪、战略适配评估与覆盖空缺分析"}
           </p>
         </div>
-
-        <div className="flex items-center gap-3">
-          <Link
-            href="/scraper"
-            className="flex items-center gap-1.5 px-4 py-2 border-[1.5px] border-[#133020] bg-transparent text-[#133020] hover:bg-[#F5EEDB] text-xs font-medium rounded-[8px] transition-all duration-180"
-          >
-            <Bot className="w-4 h-4 text-[#046241]" />
-            <span>{locale === "en" ? "AI scraper engine" : "AI 抓取引擎"}</span>
-          </Link>
-        </div>
       </div>
 
       {/* Row 1 — Stat Cards (4 across) */}
@@ -160,8 +150,12 @@ export default function DashboardPage() {
 
       {/* Row 4 — Gaps & Alerts (Coverage Gaps + Recently Added Events) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-5">
-          <CoverageGapsWidget gaps={gaps} />
+        <div className="lg:col-span-5 flex flex-col">
+          <CoverageGapsWidget
+            gaps={gaps}
+            eventsByRegion={eventsByRegion}
+            businessLineDist={businessLineDist}
+          />
         </div>
 
         <div className="lg:col-span-7 bg-white p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] shadow-[0_2px_16px_rgba(0,0,0,0.05)] flex flex-col justify-between">
@@ -254,9 +248,6 @@ export default function DashboardPage() {
                 ? "所有展会均已根据 Lifewood 买家画像完成战略评估"
                 : "All entries reviewed for Lifewood buyer alignment"}
             </span>
-            <Link href="/events/new" className="text-[#046241] font-semibold hover:underline">
-              {locale === "zh" ? "+ 添加新记录" : "+ Add new record"}
-            </Link>
           </div>
         </div>
       </div>
