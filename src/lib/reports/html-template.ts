@@ -5,7 +5,8 @@ export function generateBrandedHTMLReport(
   events: any[],
   reportTitle: string,
   region: string,
-  locale: Locale = "en"
+  locale: Locale = "en",
+  timeLabel: string = "2026–2027"
 ): string {
   const isZh = locale === "zh";
 
@@ -323,7 +324,7 @@ export function generateBrandedHTMLReport(
       : "A curated, research-backed directory of AI, technology, finance, and investment exhibitions — mapped to Lifewood Data Technology's lines of business."
   }</p>
   <div class="h-meta">
-    <span class="mpill">📅 ${isZh ? "覆盖周期" : "Coverage"}: <strong>2026–2027 ${isZh ? "年度" : "Full Coverage"}</strong></span>
+    <span class="mpill">📅 ${isZh ? "时间范围" : "Time Range"}: <strong>${timeLabel}</strong></span>
     <span class="mpill">📍 ${isZh ? "目标区域" : "Region"}: <strong>${displayRegion}</strong></span>
     <span class="mpill">🗂️ ${isZh ? "展会总数" : "Total Events Tracked"}: <strong>${localizedEvents.length}</strong></span>
     <span class="mpill">⭐ ${isZh ? "高优先展会" : "High Fit Events"}: <strong>${highPriorityCount}</strong></span>

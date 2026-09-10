@@ -12,6 +12,7 @@ export default function ReportsPage() {
   const { locale } = useLocaleStore();
   const [reportType, setReportType] = useState("regional");
   const [region, setRegion] = useState("Asia");
+  const [timeRange, setTimeRange] = useState("ALL");
   const [format, setFormat] = useState<"html" | "xlsx" | "csv">("html");
 
   const reportTypeOptions = [
@@ -38,6 +39,45 @@ export default function ReportsPage() {
       value: r,
       label: localizeRegionName(r, locale),
     })),
+  ];
+
+  const timeRangeOptions = [
+    {
+      value: "ALL",
+      label: locale === "zh" ? "全部时间 (2026–2027 全量)" : "Full Coverage (2026–2027 All Dates)",
+    },
+    {
+      value: "2026_Q1",
+      label: locale === "zh" ? "2026 Q1 第一季度 (1月-3月)" : "2026 Q1 (Jan – Mar)",
+    },
+    {
+      value: "2026_Q2",
+      label: locale === "zh" ? "2026 Q2 第二季度 (4月-6月)" : "2026 Q2 (Apr – Jun)",
+    },
+    {
+      value: "2026_Q3",
+      label: locale === "zh" ? "2026 Q3 第三季度 (7月-9月)" : "2026 Q3 (Jul – Sep)",
+    },
+    {
+      value: "2026_Q4",
+      label: locale === "zh" ? "2026 Q4 第四季度 (10月-12月)" : "2026 Q4 (Oct – Dec)",
+    },
+    {
+      value: "2026_H1",
+      label: locale === "zh" ? "2026 H1 上半年 (1月-6月)" : "2026 H1 (Jan – Jun)",
+    },
+    {
+      value: "2026_H2",
+      label: locale === "zh" ? "2026 H2 下半年 (7月-12月)" : "2026 H2 (Jul – Dec)",
+    },
+    {
+      value: "2026",
+      label: locale === "zh" ? "2026 全年" : "Full Year 2026",
+    },
+    {
+      value: "2027",
+      label: locale === "zh" ? "2027 全年" : "Full Year 2027",
+    },
   ];
 
   const formatOptions = [
@@ -67,13 +107,13 @@ export default function ReportsPage() {
         const res = await fetch("/api/reports/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ reportType, region, format: "xlsx", locale }),
+          body: JSON.stringify({ reportType, region, timeRange, format: "xlsx", locale }),
         });
         const blob = await res.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `Lifewood_Exhibition_Report_${region}.xlsx`;
+        a.download = `Lifewood_Exhibition_Report_${region}_${timeRange}.xlsx`;
         a.click();
         toast.success(locale === "zh" ? "Excel 报告工作簿已成功下载！" : "Excel report workbook downloaded!");
       } else if (format === "csv") {
@@ -81,13 +121,13 @@ export default function ReportsPage() {
         const res = await fetch("/api/reports/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ reportType, region, format: "csv", locale }),
+          body: JSON.stringify({ reportType, region, timeRange, format: "csv", locale }),
         });
         const blob = await res.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `Lifewood_Exhibition_Report_${region}.csv`;
+        a.download = `Lifewood_Exhibition_Report_${region}_${timeRange}.csv`;
         a.click();
         toast.success(locale === "zh" ? "CSV 报告已成功下载！" : "CSV report downloaded!");
       } else {
@@ -95,7 +135,7 @@ export default function ReportsPage() {
         const res = await fetch("/api/reports/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ reportType, region, format: "html", locale }),
+          body: JSON.stringify({ reportType, region, timeRange, format: "html", locale }),
         });
         const data = await res.json();
         if (res.ok) {
@@ -119,7 +159,7 @@ export default function ReportsPage() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `Lifewood_Exhibition_Report_${region}.html`;
+    a.download = `Lifewood_Exhibition_Report_${region}_${timeRange}.html`;
     a.click();
     toast.success(locale === "zh" ? "HTML 报告已成功下载！" : "HTML report downloaded!");
   };
@@ -145,7 +185,7 @@ export default function ReportsPage() {
 
       {/* Config Form */}
       <div className="bg-white p-10 rounded-xl border border-[#D8D2C8] shadow-xs space-y-5">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
           <div>
             <label className="block text-xs font-bold text-[#133020] uppercase tracking-wider mb-2">
               {locale === "zh" ? "报告类型" : "Report Type"}
@@ -167,6 +207,18 @@ export default function ReportsPage() {
               onChange={(val) => setRegion(val)}
               options={regionOptions}
               aria-label={locale === "zh" ? "选择区域" : "Region Selection"}
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-[#133020] uppercase tracking-wider mb-2">
+              {locale === "zh" ? "时间范围" : "Time Range / Period"}
+            </label>
+            <LifewoodDropdown
+              value={timeRange}
+              onChange={(val) => setTimeRange(val)}
+              options={timeRangeOptions}
+              aria-label={locale === "zh" ? "时间范围" : "Time Range"}
             />
           </div>
 
