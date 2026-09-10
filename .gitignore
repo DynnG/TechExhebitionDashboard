@@ -24,4 +24,7 @@ next-env.d.ts
 # local cache
 /data/
 
+node_modules/
+.tmp/
 
+Batch11_Tech_Exhibition_Dashboard_Weekly_Task_Brief.pdf
