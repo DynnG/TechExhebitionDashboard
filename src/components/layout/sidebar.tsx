@@ -118,7 +118,7 @@ export function Sidebar() {
 
       {/* Top Header & Logo */}
       <div>
-        <div className="p-2 flex flex-col items-center gap-2 border-b border-[#133020]/10 dark:border-white/10 bg-[#F9F7F7] rounded-t-md">
+        <div className="p-2 flex flex-col items-center gap-2 border-b border-[#133020]/10 dark:border-white/10 bg-[#F9F7F7]">
           <div className="relative w-full h-6">
             <Image
               src="/logo.png"
