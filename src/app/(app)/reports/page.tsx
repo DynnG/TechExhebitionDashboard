@@ -12,7 +12,7 @@ export default function ReportsPage() {
   const { locale } = useLocaleStore();
   const [reportType, setReportType] = useState("regional");
   const [region, setRegion] = useState("Asia");
-  const [format, setFormat] = useState<"html" | "csv">("html");
+  const [format, setFormat] = useState<"html" | "xlsx" | "csv">("html");
 
   const reportTypeOptions = [
     {
@@ -43,7 +43,11 @@ export default function ReportsPage() {
   const formatOptions = [
     {
       value: "html",
-      label: locale === "zh" ? "Lifewood 品牌定制 HTML（香港报告风格）" : "Lifewood Branded HTML (HK Report Style)",
+      label: locale === "zh" ? "Lifewood 品牌定制 HTML（香港高管报告风格）" : "Lifewood Branded HTML (HK Report Style)",
+    },
+    {
+      value: "xlsx",
+      label: locale === "zh" ? "Lifewood 多标签页 Excel 工作簿 (.xlsx)" : "Lifewood Multi-Tab Excel Workbook (.xlsx)",
     },
     {
       value: "csv",
@@ -58,7 +62,21 @@ export default function ReportsPage() {
   const handleGenerate = async () => {
     setLoading(true);
     try {
-      if (format === "csv") {
+      if (format === "xlsx") {
+        // Download XLSX directly
+        const res = await fetch("/api/reports/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reportType, region, format: "xlsx", locale }),
+        });
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `Lifewood_Exhibition_Report_${region}.xlsx`;
+        a.click();
+        toast.success(locale === "zh" ? "Excel 报告工作簿已成功下载！" : "Excel report workbook downloaded!");
+      } else if (format === "csv") {
         // Download CSV directly
         const res = await fetch("/api/reports/generate", {
           method: "POST",
@@ -83,7 +101,7 @@ export default function ReportsPage() {
         if (res.ok) {
           setGeneratedHtml(data.html);
           setCount(data.count);
-          toast.success(locale === "zh" ? "品牌 HTML 报告已成功生成！" : "Branded HTML report generated successfully!");
+          toast.success(locale === "zh" ? "香港风格品牌 HTML 报告已成功生成！" : "Branded HK-style HTML report generated successfully!");
         } else {
           toast.error(data.error || (locale === "zh" ? "生成报告失败" : "Failed to generate report"));
         }
@@ -119,8 +137,8 @@ export default function ReportsPage() {
           </div>
           <p className="text-xs text-[#333333] mt-0.5">
             {locale === "zh"
-              ? "导出符合 Lifewood 品牌规范的香港风格 HTML 报告或 CSV 数据集，用于高管汇报展示"
-              : "Export Lifewood-branded HK report HTML documents or CSV datasets for executive presentation"}
+              ? "导出符合 Lifewood 品牌规范的香港高管风格 HTML 报告或 Excel 电子表格 (.xlsx)，用于战略评估与汇报"
+              : "Export Lifewood-branded HK executive HTML reports or multi-tab Excel workbooks (.xlsx) for strategic presentation"}
           </p>
         </div>
       </div>

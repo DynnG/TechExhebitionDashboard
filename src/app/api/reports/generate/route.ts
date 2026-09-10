@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { generateBrandedHTMLReport } from "@/lib/reports/html-template";
+import { generateExcelReportBuffer } from "@/lib/reports/excel-template";
 import { localizeEvent, localizeRegionName } from "@/lib/i18n/event-localization";
 
 export async function POST(req: Request) {
@@ -25,6 +26,16 @@ export async function POST(req: Request) {
     const reportTitle = isZh
       ? `${displayRegion} 科技展会情报报告 2026–2027`
       : `${region === "ALL" ? "Global" : region} Tech Exhibition Intelligence Report 2026–2027`;
+
+    if (format === "xlsx") {
+      const buffer = generateExcelReportBuffer(events, reportTitle, region, locale);
+      return new Response(new Uint8Array(buffer), {
+        headers: {
+          "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          "Content-Disposition": `attachment; filename="Lifewood_Exhibition_Report_${region.toLowerCase()}.xlsx"`,
+        },
+      });
+    }
 
     if (format === "csv") {
       // CSV Generation
