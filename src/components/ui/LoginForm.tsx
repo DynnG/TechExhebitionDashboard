@@ -58,14 +58,14 @@ export function LoginForm() {
           setError(
             locale === "zh"
               ? "失败次数过多，账户已被临时锁定。"
-              : "Too many failed attempts. Account temporarily locked."
+              : "Too many failed attempts. Account temporarily locked.",
           );
         } else {
           setError(
             res.error ||
               (locale === "zh"
                 ? "登录失败，请核对邮箱与密码。"
-                : "Failed to sign in. Please check credentials.")
+                : "Failed to sign in. Please check credentials."),
           );
         }
       } else if (res?.ok) {
@@ -73,7 +73,9 @@ export function LoginForm() {
         router.refresh();
       }
     } catch {
-      setError(locale === "zh" ? "发生未知错误。" : "An unexpected error occurred.");
+      setError(
+        locale === "zh" ? "发生未知错误。" : "An unexpected error occurred.",
+      );
     } finally {
       setLoading(false);
     }
@@ -93,17 +95,8 @@ export function LoginForm() {
 
   return (
     <div className="w-full max-w-lg bg-white rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] p-6 sm:p-8 border border-[#D8D2C8] relative font-manrope">
-      {/* Top Left Lifewood Logo */}
+      {/* Top Header with Logo at Top Left */}
       <div className="flex items-center justify-between mb-4">
-        <img
-          src="/Lifewood-logo.png"
-          alt="Lifewood"
-          className="h-9 w-auto object-contain"
-          onError={(e) => {
-            // Fallback if Lifewood-logo.png is different path
-            (e.target as HTMLImageElement).src = "/Logo 2.png";
-          }}
-        />
         <span className="text-[10px] font-bold text-[#046241] uppercase tracking-wider bg-[#046241]/10 px-2.5 py-1 rounded-full">
           Portal Access
         </span>
@@ -131,7 +124,8 @@ export function LoginForm() {
             <span className="font-semibold block">{error}</span>
             {cooldownSeconds > 0 && (
               <span className="text-[11px] text-[#B91C1C]/90 font-mono mt-0.5 block">
-                {locale === "zh" ? "请稍候重试：" : "Try again in: "} {formatTime(cooldownSeconds)}
+                {locale === "zh" ? "请稍候重试：" : "Try again in: "}{" "}
+                {formatTime(cooldownSeconds)}
               </span>
             )}
           </div>
@@ -172,15 +166,21 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={loading || cooldownSeconds > 0}
-          className="w-full py-3 px-5 rounded-xl bg-[#046241] hover:bg-[#034d33] text-white border border-[#046241] font-semibold text-xs transition-all duration-200 shadow-sm flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed mt-2 cursor-pointer"
+          className="w-full py-3 px-5 rounded-xl bg-[#046241] hover:bg-[#133020] text-white border border-[#046241] font-semibold text-xs transition-all duration-200 shadow-sm flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed mt-2 cursor-pointer"
         >
           {loading ? (
             <span>{locale === "zh" ? "登录中..." : "Signing in..."}</span>
           ) : cooldownSeconds > 0 ? (
-            <span>{locale === "zh" ? `已锁定 (${formatTime(cooldownSeconds)})` : `Locked (${formatTime(cooldownSeconds)})`}</span>
+            <span>
+              {locale === "zh"
+                ? `已锁定 (${formatTime(cooldownSeconds)})`
+                : `Locked (${formatTime(cooldownSeconds)})`}
+            </span>
           ) : (
             <>
-              <span>{locale === "zh" ? "登录进入工作台" : "Sign in to Dashboard"}</span>
+              <span>
+                {locale === "zh" ? "登录进入工作台" : "Sign in to Dashboard"}
+              </span>
               <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition text-[#FFB347]" />
             </>
           )}
@@ -191,7 +191,9 @@ export function LoginForm() {
 
       <div className="mt-4 pt-3 border-t border-[#D8D2C8]">
         <p className="text-[11px] text-[#666666] mb-2 font-medium">
-          {locale === "zh" ? "快速切换演示账号：" : "Quick switch demo account:"}
+          {locale === "zh"
+            ? "快速切换演示账号："
+            : "Quick switch demo account:"}
         </p>
         <div className="grid grid-cols-3 gap-2">
           <button
