@@ -50,12 +50,14 @@ The platform equips executive decision-makers, business development leaders, and
 * **Card & Table View Switcher:** Toggle between responsive visual cards grid and structured tabular views.
 * **Multi-Criteria Filter Bar:** Filter exhibitions by Region, Business Line, Fit Score threshold, Priority Level, or keyword search.
 * **Interactive Add Event Modal:** In-page pop-up modal attached via React Portal with smooth scale animations and full-screen backdrop overlay (`z-[99999]`).
-* **Real-time Duplicate Prevention:** As users input event details, `DuplicateWarning` checks existing records to prevent duplicates.
-* **Calendar Date Range Picker:** Interactive Start & End date pickers (`<input type="date">`) for intuitive date selection.
+* **Automated Queue Submission:** Submitting a manual event automatically registers a `QueueItem` record in `db.queueItem` with status `PENDING_REVIEW` and redirects directly to `/queues`.
+* **Enhanced Validation Error Handling:** Visual error summary box with auto-scrolling to errors, inline error messages, and red border highlights (`border-rose-500`) for all required fields in Groups A through E.
+* **Custom Delete Confirmation Modal:** Replacing browser `confirm()` and `alert()` popups with a branded, responsive `DeleteEventModal`.
 
 ### 🔍 3. Single Event Specification & Map Details (`/events/[id]`)
 * **Header & Rating Badge:** Displays record number, region tag, pricing status (`Free Entry` vs `Paid / Ticketed`), priority tag, and an enlarged, highlighted top-right Fit Score pill.
 * **Google Maps Location Card:** Shows venue name, full street address (`locationAddress`), and a direct CTA button (`Open Location in Google Maps ↗`). Includes fallback badge when address is omitted.
+* **Mark as Attended & Auto-Redirection:** Marking an exhibition as attended automatically updates the database, toasts success, and redirects to the Attended History Archives (`/history?tab=ATTENDED`).
 * **Prominent Official Website CTA:** Direct high-contrast button to visit official event websites.
 * **Pop-Up Edit Modal:** In-page modal allowing Admins and Supervisors to update record details without leaving the page.
 
@@ -66,13 +68,13 @@ The platform equips executive decision-makers, business development leaders, and
 * **Staging Review Table:** Review extracted items, inspect AI confidence scores, and transfer accepted entries directly to the Review Queue (`/queues`).
 
 ### 📥 5. Governance & Review Queues (`/queues`)
-* **Review Queue (`FOR_REVIEW`):** Holds scraped entries and intern submissions awaiting supervisor evaluation.
-* **Corrections Queue (`CORRECTION`):** Tracks data correction requests for existing records.
-* **Clearance Workflow:** Approving an item updates the event status to `PUBLISHED` and clears it from the active queue into History.
+* **Unified Event Card Grid:** Queue items are displayed in a responsive grid of Event Cards matching catalog and history aesthetics (featuring left 6px business line color accent bars, numeric fit score badges, submitter role pills, and rationale boxes).
+* **Directly Clickable Cards:** Clicking anywhere on a Queue Card instantly opens a full-specification pop-up modal (`ModalPortal`) detailing all Groups A through E fields (Identity, Source, Strategic Assessment, Commercial Details, Provenance, and Google Maps location button).
+* **In-Modal & Card Governance Controls:** Supervisors and Admins can approve (`APPROVE`) or reject (`REJECT`) manual submissions directly from the card footer or from within the specification pop-up modal.
 
 ### 📜 6. Governance & Attendance History (`/history`)
 * **Tab 1 — Queue Decisions History:** Audit log of all approved and rejected queue items. Includes a **30-Day Auto-Clear policy** (automatically hides decisions older than 30 days).
-* **Tab 2 — Attended Exhibitions Log:** Permanent record of exhibitions marked for attendance or exhibition. **Never expires.**
+* **Tab 2 — Attended Exhibitions Log:** Permanent record of exhibitions marked for attendance or exhibition. Accessible via `/history?tab=ATTENDED`. **Never expires.**
 
 ### 👥 7. User Management & Role-Based Access Control (`/users`)
 * **Role Hierarchy:**

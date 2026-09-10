@@ -8,6 +8,7 @@ import { FitScoreBadge } from "@/components/events/fit-score-badge";
 import { PriorityIndicator } from "@/components/events/priority-indicator";
 import { BusinessLineChip } from "@/components/events/business-line-chip";
 import { ModalPortal } from "@/components/shared/modal-portal";
+import { DeleteEventModal } from "@/components/events/delete-event-modal";
 import { sanitizeEventUrl } from "@/lib/url";
 import { useSession } from "next-auth/react";
 import { localizeEvent } from "@/lib/i18n/event-localization";
@@ -24,6 +25,8 @@ export default function HistoryPage() {
   const [attendedEvents, setAttendedEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedModalEvent, setSelectedModalEvent] = useState<any>(null);
+  const [deletingAttended, setDeletingAttended] = useState<{ id: number; eventName: string } | null>(null);
+  const [isDeletingAttended, setIsDeletingAttended] = useState(false);
 
   const fetchHistory = async () => {
     setLoading(true);
@@ -64,30 +67,36 @@ export default function HistoryPage() {
     fetchHistory();
   }, []);
 
-  const handleDeleteAttended = async (id: number, eventName: string, e: React.MouseEvent) => {
+  const handleDeleteAttended = (id: number, eventName: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    const confirmMsg =
-      locale === "zh"
-        ? `确定要从已参展档案中移除/删除“${eventName}”吗？`
-        : `Are you sure you want to remove/delete "${eventName}" from the attended log?`;
-    if (!confirm(confirmMsg)) return;
+    setDeletingAttended({ id, eventName });
+  };
 
+  const handleConfirmDeleteAttended = async () => {
+    if (!deletingAttended) return;
+    setIsDeletingAttended(true);
     try {
-      // Unmark attended or delete if admin
-      const res = await fetch(`/api/events/${id}`, {
+      const res = await fetch(`/api/events/${deletingAttended.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isAttended: false }),
       });
 
       if (res.ok) {
-        toast.success(locale === "zh" ? `已从参展记录中移除“${eventName}”。` : `"${eventName}" removed from attended log.`);
+        toast.success(
+          locale === "zh"
+            ? `已从参展记录中移除“${deletingAttended.eventName}”。`
+            : `"${deletingAttended.eventName}" removed from attended log.`
+        );
+        setDeletingAttended(null);
         fetchHistory();
       } else {
         toast.error(locale === "zh" ? "更新记录失败" : "Failed to update record");
       }
     } catch {
       toast.error(locale === "zh" ? "移除记录出错" : "Error removing record");
+    } finally {
+      setIsDeletingAttended(false);
     }
   };
 
@@ -663,6 +672,21 @@ export default function HistoryPage() {
           );
         })()}
       </ModalPortal>
+
+      {/* Delete / Remove Attended Event Modal */}
+      <DeleteEventModal
+        isOpen={!!deletingAttended}
+        onClose={() => setDeletingAttended(null)}
+        onConfirm={handleConfirmDeleteAttended}
+        title={locale === "zh" ? "从参展档案中移除" : "Remove from Attended Log"}
+        eventName={deletingAttended?.eventName}
+        description={
+          locale === "zh"
+            ? "确定要从已参展档案中移除此展会记录吗？此操作将解除参展标记。"
+            : "Are you sure you want to remove this event from the attended log? This will unmark the event's attended status."
+        }
+        isDeleting={isDeletingAttended}
+      />
     </div>
   );
 }
