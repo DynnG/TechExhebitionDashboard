@@ -7,7 +7,7 @@ import { localizeEvent, localizeRegionName } from "@/lib/i18n/event-localization
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { reportType, region, timeRange = "ALL", format, locale = "en" } = body;
+    const { reportType, region, timeRange = "ALL", customStartDate, customEndDate, format, locale = "en" } = body;
 
     const where: any = { status: "PUBLISHED" };
     if (region && region !== "ALL") {
@@ -15,7 +15,15 @@ export async function POST(req: Request) {
     }
 
     // Time Range Filtering
-    if (timeRange && timeRange !== "ALL") {
+    if (timeRange === "CUSTOM" && (customStartDate || customEndDate)) {
+      where.startDate = {};
+      if (customStartDate) {
+        where.startDate.gte = new Date(`${customStartDate}T00:00:00Z`);
+      }
+      if (customEndDate) {
+        where.startDate.lte = new Date(`${customEndDate}T23:59:59Z`);
+      }
+    } else if (timeRange && timeRange !== "ALL") {
       const year2026Start = new Date("2026-01-01T00:00:00Z");
       const year2026End = new Date("2026-12-31T23:59:59Z");
       const year2027Start = new Date("2027-01-01T00:00:00Z");
@@ -76,7 +84,11 @@ export async function POST(req: Request) {
     
     // Time label for report title
     let timeLabel = "2026–2027";
-    if (timeRange === "2026_Q1") timeLabel = isZh ? "2026 第一季度 (Q1)" : "2026 Q1 (Jan–Mar)";
+    if (timeRange === "CUSTOM") {
+      const s = customStartDate || (isZh ? "起始" : "Start");
+      const e = customEndDate || (isZh ? "截止" : "End");
+      timeLabel = `${s} — ${e}`;
+    } else if (timeRange === "2026_Q1") timeLabel = isZh ? "2026 第一季度 (Q1)" : "2026 Q1 (Jan–Mar)";
     else if (timeRange === "2026_Q2") timeLabel = isZh ? "2026 第二季度 (Q2)" : "2026 Q2 (Apr–Jun)";
     else if (timeRange === "2026_Q3") timeLabel = isZh ? "2026 第三季度 (Q3)" : "2026 Q3 (Jul–Sep)";
     else if (timeRange === "2026_Q4") timeLabel = isZh ? "2026 第四季度 (Q4)" : "2026 Q4 (Oct–Dec)";
