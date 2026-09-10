@@ -18,7 +18,6 @@ export default function QueuesPage() {
   const userRole = (session?.user as any)?.role || "INTERN";
   const { locale } = useLocaleStore();
 
-  const [activeTab, setActiveTab] = useState<"FOR_REVIEW" | "CORRECTION">("FOR_REVIEW");
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<number | null>(null);
@@ -69,7 +68,7 @@ export default function QueuesPage() {
     }
   };
 
-  const filteredItems = items.filter((i) => i.type === activeTab);
+  const filteredItems = items.filter((i) => i.status === "PENDING");
 
   return (
     <div className="min-h-screen -m-8 p-8 space-y-8 font-manrope bg-[#F5EEDB] dark:bg-[#133020] text-[#133020] dark:text-white transition-colors duration-300">
@@ -101,58 +100,43 @@ export default function QueuesPage() {
         )}
       </div>
 
-      {/* Tabs Switcher */}
-      <div className="flex border-b border-[#D8D2C8] gap-6">
-        <button
-          onClick={() => setActiveTab("FOR_REVIEW")}
-          className={`pb-3 text-xs font-extrabold transition border-b-2 flex items-center gap-2 cursor-pointer ${
-            activeTab === "FOR_REVIEW"
-              ? "border-[#046241] text-[#046241]"
-              : "border-transparent text-[#666666] hover:text-[#133020]"
-          }`}
-        >
-          <span>{locale === "zh" ? "待审核（新提交）" : "For Review (New Submissions)"}</span>
-          <span className="px-2 py-0.5 rounded-full bg-[#133020] text-white text-[10px] font-extrabold">
-            {items.filter((i) => i.type === "FOR_REVIEW" && i.status === "PENDING").length}
+      {/* Queue Header Summary */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-bold text-[#133020] dark:text-white">
+            {locale === "zh" ? "待审核提交列表" : "Submissions For Review"}
           </span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab("CORRECTION")}
-          className={`pb-3 text-xs font-extrabold transition border-b-2 flex items-center gap-2 cursor-pointer ${
-            activeTab === "CORRECTION"
-              ? "border-[#046241] text-[#046241]"
-              : "border-transparent text-[#666666] hover:text-[#133020]"
-          }`}
-        >
-          <span>{locale === "zh" ? "更正队列（数据修改）" : "Corrections Queue (Data Edits)"}</span>
-          <span className="px-2 py-0.5 rounded-full bg-[#708E7C] text-white text-[10px] font-extrabold">
-            {items.filter((i) => i.type === "CORRECTION" && i.status === "PENDING").length}
+          <span className="px-2.5 py-0.5 rounded-full bg-[#046241] text-white text-xs font-bold">
+            {items.filter((i) => i.status === "PENDING").length}
           </span>
-        </button>
+        </div>
       </div>
 
       {/* Content */}
       {loading ? (
-        <div className="py-20 flex flex-col items-center justify-center text-[#046241]">
-          <Loader2 className="w-8 h-8 animate-spin mb-2" />
-          <span className="text-xs font-semibold text-[#133020]">
+        <div className="py-24 flex flex-col items-center justify-center text-[#046241]">
+          <Loader2 className="w-9 h-9 animate-spin mb-3 text-[#046241]" />
+          <span className="text-sm font-semibold text-[#133020] dark:text-white">
             {locale === "zh" ? "正在加载待处理队列记录..." : "Loading pending queue records..."}
           </span>
         </div>
       ) : filteredItems.length === 0 ? (
-        <div className="bg-white border-2 border-dashed border-[#D8D2C8] rounded-2xl p-12 text-center max-w-md mx-auto my-8 font-manrope">
-          <div className="w-12 h-12 rounded-full bg-[#046241]/10 flex items-center justify-center text-[#046241] mx-auto mb-3">
-            <CheckCircle className="w-6 h-6" />
+        <div className="bg-white dark:bg-[#1A3828] border border-[#D8D2C8] dark:border-[#1E4830] rounded-3xl p-16 md:p-20 text-center max-w-2xl mx-auto my-12 font-manrope shadow-sm">
+          <div className="w-20 h-20 rounded-2xl bg-[#046241]/10 dark:bg-[#046241]/25 border border-[#046241]/20 flex items-center justify-center text-[#046241] dark:text-[#52B788] mx-auto mb-6 shadow-inner">
+            <CheckCircle className="w-10 h-10 stroke-[1.75]" />
           </div>
-          <h3 className="text-base font-bold text-[#133020] mb-1">
-            {locale === "zh" ? "队列已清空！" : "Queue is clear!"}
+          <h3 className="text-2xl font-bold text-[#133020] dark:text-white mb-2">
+            {locale === "zh" ? "队列已全部清空" : "Queue is clear"}
           </h3>
-          <p className="text-xs text-[#666666]">
+          <p className="text-sm text-[#666666] dark:text-white/70 max-w-md mx-auto leading-relaxed mb-6">
             {locale === "zh"
-              ? "当前标签下的所有提交均已评估并录入展会库。"
-              : "All submissions in this tab have been evaluated and processed into the catalog."}
+              ? "所有待处理提交均已完成审核评估并录入展会库。当前无积压任务。"
+              : "All exhibition submissions have been evaluated, reviewed, and published to the global catalog. No pending items require your attention."}
           </p>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#F9F7F7] dark:bg-[#133020] border border-[#D8D2C8] dark:border-[#1E4830] text-xs text-[#046241] dark:text-[#52B788] font-semibold">
+            <span className="w-2 h-2 rounded-full bg-[#046241] dark:bg-[#52B788] animate-pulse" />
+            <span>{locale === "zh" ? "系统流水线监控中 · 一切就绪" : "Pipeline active · All systems operational"}</span>
+          </div>
         </div>
       ) : (
         <div className="space-y-4">

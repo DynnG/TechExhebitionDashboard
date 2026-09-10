@@ -92,12 +92,28 @@ export function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-xl bg-white rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] p-10 sm:p-12 border border-[#D8D2C8] relative">
-      <div className="mb-8">
-        <h2 className="text-3xl sm:text-4xl font-bold text-[#133020] tracking-tight">
+    <div className="w-full max-w-lg bg-white rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] p-6 sm:p-8 border border-[#D8D2C8] relative font-manrope">
+      {/* Top Left Lifewood Logo */}
+      <div className="flex items-center justify-between mb-4">
+        <img
+          src="/Lifewood-logo.png"
+          alt="Lifewood"
+          className="h-9 w-auto object-contain"
+          onError={(e) => {
+            // Fallback if Lifewood-logo.png is different path
+            (e.target as HTMLImageElement).src = "/Logo 2.png";
+          }}
+        />
+        <span className="text-[10px] font-bold text-[#046241] uppercase tracking-wider bg-[#046241]/10 px-2.5 py-1 rounded-full">
+          Portal Access
+        </span>
+      </div>
+
+      <div className="mb-4">
+        <h2 className="text-2xl sm:text-3xl font-bold text-[#133020] tracking-tight">
           {locale === "zh" ? "欢迎回来" : "Welcome back"}
         </h2>
-        <p className="text-sm text-[#666666] mt-2">
+        <p className="text-xs text-[#666666] mt-1">
           {locale === "zh"
             ? "请输入您的安全凭证以访问展会情报工作台"
             : "Enter your credentials to access the intelligence platform"}
@@ -105,16 +121,16 @@ export function LoginForm() {
       </div>
 
       {error && (
-        <div className="mb-6 p-4 bg-[#B91C1C]/10 border border-[#B91C1C]/30 rounded-xl flex items-start gap-3 text-sm text-[#B91C1C]">
+        <div className="mb-4 p-3 bg-[#B91C1C]/10 border border-[#B91C1C]/30 rounded-xl flex items-start gap-2.5 text-xs text-[#B91C1C]">
           {cooldownSeconds > 0 ? (
-            <Clock className="w-5 h-5 shrink-0 mt-0.5 text-[#B91C1C]" />
+            <Clock className="w-4 h-4 shrink-0 mt-0.5 text-[#B91C1C]" />
           ) : (
-            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           )}
           <div className="flex-1">
             <span className="font-semibold block">{error}</span>
             {cooldownSeconds > 0 && (
-              <span className="text-xs text-[#B91C1C]/90 font-mono mt-1 block">
+              <span className="text-[11px] text-[#B91C1C]/90 font-mono mt-0.5 block">
                 {locale === "zh" ? "请稍候重试：" : "Try again in: "} {formatTime(cooldownSeconds)}
               </span>
             )}
@@ -122,9 +138,9 @@ export function LoginForm() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-3.5">
         <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-[#133020] mb-2">
+          <label className="block text-[11px] font-bold uppercase tracking-wider text-[#133020] mb-1">
             {locale === "zh" ? "电子邮箱或用户名" : "Email or Username"}
           </label>
           <input
@@ -134,19 +150,14 @@ export function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="user@lifewood.com"
-            className="w-full px-4 py-3.5 rounded-xl border border-[#D8D2C8] text-sm text-[#133020] bg-white placeholder-[#999999] focus:outline-none focus:border-[#046241] focus:ring-2 focus:ring-[#046241]/20 transition disabled:bg-gray-100 disabled:cursor-not-allowed"
+            className="w-full px-3.5 py-2.5 rounded-xl border border-[#D8D2C8] text-xs text-[#133020] bg-white placeholder-[#999999] focus:outline-none focus:border-[#046241] focus:ring-1 focus:ring-[#046241]/20 transition disabled:bg-gray-100 disabled:cursor-not-allowed"
           />
         </div>
 
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="block text-xs font-bold uppercase tracking-wider text-[#133020]">
-              {locale === "zh" ? "密码" : "Password"}
-            </label>
-            <span className="text-xs text-[#046241] font-semibold hover:underline cursor-pointer">
-              {locale === "zh" ? "忘记密码？" : "Forgot password?"}
-            </span>
-          </div>
+          <label className="block text-[11px] font-bold uppercase tracking-wider text-[#133020] mb-1">
+            {locale === "zh" ? "密码" : "Password"}
+          </label>
           <input
             type="password"
             required
@@ -154,14 +165,14 @@ export function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
-            className="w-full px-4 py-3.5 rounded-xl border border-[#D8D2C8] text-sm text-[#133020] bg-white placeholder-[#999999] focus:outline-none focus:border-[#046241] focus:ring-2 focus:ring-[#046241]/20 transition disabled:bg-gray-100 disabled:cursor-not-allowed"
+            className="w-full px-3.5 py-2.5 rounded-xl border border-[#D8D2C8] text-xs text-[#133020] bg-white placeholder-[#999999] focus:outline-none focus:border-[#046241] focus:ring-1 focus:ring-[#046241]/20 transition disabled:bg-gray-100 disabled:cursor-not-allowed"
           />
         </div>
 
         <button
           type="submit"
           disabled={loading || cooldownSeconds > 0}
-          className="w-full py-4 px-6 rounded-xl bg-[#133020] hover:bg-[#133020]/90 text-white hover:text-[#FFB347] border border-[#133020] font-semibold text-sm transition-all duration-200 shadow-sm flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+          className="w-full py-3 px-5 rounded-xl bg-[#046241] hover:bg-[#034d33] text-white border border-[#046241] font-semibold text-xs transition-all duration-200 shadow-sm flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed mt-2 cursor-pointer"
         >
           {loading ? (
             <span>{locale === "zh" ? "登录中..." : "Signing in..."}</span>
@@ -170,7 +181,7 @@ export function LoginForm() {
           ) : (
             <>
               <span>{locale === "zh" ? "登录进入工作台" : "Sign in to Dashboard"}</span>
-              <ArrowRight className="w-5 h-5 transform group-hover:translate-x-1 transition text-[#FFB347]" />
+              <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition text-[#FFB347]" />
             </>
           )}
         </button>
@@ -178,16 +189,16 @@ export function LoginForm() {
 
       <SocialLinks />
 
-      <div className="mt-8 pt-6 border-t border-[#D8D2C8]">
-        <p className="text-xs text-[#666666] mb-3 font-medium">
+      <div className="mt-4 pt-3 border-t border-[#D8D2C8]">
+        <p className="text-[11px] text-[#666666] mb-2 font-medium">
           {locale === "zh" ? "快速切换演示账号：" : "Quick switch demo account:"}
         </p>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-2">
           <button
             type="button"
             disabled={cooldownSeconds > 0}
             onClick={() => setQuickUser("admin@lifewood.com", "admin123")}
-            className="py-2 px-3 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-xl border border-[#D8D2C8] transition text-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="py-1.5 px-2.5 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-xl border border-[#D8D2C8] transition text-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {locale === "zh" ? "管理员 (Admin)" : "Admin"}
           </button>
@@ -197,7 +208,7 @@ export function LoginForm() {
             onClick={() =>
               setQuickUser("supervisor@lifewood.com", "supervisor123")
             }
-            className="py-2 px-3 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-xl border border-[#D8D2C8] transition text-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="py-1.5 px-2.5 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-xl border border-[#D8D2C8] transition text-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {locale === "zh" ? "审核主管 (Supervisor)" : "Supervisor"}
           </button>
@@ -205,17 +216,17 @@ export function LoginForm() {
             type="button"
             disabled={cooldownSeconds > 0}
             onClick={() => setQuickUser("intern@lifewood.com", "intern123")}
-            className="py-2 px-3 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-xl border border-[#D8D2C8] transition text-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="py-1.5 px-2.5 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-xl border border-[#D8D2C8] transition text-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {locale === "zh" ? "录入实习生 (Intern)" : "Intern"}
           </button>
         </div>
       </div>
 
-      <div className="mt-8 pt-4 flex items-center justify-between text-[11px] font-semibold text-[#8C9B9E] tracking-wider uppercase">
-        <span>© 2026 LIFEWOOD DATA TECHNOLOGY PHILIPPINES</span>
+      <div className="mt-4 pt-2 flex items-center justify-between text-[10px] font-semibold text-[#8C9B9E] tracking-wider uppercase">
+        <span>© 2026 LIFEWOOD DATA TECHNOLOGY</span>
         <div className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-[#34D399] inline-block"></span>
+          <span className="w-1.5 h-1.5 rounded-full bg-[#046241] inline-block"></span>
           <span>V 1.0</span>
         </div>
       </div>

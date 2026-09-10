@@ -71,7 +71,7 @@ export function Topbar() {
   const title = getPageTitle(pathname);
 
   return (
-    <header className="h-16 bg-[#F5EEDB]/85 dark:bg-[#133020]/90 backdrop-blur-md border-b border-[#D8D2C8] dark:border-[#1E4830] px-6 lg:px-8 flex items-center justify-between sticky top-0 z-30 shadow-xs transition-colors font-manrope">
+    <header className="h-16 bg-[#F5EEDB]/95 dark:bg-[#133020]/95 backdrop-blur-md border-b border-[#D8D2C8] dark:border-[#1E4830] px-6 lg:px-8 flex items-center justify-between sticky top-0 z-30 shadow-xs transition-colors font-manrope">
 
       {/* Page Title & Breadcrumbs */}
       <div>
@@ -105,7 +105,7 @@ export function Topbar() {
           onClick={toggleTheme}
           whileTap={{ scale: 0.95 }}
           whileHover={{ scale: 1.02 }}
-          className="flex items-center gap-2 px-3 py-2 border-[1.5px] border-[#D8D2C8] dark:border-[#405449] bg-white dark:bg-[#17231C] text-[#133020] dark:text-[#F5EEDB] hover:bg-[#F5EEDB] dark:hover:bg-[#22352A] text-xs font-medium rounded-[8px] transition-colors"
+          className="flex items-center gap-2 px-3 py-2 border-[1.5px] border-[#D8D2C8] dark:border-[#405449] bg-white dark:bg-[#17231C] text-[#133020] dark:text-[#F9F7F7] hover:bg-[#F9F7F7] dark:hover:bg-[#22352A] text-xs font-medium rounded-[8px] transition-colors"
           aria-label="Toggle dark mode"
         >
           <motion.div

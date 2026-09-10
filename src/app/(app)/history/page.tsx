@@ -207,38 +207,102 @@ export default function HistoryPage() {
           </div>
 
           {historyItems.filter((i) => decisionFilter === "ALL" || i.status === decisionFilter).length === 0 ? (
-            <div className="bg-white border-2 border-dashed border-[#D8D2C8] rounded-xl p-12 text-center max-w-md mx-auto my-6 font-manrope">
-              <History className="w-12 h-12 text-[#666666] mx-auto mb-3" />
-              <h3 className="text-base font-bold text-[#133020] mb-1">
+            <div className="bg-white dark:bg-[#1A3828] border border-[#D8D2C8] dark:border-[#1E4830] rounded-2xl p-16 text-center max-w-md mx-auto my-8 font-manrope shadow-xs">
+              <History className="w-12 h-12 text-[#666666] dark:text-white/50 mx-auto mb-3" />
+              <h3 className="text-base font-bold text-[#133020] dark:text-white mb-1">
                 {locale === "zh" ? "未找到审核决策记录" : "No decision records found"}
               </h3>
-              <p className="text-xs text-[#666666]">
+              <p className="text-xs text-[#666666] dark:text-white/60">
                 {locale === "zh"
                   ? "在过去 30 天内未找到符合此筛选条件的决策记录。"
                   : "No matching queue decisions found for this filter within the past 30 days."}
               </p>
             </div>
           ) : (
-            /* Minimized Compact Decision Rows */
-            <div className="divide-y divide-[#D8D2C8] bg-white rounded-xl border border-[#D8D2C8] overflow-hidden shadow-xs">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {historyItems
                 .filter((i) => decisionFilter === "ALL" || i.status === decisionFilter)
                 .map((item) => {
-                  const locEvt = localizeEvent(item.event, locale);
+                  const localizedEvt = localizeEvent(item.event, locale);
                   const statusLabel =
                     item.status === "APPROVED"
                       ? (locale === "zh" ? "已批准" : "APPROVED")
                       : (locale === "zh" ? "已驳回" : "REJECTED");
 
+                  let businessLines: string[] = [];
+                  try {
+                    businessLines = JSON.parse(localizedEvt?.businessLines || "[]");
+                  } catch {
+                    businessLines = Array.isArray(localizedEvt?.businessLines)
+                      ? localizedEvt.businessLines
+                      : localizedEvt?.businessLines ? [localizedEvt.businessLines] : [];
+                  }
+
                   return (
                     <div
                       key={item.id}
                       onClick={() => setSelectedModalEvent(item.event)}
-                      className="p-3.5 px-4 flex items-center justify-between gap-4 hover:bg-[#F9F7F7] cursor-pointer transition group"
+                      className="bg-white dark:bg-[#1A3828] rounded-xl border border-[#D8D2C8] dark:border-[#1E4830] shadow-sm hover:shadow-md hover:-translate-y-1 transition-all p-5 flex flex-col justify-between cursor-pointer group relative overflow-hidden"
                     >
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="space-y-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <div className="flex items-center gap-1.5 text-xs text-[#666666] dark:text-white/60">
+                              <span className="font-bold text-[#133020] dark:text-white">#{localizedEvt?.eventNumber}</span>
+                              <span>·</span>
+                              <span className="font-medium">{localizedEvt?.dates}</span>
+                            </div>
+                            <span className="text-[11px] text-[#666666] dark:text-white/60 font-medium block mt-0.5">
+                              {localizedEvt?.region} · {localizedEvt?.country}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            {localizedEvt?.fitScore && (
+                              <FitScoreBadge score={localizedEvt.fitScore} size="lg" showLevel />
+                            )}
+                          </div>
+                        </div>
+
+                        <h3 className="font-bold text-base text-[#133020] dark:text-white group-hover:text-[#046241] dark:group-hover:text-[#52B788] transition line-clamp-2 leading-snug">
+                          {localizedEvt?.eventName}
+                        </h3>
+
+                        <div className="flex items-center gap-1.5 text-xs text-[#666666] dark:text-white/60 truncate">
+                          <MapPin className="w-3.5 h-3.5 text-[#046241] dark:text-[#52B788] shrink-0" />
+                          <span className="truncate">{localizedEvt?.city}, {localizedEvt?.country}</span>
+                        </div>
+
+                        {/* Decision Details Box */}
+                        <div className="text-xs bg-[#F9F7F7] dark:bg-[#133020] p-3 rounded-lg border border-[#D8D2C8] dark:border-[#1E4830] space-y-1">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-bold text-[#666666] dark:text-white/60 uppercase">
+                              {locale === "zh" ? "决策依据" : "Rationale"}
+                            </span>
+                            <span className="text-[10px] text-[#666666] dark:text-white/50">
+                              {new Date(item.resolvedAt || item.createdAt).toLocaleDateString(
+                                locale === "zh" ? "zh-CN" : "en-US"
+                              )}
+                            </span>
+                          </div>
+                          <p className="text-xs text-[#133020] dark:text-white line-clamp-2 leading-relaxed">
+                            {item.reason}
+                          </p>
+                        </div>
+
+                        {businessLines.length > 0 && (
+                          <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                            {businessLines.slice(0, 2).map((bl) => (
+                              <BusinessLineChip key={bl} name={bl} />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Unified Bottom Action Bar */}
+                      <div className="pt-4 mt-4 border-t border-[#D8D2C8] dark:border-[#1E4830] flex items-center justify-between text-xs">
                         <span
-                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider shrink-0 ${
+                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
                             item.status === "APPROVED"
                               ? "bg-[#046241] text-white"
                               : "bg-[#B91C1C] text-white"
@@ -247,37 +311,19 @@ export default function HistoryPage() {
                           {statusLabel}
                         </span>
 
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-xs text-[#133020] group-hover:text-[#046241] truncate">
-                              #{locEvt?.eventNumber} — {locEvt?.eventName}
-                            </span>
-                            <span className="text-[11px] text-[#666666] shrink-0">
-                              · {locEvt?.city}, {locEvt?.country}
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-[#666666] truncate mt-0.5">
-                            {locale === "zh" ? "审核依据：" : "Rationale: "} {item.reason}
-                          </p>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedModalEvent(item.event);
+                            }}
+                            className="px-3 py-1.5 bg-[#F5EEDB] dark:bg-[#133020] text-[#046241] dark:text-[#52B788] hover:bg-[#046241] hover:text-white rounded-lg font-bold transition flex items-center gap-1 text-[11px] cursor-pointer"
+                            title={locale === "zh" ? "查看完整参数规格" : "View Full Specifications"}
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            <span>{locale === "zh" ? "查看" : "View"}</span>
+                          </button>
                         </div>
-                      </div>
-
-                      <div className="flex items-center gap-3 shrink-0">
-                        <span className="text-[11px] text-[#666666] hidden sm:inline font-medium">
-                          {new Date(item.resolvedAt || item.createdAt).toLocaleDateString(
-                            locale === "zh" ? "zh-CN" : "en-US"
-                          )}
-                        </span>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedModalEvent(item.event);
-                          }}
-                          className="p-1.5 rounded-lg bg-[#F5EEDB] text-[#046241] hover:bg-[#046241] hover:text-white transition cursor-pointer"
-                          title={locale === "zh" ? "查看记录参数详情" : "Inspect Record Specifications"}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
                       </div>
                     </div>
                   );
