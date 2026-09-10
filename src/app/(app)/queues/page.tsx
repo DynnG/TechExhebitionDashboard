@@ -8,23 +8,23 @@ import { PriorityIndicator } from "@/components/events/priority-indicator";
 import { ModalPortal } from "@/components/shared/modal-portal";
 import { ListTodo, CheckCircle, XCircle, Clock, Globe, Eye, Sparkles, X, Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { Check, RefreshCw, X } from "lucide-react";
 import { toast } from "sonner";
 import { useLocaleStore } from "@/stores/locale-store";
 import { sanitizeEventUrl } from "@/lib/url";
 import { localizeEvent } from "@/lib/i18n/event-localization";
 
 export default function QueuesPage() {
-  const { data: session } = useSession();
-  const userRole = (session?.user as any)?.role || "INTERN";
   const { locale } = useLocaleStore();
-
-  const [activeTab, setActiveTab] = useState<"FOR_REVIEW" | "CORRECTION">("FOR_REVIEW");
-  const [items, setItems] = useState<any[]>([]);
+  const { data: session } = useSession();
+  const canReview = ["ADMIN", "SUPERVISOR"].includes(sessionRole(session?.user));
+  const [items, setItems] = useState<QueueRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [inspectEvent, setInspectEvent] = useState<any>(null);
-
-  const fetchQueues = async () => {
-    setLoading(true);
+  const [error, setError] = useState(false);
+  const [busy, setBusy] = useState<number | null>(null);
+  const [inspectEvent, setInspectEvent] = useState<EventRecord | null>(null);
+  const fetchQueues = useCallback(async () => {
+    setLoading(true); setError(false);
     try {
       const res = await fetch("/api/queues?status=PENDING");
       const data = await res.json();
@@ -41,8 +41,11 @@ export default function QueuesPage() {
   useEffect(() => {
     fetchQueues();
   }, []);
+  useEffect(() => { void fetchQueues(); }, [fetchQueues]);
 
-  const handleAction = async (id: number, action: "APPROVE" | "REJECT") => {
+  async function handleAction(id: number, action: "APPROVE" | "REJECT") {
+    if (busy !== null) return;
+    setBusy(id);
     try {
       const res = await fetch(`/api/queues/${id}`, {
         method: "PUT",
