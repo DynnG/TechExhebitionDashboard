@@ -37,7 +37,7 @@ export function EventsByRegionChart({ data }: EventsByRegionProps) {
   }, [data, locale]);
 
   return (
-    <div className="bg-white p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] shadow-[0_2px_16px_rgba(0,0,0,0.05)] font-manrope">
+    <div className="bg-white p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] shadow-[0_2px_16px_rgba(0,0,0,0.05)] font-manrope h-[400px] flex flex-col">
       <div className="border-b border-[#D8D2C8] pb-3 mb-4">
         <h3 className="text-[14px] font-semibold text-[#133020]">
           {locale === "zh" ? "各区域展会分布" : "Events by region"}
@@ -47,7 +47,7 @@ export function EventsByRegionChart({ data }: EventsByRegionProps) {
         </p>
       </div>
 
-      <div className="h-64 w-full [&_*:focus]:outline-none [&_path]:outline-none">
+      <div className="flex-1 min-h-64 w-full [&_*:focus]:outline-none [&_path]:outline-none">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart style={{ outline: "none" }}>
             <Pie

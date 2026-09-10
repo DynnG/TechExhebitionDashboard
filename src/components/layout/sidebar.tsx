@@ -103,17 +103,28 @@ export function Sidebar() {
         )}
       </button>
 
-      {/* Top Header & Logo */}
-      <div>
-        <div className="p-1.5 flex flex-col items-start gap-2 border-b border-[#133020]/10">
-          <div className="relative w-full h-5">
-            <Image
-              src="/logo.png"
-              alt="Lifewood logo"
-              fill
-              className="object-contain object-left"
-            />
-          </div>
+            {/* Top Header & Logo */}
+            <div>
+        <div className="p-3 flex flex-col items-center gap-2 border-b border-[#133020]/10">
+          {collapsed ? (
+            <div className="relative w-9 h-9">
+              <Image
+                src="/ICON_logo.png"
+                alt="Lifewood icon"
+                fill
+                className="object-contain"
+              />
+            </div>
+          ) : (
+            <div className="relative w-28 h-6">
+              <Image
+                src="/logo.png"
+                alt="Lifewood logo"
+                fill
+                className="object-contain"
+              />
+            </div>
+          )}
           {!collapsed && (
             <div>
               <p className="text-[10px] text-[#133020]/60 uppercase tracking-wider font-bold">

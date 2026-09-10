@@ -77,7 +77,7 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
   };
 
   return (
-    <div className="bg-white p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] shadow-[0_2px_16px_rgba(0,0,0,0.05)] font-manrope">
+    <div className="bg-white p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] shadow-[0_2px_16px_rgba(0,0,0,0.05)] font-manrope h-[400px] flex flex-col">
       <div className="flex items-center justify-between flex-wrap gap-3 mb-4 border-b border-[#D8D2C8] pb-3">
         <div>
           <h3 className="text-[14px] font-semibold text-[#133020]">
@@ -137,7 +137,7 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
         </div>
       </div>
 
-      <div className="h-64 w-full">
+      <div className="flex-1 min-h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={formattedData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <XAxis

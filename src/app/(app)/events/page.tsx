@@ -189,23 +189,17 @@ export default function EventsPage() {
             </button>
           </div>
 
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-1.5 px-4 py-2 bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] font-medium text-xs rounded-[8px] transition-all duration-180 shadow-2xs cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>{locale === "en" ? "Add event" : "+ 添加展会"}</span>
-          </button>
-        </div>
+                </div>
       </div>
 
-      {/* Filter Bar */}
+      {/* Filter Bar (includes Add Event beside search) */}
       <EventFilters
         filters={filters}
         onChange={handleFilterChange}
         onClear={handleClearFilters}
+        onAddEvent={() => setShowAddModal(true)}
       />
-
+      
       {/* Loading state */}
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

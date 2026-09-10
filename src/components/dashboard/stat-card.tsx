@@ -19,7 +19,7 @@ export function StatCard({
 }: StatCardProps) {
   return (
     <BorderGlow glowColor={glowColor} borderRadius="12px" className="w-full">
-      <div className="p-5 flex items-start justify-between relative overflow-hidden font-manrope">
+      <div className="p-5 min-h-[124px] flex items-start justify-between relative overflow-hidden font-manrope">
         {/* Editorial top accent bar */}
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#FFB347] via-[#FFB347]/40 to-transparent" />
 
