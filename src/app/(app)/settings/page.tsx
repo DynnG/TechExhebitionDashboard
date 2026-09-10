@@ -25,17 +25,17 @@ export default function SettingsPage() {
     e.preventDefault();
 
     if (!currentPassword || !newPassword || !confirmPassword) {
-      toast.error("Please fill in all password fields.");
+      toast.error(locale === "zh" ? "请完整填写所有密码字段。" : "Please fill in all password fields.");
       return;
     }
 
     if (newPassword.length < 6) {
-      toast.error("New password must be at least 6 characters long.");
+      toast.error(locale === "zh" ? "新密码长度至少须为 6 个字符。" : "New password must be at least 6 characters long.");
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      toast.error("New password and confirm password do not match.");
+      toast.error(locale === "zh" ? "两次输入的新密码不一致。" : "New password and confirm password do not match.");
       return;
     }
 
@@ -49,15 +49,15 @@ export default function SettingsPage() {
 
       const data = await res.json();
       if (res.ok) {
-        toast.success("Password changed successfully!");
+        toast.success(locale === "zh" ? "密码修改成功！" : "Password changed successfully!");
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
       } else {
-        toast.error(data.error || "Failed to change password.");
+        toast.error(data.error || (locale === "zh" ? "修改密码失败。" : "Failed to change password."));
       }
     } catch {
-      toast.error("An error occurred while updating your password.");
+      toast.error(locale === "zh" ? "修改密码时发生错误。" : "An error occurred while updating your password.");
     } finally {
       setSubmitting(false);
     }
@@ -163,39 +163,49 @@ export default function SettingsPage() {
               <table className="w-full text-xs text-left border-collapse">
                 <thead>
                   <tr className="bg-[#133020] text-white font-semibold uppercase tracking-wider text-[10px]">
-                    <th className="p-2.5">Platform Action</th>
-                    <th className="p-2.5 text-center">Admin</th>
-                    <th className="p-2.5 text-center">Supervisor</th>
-                    <th className="p-2.5 text-center">Intern</th>
+                    <th className="p-2.5">{locale === "zh" ? "平台操作权限" : "Platform Action"}</th>
+                    <th className="p-2.5 text-center">{locale === "zh" ? "管理员" : "Admin"}</th>
+                    <th className="p-2.5 text-center">{locale === "zh" ? "审核主管" : "Supervisor"}</th>
+                    <th className="p-2.5 text-center">{locale === "zh" ? "录入实习生" : "Intern"}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#D8D2C8]">
                   <tr>
-                    <td className="p-2.5 font-semibold text-[#133020]">View Dashboard & Exhibition Records</td>
+                    <td className="p-2.5 font-semibold text-[#133020]">
+                      {locale === "zh" ? "查看大屏看板与展会档案" : "View Dashboard & Exhibition Records"}
+                    </td>
                     <td className="p-2.5 text-center text-[#046241] font-bold">✅</td>
                     <td className="p-2.5 text-center text-[#046241] font-bold">✅</td>
                     <td className="p-2.5 text-center text-[#046241] font-bold">✅</td>
                   </tr>
                   <tr>
-                    <td className="p-2.5 font-semibold text-[#133020]">Add New Event (Draft / Review)</td>
+                    <td className="p-2.5 font-semibold text-[#133020]">
+                      {locale === "zh" ? "录入新展会 (草稿/待审核)" : "Add New Event (Draft / Review)"}
+                    </td>
                     <td className="p-2.5 text-center text-[#046241] font-bold">✅</td>
                     <td className="p-2.5 text-center text-[#046241] font-bold">✅</td>
                     <td className="p-2.5 text-center text-[#046241] font-bold">✅</td>
                   </tr>
                   <tr>
-                    <td className="p-2.5 font-semibold text-[#133020]">Publish Event Directly</td>
+                    <td className="p-2.5 font-semibold text-[#133020]">
+                      {locale === "zh" ? "直接发布展会记录" : "Publish Event Directly"}
+                    </td>
                     <td className="p-2.5 text-center text-[#046241] font-bold">✅</td>
                     <td className="p-2.5 text-center text-[#046241] font-bold">✅</td>
                     <td className="p-2.5 text-center text-[#B91C1C] font-bold">❌</td>
                   </tr>
                   <tr>
-                    <td className="p-2.5 font-semibold text-[#133020]">Approve Queue Items & Edits</td>
+                    <td className="p-2.5 font-semibold text-[#133020]">
+                      {locale === "zh" ? "审核队列与修改申请" : "Approve Queue Items & Edits"}
+                    </td>
                     <td className="p-2.5 text-center text-[#046241] font-bold">✅</td>
                     <td className="p-2.5 text-center text-[#046241] font-bold">✅</td>
                     <td className="p-2.5 text-center text-[#B91C1C] font-bold">❌</td>
                   </tr>
                   <tr>
-                    <td className="p-2.5 font-semibold text-[#133020]">Delete Exhibition Record</td>
+                    <td className="p-2.5 font-semibold text-[#133020]">
+                      {locale === "zh" ? "删除展会记录档案" : "Delete Exhibition Record"}
+                    </td>
                     <td className="p-2.5 text-center text-[#046241] font-bold">✅</td>
                     <td className="p-2.5 text-center text-[#B91C1C] font-bold">❌</td>
                     <td className="p-2.5 text-center text-[#B91C1C] font-bold">❌</td>

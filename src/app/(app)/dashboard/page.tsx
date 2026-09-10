@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useLocaleStore } from "@/stores/locale-store";
+import { localizeEvent } from "@/lib/i18n/event-localization";
 
 export default function DashboardPage() {
   const [data, setData] = useState<any>(null);
@@ -131,7 +132,7 @@ export default function DashboardPage() {
         />
         <StatCard
           title={locale === "en" ? "Global regions covered" : "覆盖全球大区"}
-          value={`${stats.uniqueRegions} regions`}
+          value={locale === "zh" ? `${stats.uniqueRegions} 个大区` : `${stats.uniqueRegions} regions`}
           subtitle={locale === "en" ? "APAC, NA, Europe & ME" : "亚太、北美、欧洲及中东"}
           icon={Globe}
         />
@@ -171,7 +172,9 @@ export default function DashboardPage() {
                   {locale === "en" ? "Recently added exhibitions" : "最新录入展会记录"}
                 </h3>
                 <p className="text-[11px] text-[#666666]">
-                  Latest verified entries in intelligence database
+                  {locale === "zh"
+                    ? "情报数据库中最新审核的展会"
+                    : "Latest verified entries in intelligence database"}
                 </p>
               </div>
 
@@ -186,7 +189,8 @@ export default function DashboardPage() {
 
             {/* High-density structured recent events list */}
             <div className="divide-y divide-[#D8D2C8]">
-              {(recentEvents || []).slice(0, 4).map((evt: any) => {
+              {(recentEvents || []).slice(0, 4).map((rawEvt: any) => {
+                const evt = localizeEvent(rawEvt, locale);
                 let businessLines: string[] = [];
                 try {
                   businessLines = JSON.parse(evt.businessLines || "[]");
@@ -245,9 +249,13 @@ export default function DashboardPage() {
           </div>
 
           <div className="pt-3 border-t border-[#D8D2C8] flex items-center justify-between text-[11px] text-[#666666] mt-3">
-            <span>All entries reviewed for Lifewood buyer alignment</span>
+            <span>
+              {locale === "zh"
+                ? "所有展会均已根据 Lifewood 买家画像完成战略评估"
+                : "All entries reviewed for Lifewood buyer alignment"}
+            </span>
             <Link href="/events/new" className="text-[#046241] font-semibold hover:underline">
-              + Add new record
+              {locale === "zh" ? "+ 添加新记录" : "+ Add new record"}
             </Link>
           </div>
         </div>

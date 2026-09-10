@@ -24,6 +24,8 @@ import { PriorityIndicator } from "./priority-indicator";
 import { BusinessLineChip } from "./business-line-chip";
 import { toast } from "sonner";
 import { sanitizeEventUrl } from "@/lib/url";
+import { useTranslation } from "@/lib/i18n/use-translation";
+import { localizeEvent } from "@/lib/i18n/event-localization";
 
 export interface EventRecord {
   no: number;
@@ -59,6 +61,7 @@ export interface EventRecord {
 }
 
 export default function EventScraperDashboard() {
+  const { locale, t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [statusText, setStatusText] = useState("");
@@ -222,19 +225,29 @@ export default function EventScraperDashboard() {
                 });
                 if (incoming.is_duplicate) {
                   toast.warning(
-                    `Duplicate: ${incoming.event_name} (${incoming.duplicate_reason || "Already recorded"})`
+                    locale === "zh"
+                      ? `检测到重复: ${incoming.event_name} (${incoming.duplicate_reason || "已录入系统"})`
+                      : `Duplicate: ${incoming.event_name} (${incoming.duplicate_reason || "Already recorded"})`
                   );
                 } else {
-                  toast.success(`Found: ${incoming.event_name} (Fit ${incoming.fit_score}/5)`);
+                  toast.success(
+                    locale === "zh"
+                      ? `发现新展会: ${incoming.event_name} (适配度 ${incoming.fit_score}/5)`
+                      : `Found: ${incoming.event_name} (Fit ${incoming.fit_score}/5)`
+                  );
                 }
               } else if (payload.type === "done") {
-                setStatusText(payload.message || "Crawl finished!");
+                setStatusText(payload.message || (locale === "zh" ? "抓取完成！" : "Crawl finished!"));
                 setCurrentStep(3);
                 toast.success(
                   `Crawl complete! ${payload.uniqueCount || 0} unique events processed.`
                 );
               } else if (payload.type === "error") {
-                toast.error(`Crawler Error: ${payload.error}`);
+                toast.error(
+                  locale === "zh"
+                    ? `采集器错误: ${payload.error}`
+                    : `Crawler Error: ${payload.error}`
+                );
               }
             } catch (parseErr) {
               console.warn("Could not parse SSE payload chunk:", parseErr);
@@ -264,14 +277,22 @@ export default function EventScraperDashboard() {
           });
           toast.success(`Discovered ${result.uniqueCount || incomingList.length} unique records`);
         } else {
-          toast.error(`Crawler error: ${result.error}`);
+          toast.error(
+            locale === "zh"
+              ? `采集器错误: ${result.error}`
+              : `Crawler error: ${result.error}`
+          );
         }
       }
     } catch (err: any) {
       if (err.name === "AbortError") {
         console.log("Crawl manually aborted by user.");
       } else {
-        toast.error(`Engine unreachable: ${err.message}. Ensure "node server.js" is running.`);
+        toast.error(
+          locale === "zh"
+            ? `采集服务未响应: ${err.message}。请确保后台服务正在运行。`
+            : `Engine unreachable: ${err.message}. Ensure "node server.js" is running.`
+        );
       }
     } finally {
       setLoading(false);
@@ -287,12 +308,12 @@ export default function EventScraperDashboard() {
       });
       if (res.ok) {
         setEvents([]);
-        toast.success("Crawler cache cleared successfully.");
+        toast.success(locale === "zh" ? "采集器缓存已成功清空。" : "Crawler cache cleared successfully.");
       } else {
-        toast.error("Could not clear crawler cache.");
+        toast.error(locale === "zh" ? "未能清空采集器缓存。" : "Could not clear crawler cache.");
       }
     } catch {
-      toast.error("Failed to reach crawler on port 5000.");
+      toast.error(locale === "zh" ? "连接采集器端口 5000 失败。" : "Failed to reach crawler on port 5000.");
     }
   };
 
@@ -353,18 +374,22 @@ export default function EventScraperDashboard() {
         if (data.isDuplicate) {
           toast.info(
             data.message ||
-              `"${event.event_name}" already exists in the database and was removed from scraped queue.`
+              (locale === "zh"
+                ? `“${event.event_name}”已存在于数据库中，已从待审核列表中移除。`
+                : `"${event.event_name}" already exists in the database and was removed from scraped queue.`)
           );
         } else {
           toast.success(
-            `"${event.event_name}" accepted and transferred to Review Queue!`
+            locale === "zh"
+              ? `“${event.event_name}”已采纳并转移至审核队列！`
+              : `"${event.event_name}" accepted and transferred to Review Queue!`
           );
         }
       } else {
-        toast.error(data.error || "Failed to accept event");
+        toast.error(data.error || (locale === "zh" ? "采纳展会失败" : "Failed to accept event"));
       }
     } catch {
-      toast.error("Error submitting event to queue");
+      toast.error(locale === "zh" ? "提交展会至审核队列异常" : "Error submitting event to queue");
     } finally {
       setAcceptingId(null);
     }
@@ -388,18 +413,26 @@ export default function EventScraperDashboard() {
       }).catch(() => {});
     } catch {}
 
-    toast.info(`Removed "${event.event_name}" from scraped list.`);
+    toast.info(
+      locale === "zh"
+        ? `已从采集列表中移除“${event.event_name}”`
+        : `Removed "${event.event_name}" from scraped list.`
+    );
   };
 
   // Bulk Accept All Unique
   const handleAcceptAll = async () => {
     const uniqueToAccept = events.filter((e) => !e.is_duplicate);
     if (uniqueToAccept.length === 0) {
-      toast.info("No unique events to transfer.");
+      toast.info(locale === "zh" ? "暂无可转移的唯一展会记录。" : "No unique events to transfer.");
       return;
     }
 
-    toast.info(`Transferring ${uniqueToAccept.length} unique events to Review Queue...`);
+    toast.info(
+      locale === "zh"
+        ? `正在转移 ${uniqueToAccept.length} 场唯一展会至审核队列...`
+        : `Transferring ${uniqueToAccept.length} unique events to Review Queue...`
+    );
     for (const evt of uniqueToAccept) {
       await handleAcceptEvent(evt);
     }
@@ -412,26 +445,38 @@ export default function EventScraperDashboard() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <h2 className="text-[18px] font-semibold text-[#133020]">
-              Tech exhibition discovery engine (Batch 11)
+              {locale === "zh"
+                ? "科技展会智能发现与抓取引擎 (Batch 11)"
+                : "Tech exhibition discovery engine (Batch 11)"}
             </h2>
             <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#046241] bg-[#046241]/10 px-2.5 py-0.5 rounded-full">
               <Sparkles className="w-3 h-3" />
-              <span>Real-Time Stream · Apify + Gemini 2.5 Flash</span>
+              <span>
+                {locale === "zh"
+                  ? "实时数据流 · Apify + Gemini 2.5 Flash"
+                  : "Real-Time Stream · Apify + Gemini 2.5 Flash"}
+              </span>
             </span>
           </div>
           <p className="text-[12px] text-[#666666]">
-            Target scope: Sep 1, 2026 – Dec 31, 2027 · Automated 27-column audit · Minimum Fit 3+ enforcement
+            {locale === "zh"
+              ? "目标范围：2026年9月1日 – 2027年12月31日 · 自动化 27 维度审计 · 最低适配度 3+ 阈值要求"
+              : "Target scope: Sep 1, 2026 – Dec 31, 2027 · Automated 27-column audit · Minimum Fit 3+ enforcement"}
           </p>
         </div>
 
         <div className="flex items-center gap-3 text-xs">
           <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#F9F7F7] border border-[#D8D2C8] rounded-full text-[#133020]">
             <span className="w-2 h-2 rounded-full bg-[#046241] animate-pulse" />
-            <span className="font-semibold">Engine Port: 5000</span>
+            <span className="font-semibold">
+              {locale === "zh" ? "引擎端口：5000" : "Engine Port: 5000"}
+            </span>
           </div>
           {events.length > 0 && (
             <span className="font-semibold text-[#046241] bg-[#046241]/10 px-2.5 py-1 rounded-full">
-              {events.length} verified event(s)
+              {locale === "zh"
+                ? `${events.length} 场已验证展会`
+                : `${events.length} verified event(s)`}
             </span>
           )}
         </div>
@@ -445,7 +490,11 @@ export default function EventScraperDashboard() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             disabled={loading}
-            placeholder="e.g. tech exhibition 2027 Singapore OR Hong Kong OR United States"
+            placeholder={
+              locale === "zh"
+                ? "例如：tech exhibition 2027 Singapore OR Hong Kong OR United States"
+                : "e.g. tech exhibition 2027 Singapore OR Hong Kong OR United States"
+            }
             className="w-full px-4 py-2.5 rounded-[8px] border border-[#D8D2C8] bg-white text-xs text-[#133020] placeholder-[#999999] focus:outline-none focus:border-[#046241] focus:ring-2 focus:ring-[#046241]/15 transition disabled:opacity-60"
           />
         </div>
@@ -456,7 +505,9 @@ export default function EventScraperDashboard() {
             className="px-5 py-2.5 rounded-[8px] bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] font-semibold text-xs shadow-xs transition-all duration-180 flex items-center gap-2 shrink-0 cursor-pointer"
           >
             <Play className="w-3.5 h-3.5 fill-[#133020]" />
-            <span>Start discovery & crawl</span>
+            <span>
+              {locale === "zh" ? "启动 AI 智能抓取" : "Start discovery & crawl"}
+            </span>
           </button>
         ) : (
           <button
@@ -465,7 +516,11 @@ export default function EventScraperDashboard() {
             title="Stop crawl and keep whatever events were already discovered"
           >
             <Square className="w-3.5 h-3.5 fill-white" />
-            <span>Stop & keep ({events.length})</span>
+            <span>
+              {locale === "zh"
+                ? `停止并保留 (${events.length})`
+                : `Stop & keep (${events.length})`}
+            </span>
           </button>
         )}
       </div>
@@ -478,13 +533,17 @@ export default function EventScraperDashboard() {
             <div className="flex items-center gap-2.5">
               <Loader2 className="w-4 h-4 text-[#046241] animate-spin shrink-0" />
               <span className="text-xs font-semibold text-[#133020]">
-                {statusText || "Discovering exhibitions..."}
+                {statusText ||
+                  (locale === "zh" ? "正在智能发现展会..." : "Discovering exhibitions...")}
               </span>
             </div>
 
             <div className="flex items-center gap-2 text-xs font-mono font-semibold text-[#133020] bg-white px-2.5 py-1 rounded-[6px] border border-[#D8D2C8] shadow-2xs">
               <Clock className="w-3.5 h-3.5 text-[#C17110]" />
-              <span>Elapsed: {formatTimer(elapsedSeconds)}</span>
+              <span>
+                {locale === "zh" ? "耗时：" : "Elapsed: "}
+                {formatTimer(elapsedSeconds)}
+              </span>
             </div>
           </div>
 
@@ -506,10 +565,14 @@ export default function EventScraperDashboard() {
                     1
                   </span>
                 )}
-                <span>1. Google Discovery</span>
+                <span>
+                  {locale === "zh" ? "1. 搜索引擎智能发现" : "1. Google Discovery"}
+                </span>
               </div>
               <p className="text-[11px] text-[#666666] mt-1 pl-6">
-                Organic candidate event search via Apify
+                {locale === "zh"
+                  ? "多引擎并发扫描全球展会官方候选站点"
+                  : "Organic candidate event search via Apify"}
               </p>
             </div>
 
@@ -531,10 +594,14 @@ export default function EventScraperDashboard() {
                     2
                   </span>
                 )}
-                <span>2. High-Speed Crawl</span>
+                <span>
+                  {locale === "zh" ? "2. 高速页面并行抓取" : "2. High-Speed Crawl"}
+                </span>
               </div>
               <p className="text-[11px] text-[#666666] mt-1 pl-6">
-                Parallel page content extraction
+                {locale === "zh"
+                  ? "深度提取展会详情与正文内容"
+                  : "Parallel page content extraction"}
               </p>
             </div>
 
@@ -554,10 +621,14 @@ export default function EventScraperDashboard() {
                     3
                   </span>
                 )}
-                <span>3. Gemini AI Audit</span>
+                <span>
+                  {locale === "zh" ? "3. Gemini 智能对齐审计" : "3. Gemini AI Audit"}
+                </span>
               </div>
               <p className="text-[11px] text-[#666666] mt-1 pl-6">
-                27-column audit & Fit Score calculation
+                {locale === "zh"
+                  ? "27个维度解析与战略适配度评分"
+                  : "27-column audit & Fit Score calculation"}
               </p>
             </div>
           </div>
@@ -566,7 +637,9 @@ export default function EventScraperDashboard() {
           {candidateUrls.length > 0 && (
             <div className="pt-1">
               <span className="text-[11px] font-semibold text-[#666666] block mb-1.5">
-                Found Candidate Exhibition URLs ({candidateUrls.length}):
+                {locale === "zh"
+                  ? `发现候选展会网址 (${candidateUrls.length}):`
+                  : `Found Candidate Exhibition URLs (${candidateUrls.length}):`}
               </span>
               <div className="flex items-center gap-1.5 flex-wrap">
                 {candidateUrls.map((u, i) => (
@@ -593,7 +666,7 @@ export default function EventScraperDashboard() {
           <div className="flex items-center gap-2 flex-wrap">
             <div className="text-xs font-semibold text-[#133020] flex items-center gap-1.5 mr-2">
               <Filter className="w-3.5 h-3.5 text-[#046241]" />
-              <span>Filter:</span>
+              <span>{locale === "zh" ? "筛选：" : "Filter:"}</span>
             </div>
 
             {/* Filter Pills */}
@@ -606,7 +679,7 @@ export default function EventScraperDashboard() {
                     : "text-[#666666] hover:text-[#133020]"
                 }`}
               >
-                All Events ({events.length})
+                {locale === "zh" ? `全部展会 (${events.length})` : `All Events (${events.length})`}
               </button>
               <button
                 onClick={() => setFilterMode("unique")}
@@ -616,7 +689,7 @@ export default function EventScraperDashboard() {
                     : "text-[#046241] hover:text-[#133020]"
                 }`}
               >
-                <span>New Unique</span>
+                <span>{locale === "zh" ? "新增唯一" : "New Unique"}</span>
                 <span className="bg-[#046241]/20 px-1 rounded-full text-[10px] font-bold">
                   {uniqueCount}
                 </span>
@@ -629,7 +702,7 @@ export default function EventScraperDashboard() {
                     : "text-[#B87A00] hover:text-[#8C6B14]"
                 }`}
               >
-                <span>Duplicates</span>
+                <span>{locale === "zh" ? "重复项" : "Duplicates"}</span>
                 <span className="bg-[#B87A00]/20 px-1 rounded-full text-[10px] font-bold">
                   {duplicateCount}
                 </span>
@@ -638,7 +711,7 @@ export default function EventScraperDashboard() {
 
             {loading && (
               <span className="text-[11px] text-[#046241] animate-pulse font-normal ml-2">
-                (Streaming in real time...)
+                {locale === "zh" ? "(实时数据流抓取中...)" : "(Streaming in real time...)"}
               </span>
             )}
           </div>
@@ -647,10 +720,10 @@ export default function EventScraperDashboard() {
             <button
               onClick={handleClearCache}
               className="px-2.5 py-1.5 border border-[#D8D2C8] hover:border-red-300 text-[#666666] hover:text-red-600 rounded-[6px] text-xs font-medium flex items-center gap-1 transition cursor-pointer"
-              title="Clear previously saved crawler memory"
+              title={locale === "zh" ? "清空之前保存的抓取缓存" : "Clear previously saved crawler memory"}
             >
               <Trash2 className="w-3.5 h-3.5" />
-              <span>Clear Cache</span>
+              <span>{locale === "zh" ? "清空缓存" : "Clear Cache"}</span>
             </button>
 
             <button
@@ -659,7 +732,11 @@ export default function EventScraperDashboard() {
               className="px-3.5 py-1.5 bg-[#133020] hover:bg-[#046241] text-white hover:text-[#FFB347] rounded-[6px] text-xs font-semibold flex items-center gap-1.5 transition shadow-2xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <PlusCircle className="w-3.5 h-3.5 text-[#FFB347]" />
-              <span>Accept All Unique ({uniqueCount})</span>
+              <span>
+                {locale === "zh"
+                  ? `采纳全部新增 (${uniqueCount})`
+                  : `Accept All Unique (${uniqueCount})`}
+              </span>
             </button>
           </div>
         </div>
@@ -671,15 +748,33 @@ export default function EventScraperDashboard() {
           <thead>
             <tr className="bg-[#133020] text-white text-[10.5px] uppercase tracking-[0.08em] font-semibold border-b border-[#133020]">
               <th className="py-3 px-3.5 text-center w-12">#</th>
-              <th className="py-3 px-3.5 min-w-[220px]">Exhibition event</th>
-              <th className="py-3 px-3.5 min-w-[120px]">Dates</th>
-              <th className="py-3 px-3.5 min-w-[140px]">Location</th>
-              <th className="py-3 px-3.5 min-w-[160px]">Business lines</th>
-              <th className="py-3 px-3.5 text-center w-16">Fit</th>
-              <th className="py-3 px-3.5 text-center w-24">Priority</th>
-              <th className="py-3 px-3.5 min-w-[110px]">Booth cost</th>
-              <th className="py-3 px-3.5 text-right w-24">Link</th>
-              <th className="py-3 px-3.5 text-right w-28">Queue Action</th>
+              <th className="py-3 px-3.5 min-w-[220px]">
+                {locale === "zh" ? "展会名称" : "Exhibition event"}
+              </th>
+              <th className="py-3 px-3.5 min-w-[120px]">
+                {locale === "zh" ? "展会日期" : "Dates"}
+              </th>
+              <th className="py-3 px-3.5 min-w-[140px]">
+                {locale === "zh" ? "地点" : "Location"}
+              </th>
+              <th className="py-3 px-3.5 min-w-[160px]">
+                {locale === "zh" ? "业务线" : "Business lines"}
+              </th>
+              <th className="py-3 px-3.5 text-center w-16">
+                {locale === "zh" ? "适配度" : "Fit"}
+              </th>
+              <th className="py-3 px-3.5 text-center w-24">
+                {locale === "zh" ? "优先级" : "Priority"}
+              </th>
+              <th className="py-3 px-3.5 min-w-[110px]">
+                {locale === "zh" ? "展位费用" : "Booth cost"}
+              </th>
+              <th className="py-3 px-3.5 text-right w-24">
+                {locale === "zh" ? "官网链接" : "Link"}
+              </th>
+              <th className="py-3 px-3.5 text-right w-28">
+                {locale === "zh" ? "审核操作" : "Queue Action"}
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#D8D2C8] text-[#133020]">
@@ -689,21 +784,33 @@ export default function EventScraperDashboard() {
                   <div className="max-w-xs mx-auto space-y-1">
                     <p className="font-semibold text-[#133020] text-[13px]">
                       {filterMode === "duplicates"
-                        ? "No duplicate events detected"
+                        ? locale === "zh"
+                          ? "未检测到重复展会记录"
+                          : "No duplicate events detected"
                         : filterMode === "unique"
-                        ? "No new unique events found"
+                        ? locale === "zh"
+                          ? "未发现新展会记录"
+                          : "No new unique events found"
+                        : locale === "zh"
+                        ? "暂无抓取到的展会记录"
                         : "No exhibition records crawled yet"}
                     </p>
                     <p className="text-[11px] text-[#666666]">
                       {filterMode !== "all"
-                        ? "Switch back to 'All Events' to view the full discovery list."
+                        ? locale === "zh"
+                          ? "切换回“全部展会”可查看完整的发现列表。"
+                          : "Switch back to 'All Events' to view the full discovery list."
+                        : locale === "zh"
+                        ? "在上方输入地理区域或产业关键词，即可触发自动化深度挖掘流程。"
                         : "Enter a geographic or industrial search query above to trigger automated discovery."}
                     </p>
                   </div>
                 </td>
               </tr>
             ) : (
-              displayedEvents.map((e, idx) => {
+              displayedEvents.map((rawEvt, idx) => {
+                const e = localizeEvent(rawEvt, locale);
+
                 let blArray: string[] = [];
                 try {
                   blArray =
@@ -714,13 +821,13 @@ export default function EventScraperDashboard() {
                   blArray = [e.business_lines];
                 }
 
-                const isAccepted = acceptedEvents[e.event_name];
-                const isAccepting = acceptingId === e.event_name;
+                const isAccepted = acceptedEvents[rawEvt.event_name];
+                const isAccepting = acceptingId === rawEvt.event_name;
                 const isDuplicate = Boolean(e.is_duplicate);
 
                 return (
                   <tr
-                    key={e.event_name + idx}
+                    key={rawEvt.event_name + idx}
                     className={`transition-colors duration-150 animate-in fade-in duration-300 ${
                       isDuplicate
                         ? "bg-[#FCFAF6] hover:bg-[#F7F2E8]"
@@ -738,10 +845,10 @@ export default function EventScraperDashboard() {
                         {isDuplicate && (
                           <span
                             className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#8C6B14] bg-[#FDF4DC] border border-[#ECD189] px-2 py-0.5 rounded-full"
-                            title={e.duplicate_reason || "Already in system"}
+                            title={e.duplicate_reason || (locale === "zh" ? "数据库已存在" : "Already in system")}
                           >
                             <AlertCircle className="w-2.5 h-2.5" />
-                            <span>Duplicate</span>
+                            <span>{locale === "zh" ? "重复项" : "Duplicate"}</span>
                           </span>
                         )}
                       </div>
@@ -787,7 +894,7 @@ export default function EventScraperDashboard() {
                       </div>
                     </td>
                     <td className="py-3 px-3.5 text-[11px] font-medium text-[#666666]">
-                      {e.booth_sponsorship_cost || "Not disclosed"}
+                      {e.booth_sponsorship_cost || (locale === "zh" ? "未公开披露" : "Not disclosed")}
                     </td>
                     <td className="py-3 px-3.5 text-right whitespace-nowrap">
                       {(() => {
@@ -798,7 +905,7 @@ export default function EventScraperDashboard() {
                         if (!targetUrl) {
                           return (
                             <span className="text-[11px] text-[#999999]">
-                              No link
+                              {locale === "zh" ? "暂无链接" : "No link"}
                             </span>
                           );
                         }
@@ -809,7 +916,7 @@ export default function EventScraperDashboard() {
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#046241] hover:text-[#133020] transition"
                           >
-                            <span>Visit</span>
+                            <span>{locale === "zh" ? "访问官网" : "Visit"}</span>
                             <ExternalLink className="w-3 h-3" />
                           </a>
                         );
@@ -820,13 +927,13 @@ export default function EventScraperDashboard() {
                         <div className="inline-flex items-center gap-1.5 justify-end">
                           <span
                             className="inline-flex items-center gap-1 text-[11px] font-medium text-[#777777] bg-[#F0ECE1] px-2.5 py-1 rounded-full border border-[#D8D2C8]"
-                            title={e.duplicate_reason || "Event already recorded in system"}
+                            title={e.duplicate_reason || (locale === "zh" ? "该展会已收录在数据库中" : "Event already recorded in system")}
                           >
-                            <span>Existing Record</span>
+                            <span>{locale === "zh" ? "已收录记录" : "Existing Record"}</span>
                           </span>
                           <button
-                            onClick={() => handleDismissEvent(e)}
-                            title="Dismiss from list"
+                            onClick={() => handleDismissEvent(rawEvt)}
+                            title={locale === "zh" ? "从列表中移除" : "Dismiss from list"}
                             className="p-1 text-[#777777] hover:text-red-600 hover:bg-red-50 rounded transition cursor-pointer"
                           >
                             <X className="w-3.5 h-3.5" />
@@ -835,15 +942,21 @@ export default function EventScraperDashboard() {
                       ) : (
                         <div className="inline-flex items-center gap-1.5 justify-end">
                           <button
-                            onClick={() => handleAcceptEvent(e)}
+                            onClick={() => handleAcceptEvent(rawEvt)}
                             disabled={isAccepting}
                             className="px-2.5 py-1 bg-[#046241] hover:bg-[#133020] text-white rounded-[6px] text-[11px] font-semibold transition cursor-pointer disabled:opacity-50"
                           >
-                            {isAccepting ? "Moving..." : "+ Accept"}
+                            {isAccepting
+                              ? locale === "zh"
+                                ? "转移中..."
+                                : "Moving..."
+                              : locale === "zh"
+                              ? "+ 采纳"
+                              : "+ Accept"}
                           </button>
                           <button
-                            onClick={() => handleDismissEvent(e)}
-                            title="Dismiss from list"
+                            onClick={() => handleDismissEvent(rawEvt)}
+                            title={locale === "zh" ? "从列表中移除" : "Dismiss from list"}
                             className="p-1 text-[#777777] hover:text-red-600 hover:bg-red-50 rounded transition cursor-pointer"
                           >
                             <X className="w-3.5 h-3.5" />

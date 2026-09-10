@@ -30,9 +30,14 @@ export function ScraperStatusWidget() {
   }, []);
 
   const formatTime = (iso?: string | null) => {
-    if (!iso) return "Sep 7, 2026, 18:30";
+    if (!iso) {
+      return locale === "zh" ? "2026年9月7日 18:30" : "Sep 7, 2026, 18:30";
+    }
     try {
       const d = new Date(iso);
+      if (locale === "zh") {
+        return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+      }
       return d.toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
@@ -40,7 +45,7 @@ export function ScraperStatusWidget() {
         minute: "2-digit",
       });
     } catch {
-      return "Sep 7, 2026, 18:30";
+      return locale === "zh" ? "2026年9月7日 18:30" : "Sep 7, 2026, 18:30";
     }
   };
 
@@ -63,7 +68,9 @@ export function ScraperStatusWidget() {
               </span>
             </div>
             <p className="text-[11px] text-[#666666] mt-0.5">
-              Apify + Google Gemini 2.5 Flash continuous discovery pipeline
+              {locale === "zh"
+                ? "Apify + Google Gemini 2.5 Flash 持续发现流水线"
+                : "Apify + Google Gemini 2.5 Flash continuous discovery pipeline"}
             </p>
           </div>
         </div>
@@ -72,7 +79,7 @@ export function ScraperStatusWidget() {
         <div className="flex items-center gap-6 text-xs flex-wrap">
           <div className="space-y-0.5">
             <span className="text-[10px] uppercase tracking-wider text-[#666666] font-medium block">
-              Last run time
+              {locale === "zh" ? "上次运行时间" : "Last run time"}
             </span>
             <div className="flex items-center gap-1 font-semibold text-[#133020]">
               <Clock className="w-3.5 h-3.5 text-[#046241]" />
@@ -82,20 +89,20 @@ export function ScraperStatusWidget() {
 
           <div className="space-y-0.5">
             <span className="text-[10px] uppercase tracking-wider text-[#666666] font-medium block">
-              Next scheduled run
+              {locale === "zh" ? "下次计划运行" : "Next scheduled run"}
             </span>
             <div className="flex items-center gap-1 font-semibold text-[#133020]">
               <CalendarClock className="w-3.5 h-3.5 text-[#C17110]" />
-              <span>Daily at 02:00 UTC</span>
+              <span>{locale === "zh" ? "每日 02:00 UTC" : "Daily at 02:00 UTC"}</span>
             </div>
           </div>
 
           <div className="space-y-0.5">
             <span className="text-[10px] uppercase tracking-wider text-[#666666] font-medium block">
-              Events found last run
+              {locale === "zh" ? "上次抓取发现" : "Events found last run"}
             </span>
             <span className="text-[14px] font-bold text-[#133020]">
-              {status.events_found || 12} records
+              {status.events_found || 12} {locale === "zh" ? "条记录" : "records"}
             </span>
           </div>
 

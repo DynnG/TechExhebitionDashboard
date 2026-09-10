@@ -1,28 +1,46 @@
+"use client";
+
+import { useTranslation } from "@/lib/i18n/use-translation";
+
 interface PriorityIndicatorProps {
   priority: string;
   className?: string;
 }
 
 export function PriorityIndicator({ priority, className = "" }: PriorityIndicatorProps) {
+  const { locale } = useTranslation();
+
   let dotColor = "#9CAFA4";
   let textColor = "text-[#9CAFA4]";
   const normPriority = (priority || "").toLowerCase();
 
-  if (normPriority === "high") {
+  const isHigh = normPriority === "high" || normPriority === "高";
+  const isMed = normPriority === "medium" || normPriority === "中";
+
+  if (isHigh) {
     dotColor = "#C17110";
     textColor = "text-[#C17110]";
-  } else if (normPriority === "medium") {
+  } else if (isMed) {
     dotColor = "#FFB347";
     textColor = "text-[#E89131]";
   }
 
-  // Ensure sentence case: High, Medium, Low
-  const displayLabel = priority
-    ? priority.charAt(0).toUpperCase() + priority.slice(1).toLowerCase()
-    : "Low";
+  let displayLabel = "Low";
+  if (locale === "zh") {
+    displayLabel = isHigh ? "高" : isMed ? "中" : "低";
+  } else {
+    displayLabel = isHigh ? "High" : isMed ? "Medium" : "Low";
+  }
 
   return (
-    <div className={`flex items-center gap-1.5 text-[12px] font-medium font-manrope ${className}`}>
+    <div
+      title={
+        locale === "zh"
+          ? `${displayLabel}优先级`
+          : `${displayLabel} priority`
+      }
+      className={`flex items-center gap-1.5 text-[12px] font-medium font-manrope ${className}`}
+    >
       <span
         className="w-[7px] h-[7px] rounded-full inline-block shrink-0"
         style={{ backgroundColor: dotColor }}

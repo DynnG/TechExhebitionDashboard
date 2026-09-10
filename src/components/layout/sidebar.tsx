@@ -94,7 +94,7 @@ export function Sidebar() {
       <button
         onClick={() => setCollapsed(!collapsed)}
         className="absolute -right-3.5 top-5 w-7 h-7 bg-[#FFB347] text-[#133020] border border-[#133020]/20 rounded-full flex items-center justify-center shadow-lg hover:bg-[#FFC370] hover:scale-110 transition z-[60] cursor-pointer"
-        title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        title={locale === "zh" ? (collapsed ? "展开侧边栏" : "折叠侧边栏") : (collapsed ? "Expand sidebar" : "Collapse sidebar")}
       >
         {collapsed ? (
           <ChevronRight className="w-4.5 h-4.5" />
@@ -181,13 +181,15 @@ export function Sidebar() {
                     userRole
                   )}`}
                 >
-                  {userRole}
+                  {locale === "zh"
+                    ? (userRole === "ADMIN" ? "管理员" : userRole === "SUPERVISOR" ? "主管" : "实习生")
+                    : userRole}
                 </span>
               </div>
             </div>
             <button
               onClick={() => signOut({ callbackUrl: "/login" })}
-              title="Sign Out"
+              title={locale === "zh" ? "退出登录" : "Sign Out"}
               className="p-2 text-[#133020]/60 hover:text-[#FFB347] hover:bg-[#133020]/5 rounded-lg transition"
             >
               <LogOut className="w-4 h-4" />
@@ -196,7 +198,7 @@ export function Sidebar() {
         ) : (
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
-            title={`Sign Out (${userName})`}
+            title={locale === "zh" ? `退出登录 (${userName})` : `Sign Out (${userName})`}
             className="w-full flex justify-center p-2 text-[#133020]/60 hover:text-[#FFB347] hover:bg-[#133020]/5 rounded-lg transition"
           >
             <LogOut className="w-5 h-5" />

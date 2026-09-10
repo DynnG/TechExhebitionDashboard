@@ -5,8 +5,10 @@ import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AlertCircle, ArrowRight, Clock } from "lucide-react";
 import { SocialLinks } from "@/components/ui/SocialLinks";
+import { useLocaleStore } from "@/stores/locale-store";
 
 export function LoginForm() {
+  const { locale } = useLocaleStore();
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("from") || "/dashboard";
@@ -53,16 +55,25 @@ export function LoginForm() {
         if (res.error.startsWith("TOO_MANY_ATTEMPTS:")) {
           const seconds = parseInt(res.error.split(":")[1], 10) || 120;
           setCooldownSeconds(seconds);
-          setError("Too many failed attempts. Account temporarily locked.");
+          setError(
+            locale === "zh"
+              ? "失败次数过多，账户已被临时锁定。"
+              : "Too many failed attempts. Account temporarily locked."
+          );
         } else {
-          setError(res.error || "Failed to sign in. Please check credentials.");
+          setError(
+            res.error ||
+              (locale === "zh"
+                ? "登录失败，请核对邮箱与密码。"
+                : "Failed to sign in. Please check credentials.")
+          );
         }
       } else if (res?.ok) {
         router.push(callbackUrl);
         router.refresh();
       }
-    } catch (err: any) {
-      setError("An unexpected error occurred.");
+    } catch {
+      setError(locale === "zh" ? "发生未知错误。" : "An unexpected error occurred.");
     } finally {
       setLoading(false);
     }
@@ -84,10 +95,12 @@ export function LoginForm() {
     <div className="w-full max-w-xl bg-white rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] p-10 sm:p-12 border border-[#D8D2C8] relative">
       <div className="mb-8">
         <h2 className="text-3xl sm:text-4xl font-bold text-[#133020] tracking-tight">
-          Welcome back
+          {locale === "zh" ? "欢迎回来" : "Welcome back"}
         </h2>
         <p className="text-sm text-[#666666] mt-2">
-          Enter your credentials to access the intelligence platform
+          {locale === "zh"
+            ? "请输入您的安全凭证以访问展会情报工作台"
+            : "Enter your credentials to access the intelligence platform"}
         </p>
       </div>
 
@@ -102,7 +115,7 @@ export function LoginForm() {
             <span className="font-semibold block">{error}</span>
             {cooldownSeconds > 0 && (
               <span className="text-xs text-[#B91C1C]/90 font-mono mt-1 block">
-                Try again in: {formatTime(cooldownSeconds)}
+                {locale === "zh" ? "请稍候重试：" : "Try again in: "} {formatTime(cooldownSeconds)}
               </span>
             )}
           </div>
@@ -112,7 +125,7 @@ export function LoginForm() {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label className="block text-xs font-bold uppercase tracking-wider text-[#133020] mb-2">
-            Email or Username
+            {locale === "zh" ? "电子邮箱或用户名" : "Email or Username"}
           </label>
           <input
             type="email"
@@ -128,10 +141,10 @@ export function LoginForm() {
         <div>
           <div className="flex items-center justify-between mb-2">
             <label className="block text-xs font-bold uppercase tracking-wider text-[#133020]">
-              Password
+              {locale === "zh" ? "密码" : "Password"}
             </label>
             <span className="text-xs text-[#046241] font-semibold hover:underline cursor-pointer">
-              Forgot password?
+              {locale === "zh" ? "忘记密码？" : "Forgot password?"}
             </span>
           </div>
           <input
@@ -151,12 +164,12 @@ export function LoginForm() {
           className="w-full py-4 px-6 rounded-xl bg-[#133020] hover:bg-[#133020]/90 text-white hover:text-[#FFB347] border border-[#133020] font-semibold text-sm transition-all duration-200 shadow-sm flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed mt-4"
         >
           {loading ? (
-            <span>Signing in...</span>
+            <span>{locale === "zh" ? "登录中..." : "Signing in..."}</span>
           ) : cooldownSeconds > 0 ? (
-            <span>Locked ({formatTime(cooldownSeconds)})</span>
+            <span>{locale === "zh" ? `已锁定 (${formatTime(cooldownSeconds)})` : `Locked (${formatTime(cooldownSeconds)})`}</span>
           ) : (
             <>
-              <span>Sign in to Dashboard</span>
+              <span>{locale === "zh" ? "登录进入工作台" : "Sign in to Dashboard"}</span>
               <ArrowRight className="w-5 h-5 transform group-hover:translate-x-1 transition text-[#FFB347]" />
             </>
           )}
@@ -167,7 +180,7 @@ export function LoginForm() {
 
       <div className="mt-8 pt-6 border-t border-[#D8D2C8]">
         <p className="text-xs text-[#666666] mb-3 font-medium">
-          Quick switch demo account:
+          {locale === "zh" ? "快速切换演示账号：" : "Quick switch demo account:"}
         </p>
         <div className="grid grid-cols-3 gap-3">
           <button
@@ -176,7 +189,7 @@ export function LoginForm() {
             onClick={() => setQuickUser("admin@lifewood.com", "admin123")}
             className="py-2 px-3 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-xl border border-[#D8D2C8] transition text-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Admin
+            {locale === "zh" ? "管理员 (Admin)" : "Admin"}
           </button>
           <button
             type="button"
@@ -186,7 +199,7 @@ export function LoginForm() {
             }
             className="py-2 px-3 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-xl border border-[#D8D2C8] transition text-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Supervisor
+            {locale === "zh" ? "审核主管 (Supervisor)" : "Supervisor"}
           </button>
           <button
             type="button"
@@ -194,7 +207,7 @@ export function LoginForm() {
             onClick={() => setQuickUser("intern@lifewood.com", "intern123")}
             className="py-2 px-3 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-xl border border-[#D8D2C8] transition text-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Intern
+            {locale === "zh" ? "录入实习生 (Intern)" : "Intern"}
           </button>
         </div>
       </div>

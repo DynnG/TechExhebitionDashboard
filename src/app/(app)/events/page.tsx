@@ -28,11 +28,19 @@ export default function EventsPage() {
         body: JSON.stringify({ isAttended: !currentStatus }),
       });
       if (res.ok) {
-        toast.success(!currentStatus ? "Event marked as Attended!" : "Attendance status updated");
+        toast.success(
+          locale === "zh"
+            ? !currentStatus
+              ? "已标记为已参展！"
+              : "已更新参展状态"
+            : !currentStatus
+            ? "Event marked as Attended!"
+            : "Attendance status updated"
+        );
         fetchEvents();
       }
     } catch {
-      toast.error("Error updating attendance");
+      toast.error(locale === "zh" ? "更新参展状态失败" : "Error updating attendance");
     }
   };
 
@@ -77,14 +85,18 @@ export default function EventsPage() {
           }));
         }
       } else {
-        toast.error("Failed to load events: " + data.error);
+        toast.error(
+          locale === "zh"
+            ? `加载展会列表失败: ${data.error}`
+            : `Failed to load events: ${data.error}`
+        );
       }
-    } catch (err: any) {
-      toast.error("Error loading events");
+    } catch {
+      toast.error(locale === "zh" ? "加载展会列表异常" : "Error loading events");
     } finally {
       setLoading(false);
     }
-  }, [filters, pagination.page, pagination.limit]);
+  }, [filters, pagination.page, pagination.limit, locale]);
 
   useEffect(() => {
     fetchEvents();
@@ -107,19 +119,31 @@ export default function EventsPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this event record?")) return;
+    if (
+      !confirm(
+        locale === "zh"
+          ? "确定要删除此展会记录吗？此操作无法撤销。"
+          : "Are you sure you want to delete this event record?"
+      )
+    )
+      return;
 
     try {
       const res = await fetch(`/api/events/${id}`, { method: "DELETE" });
       if (res.ok) {
-        toast.success("Event deleted successfully");
+        toast.success(
+          locale === "zh" ? "展会记录已成功删除" : "Event deleted successfully"
+        );
         fetchEvents();
       } else {
         const data = await res.json();
-        toast.error(data.error || "Failed to delete event");
+        toast.error(
+          data.error ||
+            (locale === "zh" ? "删除展会记录失败" : "Failed to delete event")
+        );
       }
-    } catch (err) {
-      toast.error("Error deleting event");
+    } catch {
+      toast.error(locale === "zh" ? "删除展会记录异常" : "Error deleting event");
     }
   };
 
@@ -196,16 +220,18 @@ export default function EventsPage() {
             <LayoutGrid className="w-7 h-7" />
           </div>
           <h3 className="text-base font-semibold text-[#133020] mb-1">
-            No exhibition events found
+            {locale === "zh" ? "未找到相关展会记录" : "No exhibition events found"}
           </h3>
           <p className="text-xs text-[#666666] mb-6">
-            Try adjusting your filter preferences or search term, or add a new event.
+            {locale === "zh"
+              ? "请尝试调整筛选条件或搜索关键词，或录入新展会。"
+              : "Try adjusting your filter preferences or search term, or add a new event."}
           </p>
           <button
             onClick={handleClearFilters}
             className="px-4 py-2 bg-[#133020] text-white text-xs font-medium rounded-[8px] hover:bg-[#046241] transition"
           >
-            Clear all filters
+            {locale === "zh" ? "重置筛选" : "Clear all filters"}
           </button>
         </div>
       ) : (
@@ -218,14 +244,16 @@ export default function EventsPage() {
               ))}
             </div>
           ) : (
-            <EventTable events={events} onDelete={handleDelete} onEdit={(evt) => setEditingEvent(evt)} />
+            <EventTable events={events} onDelete={handleDelete} onEdit={(evt: any) => setEditingEvent(evt)} />
           )}
 
           {/* Pagination Controls */}
           {pagination.totalPages > 1 && (
             <div className="mt-8 flex items-center justify-between text-xs text-[#666666] font-manrope">
               <span>
-                Page {pagination.page} of {pagination.totalPages}
+                {locale === "zh"
+                  ? `第 ${pagination.page} 页 / 共 ${pagination.totalPages} 页`
+                  : `Page ${pagination.page} of ${pagination.totalPages}`}
               </span>
               <div className="flex gap-2">
                 <button
@@ -235,7 +263,7 @@ export default function EventsPage() {
                   }
                   className="px-3.5 py-1.5 rounded-[8px] border-[1.5px] border-[#D8D2C8] bg-white font-medium disabled:opacity-50 hover:bg-[#F9F7F7] transition"
                 >
-                  Previous
+                  {locale === "zh" ? "上一页" : "Previous"}
                 </button>
                 <button
                   disabled={pagination.page >= pagination.totalPages}
@@ -244,8 +272,13 @@ export default function EventsPage() {
                   }
                   className="px-3.5 py-1.5 rounded-[8px] border-[1.5px] border-[#D8D2C8] bg-white font-medium disabled:opacity-50 hover:bg-[#F9F7F7] transition"
                 >
-                  Next
+                  {locale === "zh" ? "下一页" : "Next"}
                 </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
       {/* Edit Event Pop-up Modal */}
       <ModalPortal isOpen={!!editingEvent} onClose={() => setEditingEvent(null)}>
         <div className="bg-[#133020] text-white p-5 px-7 flex items-center justify-between shrink-0 shadow-sm border-b border-white/10">
@@ -283,11 +316,7 @@ export default function EventsPage() {
           )}
         </div>
       </ModalPortal>
-    </div>
-            </div>
-          )}
-        </div>
-      )}
+
       {/* Add Event Pop-up Modal */}
       <ModalPortal isOpen={showAddModal} onClose={() => setShowAddModal(false)}>
         <div className="bg-[#133020] text-white p-5 px-7 flex items-center justify-between shrink-0 shadow-sm border-b border-white/10">
