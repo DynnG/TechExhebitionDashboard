@@ -135,7 +135,7 @@ export default function EventScraperDashboard() {
     setCurrentStep(1);
     setStatusText("Initiating Google Search Discovery via Apify...");
     setCandidateUrls([]);
-    setEvents([]); // Clean slate for new run, or keeps previous if interrupted
+    // Retain existing event details on screen; append newly discovered items
 
     const controller = new AbortController();
     abortControllerRef.current = controller;
@@ -150,7 +150,7 @@ export default function EventScraperDashboard() {
             "Content-Type": "application/json",
             Accept: "text/event-stream",
           },
-          body: JSON.stringify({ query }),
+          body: JSON.stringify({ query, existingEvents: events }),
           signal: controller.signal,
         });
       } catch {
@@ -160,7 +160,7 @@ export default function EventScraperDashboard() {
             "Content-Type": "application/json",
             Accept: "text/event-stream",
           },
-          body: JSON.stringify({ query }),
+          body: JSON.stringify({ query, existingEvents: events }),
           signal: controller.signal,
         });
       }
@@ -218,7 +218,7 @@ export default function EventScraperDashboard() {
                     updated[idx] = { ...updated[idx], ...incoming };
                     return updated;
                   }
-                  return [...prev, incoming];
+                  return [...prev, { ...incoming, no: prev.length + 1 }];
                 });
                 if (incoming.is_duplicate) {
                   toast.warning(
@@ -231,7 +231,7 @@ export default function EventScraperDashboard() {
                 setStatusText(payload.message || "Crawl finished!");
                 setCurrentStep(3);
                 toast.success(
-                  `Crawl complete! ${payload.uniqueCount || events.length} unique events ready.`
+                  `Crawl complete! ${payload.uniqueCount || 0} unique events processed.`
                 );
               } else if (payload.type === "error") {
                 toast.error(`Crawler Error: ${payload.error}`);
@@ -245,8 +245,24 @@ export default function EventScraperDashboard() {
         // Fallback standard JSON response
         const result = await res.json();
         if (result.success) {
-          setEvents(result.data || []);
-          toast.success(`Discovered ${result.uniqueCount || result.data?.length || 0} unique records`);
+          const incomingList: EventRecord[] = result.data || [];
+          setEvents((prev) => {
+            const merged = [...prev];
+            for (const item of incomingList) {
+              const idx = merged.findIndex(
+                (p) =>
+                  p.event_name.toLowerCase() === item.event_name.toLowerCase() &&
+                  (p.city?.toLowerCase() === item.city?.toLowerCase() || !p.city || !item.city)
+              );
+              if (idx !== -1) {
+                merged[idx] = { ...merged[idx], ...item };
+              } else {
+                merged.push({ ...item, no: merged.length + 1 });
+              }
+            }
+            return merged;
+          });
+          toast.success(`Discovered ${result.uniqueCount || incomingList.length} unique records`);
         } else {
           toast.error(`Crawler error: ${result.error}`);
         }
