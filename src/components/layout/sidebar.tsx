@@ -118,7 +118,7 @@ export function Sidebar() {
 
       {/* Top Header & Logo */}
       <div>
-        <div className="p-2 flex flex-col items-center gap-2 border-b border-[#133020]/10 dark:border-white/10">
+        <div className="p-2 flex flex-col items-center gap-2 border-b border-[#133020]/10 dark:border-white/10 bg-[#F9F7F7] rounded-t-md">
           <div className="relative w-full h-6">
             <Image
               src="/logo.png"
@@ -130,7 +130,7 @@ export function Sidebar() {
 
           {!collapsed && (
             <div className="text-center">
-              <p className="text-[10.5px] text-[#133020]/60 dark:text-white/60 uppercase tracking-wider font-bold">
+              <p className="text-[10.5px] text-[#133020]/60 uppercase tracking-wider font-bold">
                 {locale === "en"
                   ? "Exhibition Intelligence"
                   : "全球展会智能平台"}
