@@ -28,18 +28,7 @@ export function Topbar() {
   const title = getPageTitle(pathname);
 
   return (
-<<<<<<< HEAD
-    <header className="h-14 bg-[#F5EEDB] border-b border-[#D8D2C8] px-8 flex items-center justify-between sticky top-0 z-20 shadow-xs">
-      {/* Breadcrumbs */}
-      <nav aria-label="Breadcrumbs" className="flex items-center gap-1.5 text-xs text-[#666666]">
-        <Link href="/dashboard" className="hover:text-[#046241] transition font-medium">
-          Lifewood 活树
-        </Link>
-        <ChevronRight className="w-3 h-3 text-[#999999]" />
-        <span className="text-[#133020] font-semibold">{title}</span>
-      </nav>
-=======
-    <header className="h-16 bg-[#F5EEDB]/85 backdrop-blur-md border-b border-[#D8D2C8] px-6 lg:px-8 flex items-center justify-between sticky top-0 z-40 shadow-xs transition-colors font-manrope">
+    <header className="h-16 bg-[#F5EEDB]/85 backdrop-blur-md border-b border-[#D8D2C8] px-6 lg:px-8 flex items-center justify-between sticky top-0 z-30 shadow-xs transition-colors font-manrope">
       {/* Page Title & Breadcrumbs */}
       <div>
         <div className="flex items-center gap-1.5 text-xs text-[#666666]">
@@ -53,7 +42,6 @@ export function Topbar() {
           {title}
         </h1>
       </div>
->>>>>>> b62534b (feat: event attendance, enlarged fit score badges, bento filter system, queues/history/users UI redesign, and sticky header blur)
 
       {/* Right Actions: Improved Language Toggle */}
       <div className="flex items-center gap-3">

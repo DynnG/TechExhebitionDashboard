@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { Skeleton } from "@/components/shared/skeleton";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { EventsByMonthChart } from "@/components/dashboard/events-by-month";
@@ -13,7 +12,6 @@ import { CoverageGapsWidget } from "@/components/dashboard/coverage-gaps";
 import { ScraperStatusWidget } from "@/components/dashboard/scraper-status-widget";
 import { FitScoreBadge } from "@/components/events/fit-score-badge";
 import { PriorityIndicator } from "@/components/events/priority-indicator";
-import { BusinessLineChip } from "@/components/events/business-line-chip";
 import { BUSINESS_LINES } from "@/lib/constants/business-lines";
 import {
   CalendarDays,
@@ -21,10 +19,7 @@ import {
   Award,
   CalendarCheck,
   Bot,
-  Plus,
   ArrowRight,
-  MapPin,
-  Calendar,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useLocaleStore } from "@/stores/locale-store";
@@ -56,13 +51,12 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="space-y-8 font-manrope">
-        <div className="flex items-center justify-between pb-4 border-b border-[#D8D2C8] dark:border-[#1E4830]">
+        <div className="flex items-center justify-between pb-4 border-b border-[#D8D2C8]">
           <div className="space-y-2">
             <Skeleton className="h-8 w-64" />
             <Skeleton className="h-4 w-96" />
           </div>
           <div className="flex gap-3">
-            <Skeleton className="h-9 w-28" />
             <Skeleton className="h-9 w-28" />
           </div>
         </div>
@@ -104,7 +98,6 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        {/* Section 6.5 Compliant Buttons */}
         <div className="flex items-center gap-3">
           <Link
             href="/scraper"
@@ -113,15 +106,8 @@ export default function DashboardPage() {
             <Bot className="w-4 h-4 text-[#046241]" />
             <span>{locale === "en" ? "AI scraper engine" : "AI 抓取引擎"}</span>
           </Link>
-          <Link
-            href="/events/new"
-            className="flex items-center gap-1.5 px-4 py-2 bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] font-medium text-xs rounded-[8px] transition-all duration-180 shadow-2xs"
-          >
-            <Plus className="w-4 h-4" />
-            <span>{locale === "en" ? "Add event" : "+ 添加展会"}</span>
-          </Link>
         </div>
-      </motion.div>
+      </div>
 
       {/* Row 1 — Stat Cards (4 across) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -149,7 +135,7 @@ export default function DashboardPage() {
           subtitle={locale === "en" ? "APAC, NA, Europe & ME" : "亚太、北美、欧洲及中东"}
           icon={Globe}
         />
-      </motion.div>
+      </div>
 
       {/* Row 2 — Charts (Events by Month & Events by Region) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -159,7 +145,7 @@ export default function DashboardPage() {
         <div className="lg:col-span-4">
           <EventsByRegionChart data={eventsByRegion} />
         </div>
-      </motion.div>
+      </div>
 
       {/* Row 3 — Charts (Business Line Distribution & Fit Score Distribution) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

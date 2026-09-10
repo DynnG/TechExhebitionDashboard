@@ -312,20 +312,10 @@ export default function UsersPage() {
                       <LifewoodDropdown
                         variant="compact"
                         value={editingUser.role}
-<<<<<<< HEAD
                         onChange={(val) => setEditingUser({ ...editingUser, role: val })}
                         options={roleOptionsTable}
                         aria-label="Edit User Role"
                       />
-=======
-                        onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
-                        className="px-2 py-1 border border-[#D8D2C8] rounded-lg text-xs text-[#133020] bg-white font-bold cursor-pointer"
-                      >
-                        <option value="ADMIN">ADMIN</option>
-                        <option value="SUPERVISOR">SUPERVISOR</option>
-                        <option value="INTERN">INTERN</option>
-                      </select>
->>>>>>> b62534b (feat: event attendance, enlarged fit score badges, bento filter system, queues/history/users UI redesign, and sticky header blur)
                     ) : (
                       <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] uppercase ${getRoleBadgeStyle(u.role)}`}>
                         {u.role}
@@ -473,20 +463,10 @@ export default function UsersPage() {
               </label>
               <LifewoodDropdown
                 value={formData.role}
-<<<<<<< HEAD
                 onChange={(val) => setFormData({ ...formData, role: val })}
                 options={roleOptionsModal}
                 aria-label="System Role"
               />
-=======
-                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                className="w-full px-3.5 py-2.5 border border-[#D8D2C8] rounded-xl text-xs bg-white font-bold cursor-pointer"
-              >
-                <option value="INTERN">INTERN (Submit & View Catalog Only)</option>
-                <option value="SUPERVISOR">SUPERVISOR (Approve & Manage Records)</option>
-                <option value="ADMIN">ADMIN (Full Administrative Control)</option>
-              </select>
->>>>>>> b62534b (feat: event attendance, enlarged fit score badges, bento filter system, queues/history/users UI redesign, and sticky header blur)
             </div>
 
             <div className="flex justify-end gap-3 pt-3">

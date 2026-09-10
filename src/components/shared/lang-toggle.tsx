@@ -20,6 +20,14 @@ export function LangToggle() {
     }
   }, [locale]);
 
+  const handleToggle = () => {
+    const nextLang = locale === "en" ? "zh" : "en";
+    toggleLocale();
+    toast.success(
+      nextLang === "en" ? "Language switched to English" : "语言已切换为 中文"
+    );
+  };
+
   return (
     <div
       onClick={handleToggle}
