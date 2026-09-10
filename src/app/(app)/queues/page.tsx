@@ -64,7 +64,7 @@ export default function QueuesPage() {
   const filteredItems = items.filter((i) => i.type === activeTab);
 
   return (
-    <div className="space-y-6 font-manrope">
+    <div className="min-h-screen -m-8 p-8 space-y-8 font-manrope bg-[#F5EEDB] dark:bg-[#133020] text-[#133020] dark:text-white transition-colors duration-300">
       {/* Page Header */}
       <div className="flex items-center justify-between flex-wrap gap-4 border-b border-[#D8D2C8] pb-4">
         <div>
@@ -73,10 +73,10 @@ export default function QueuesPage() {
               <ListTodo className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-[#133020]">
+              <h2 className="text-2xl font-bold text-[#FFB347]">
                 {locale === "en" ? "Review & Governance Queues" : "审核与更正队列"}
               </h2>
-              <p className="text-xs text-[#666666] mt-0.5">
+              <p className="text-xs text-black dark:text-white/60 mt-0.5">
                 Supervisor & Admin approval pipeline for intern drafts, AI scraped records, and data corrections
               </p>
             </div>
@@ -85,7 +85,7 @@ export default function QueuesPage() {
 
         {userRole === "INTERN" && (
           <div className="px-3.5 py-2 bg-[#FFB347]/20 border border-[#FFB347] text-[#133020] text-xs font-bold rounded-xl flex items-center gap-2">
-            <Clock className="w-4 h-4 text-[#C17110]" />
+            <Clock className="w-4 h-4 text-[#FFFFFF]" />
             <span>Intern Submissions Awaiting Supervisor Review</span>
           </div>
         )}

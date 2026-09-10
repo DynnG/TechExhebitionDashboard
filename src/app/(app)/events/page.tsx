@@ -124,14 +124,14 @@ export default function EventsPage() {
   };
 
   return (
-    <div className="space-y-6 font-manrope">
+    <div className="min-h-screen -m-8 p-8 space-y-8 font-manrope bg-[#F5EEDB] dark:bg-[#133020] text-[#133020] dark:text-white transition-colors duration-300">
       {/* Top Section */}
       <div className="flex items-center justify-between flex-wrap gap-4 border-b border-[#D8D2C8] pb-4">
         <div>
-          <h2 className="text-[28px] font-semibold text-[#133020] tracking-tight leading-tight">
+          <h2 className="text-[28px] font-semibold text-[#FFB347] tracking-tight leading-tight">
             {locale === "en" ? "Exhibition records" : "展会记录库"}
           </h2>
-          <p className="text-xs text-[#333333] mt-0.5">
+          <p className="text-xs text-black dark:text-white/60 mt-0.5">
             {locale === "en"
               ? `Showing ${pagination.totalCount} strategic tech exhibition records (fit score 3+)`
               : `显示 ${pagination.totalCount} 条战略科技展会记录（适配分 3+）`}

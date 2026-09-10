@@ -87,7 +87,7 @@ export default function HistoryPage() {
   };
 
   return (
-    <div className="space-y-6 font-manrope">
+    <div className="min-h-screen -m-8 p-8 space-y-8 font-manrope bg-[#F5EEDB] dark:bg-[#133020] text-[#133020] dark:text-white transition-colors duration-300">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4 border-b border-[#D8D2C8] pb-4">
         <div>
@@ -96,10 +96,10 @@ export default function HistoryPage() {
               <History className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-[#133020]">
+              <h2 className="text-2xl font-bold text-[#FFB347]">
                 {locale === "en" ? "Governance & Attendance History" : "审核与参展历史记录"}
               </h2>
-              <p className="text-xs text-[#333333] mt-0.5">
+              <p className="text-xs text-black dark:text-white/60 mt-0.5">
                 Historical audit log for supervisor queue decisions (30-day retention) and permanent attended exhibition records
               </p>
             </div>
@@ -142,13 +142,13 @@ export default function HistoryPage() {
       {loading ? (
         <div className="py-20 flex flex-col items-center justify-center text-[#046241]">
           <Loader2 className="w-8 h-8 animate-spin mb-2" />
-          <span className="text-xs font-semibold text-[#133020]">
+          <span className="text-xs font-semibold text-[#133020] dark:text-white">
             Loading history records...
           </span>
         </div>
       ) : activeTab === "DECISIONS" ? (
         <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-[#F5EEDB] rounded-xl border border-[#D8D2C8] text-xs text-[#133020]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-[#F5EEDB] dark:bg-[#FFFFFF] rounded-xl border border-[#D8D2C8] dark:border-[#1E4830] text-xs text-[#133020] dark:text-black transition-colors duration-300">
             <div className="flex items-center gap-2">
               <ClockIcon className="w-4 h-4 text-[#C17110] shrink-0" />
               <span>
@@ -261,7 +261,7 @@ export default function HistoryPage() {
       ) : (
         /* ATTENDED EXHIBITIONS TAB — Strictly View Only & Delete Only */
         <div className="space-y-4 font-manrope">
-          <div className="p-3.5 bg-[#046241]/10 rounded-xl border border-[#046241]/20 text-xs text-[#046241] flex items-center justify-between font-semibold">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-[#F5EEDB] dark:bg-[#FFFFFF] rounded-xl border border-[#D8D2C8] dark:border-[#1E4830] text-xs text-[#133020] dark:text-black transition-colors duration-300">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-[#046241] shrink-0" />
               <span>
