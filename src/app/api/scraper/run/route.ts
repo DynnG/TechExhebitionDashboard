@@ -26,15 +26,21 @@ export async function POST(req: Request) {
     const businessLines = body.businessLines || [];
 
     // Execute Live Web Crawling directly in Node.js
+    liveScraperStore.status = "running";
+    liveScraperStore.started_at = new Date().toISOString();
     const liveResults = await runLiveWebCrawler(regions, businessLines);
     liveScraperStore.results = liveResults;
+    liveScraperStore.status = "completed";
+    liveScraperStore.events_found = liveResults.length;
+    liveScraperStore.completed_at = new Date().toISOString();
+    liveScraperStore.lastRunTime = new Date().toISOString();
 
     return NextResponse.json({
       message: "Live Web Scraper executed successfully",
       status: "completed",
       eventsFound: liveResults.length,
       results: liveResults,
-      completed_at: new Date().toISOString(),
+      completed_at: liveScraperStore.completed_at,
     });
   } catch (error: any) {
     return NextResponse.json(

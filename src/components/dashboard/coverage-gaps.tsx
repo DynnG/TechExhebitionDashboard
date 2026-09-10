@@ -215,11 +215,10 @@ export function CoverageGapsWidget({
           </div>
         </div>
       )}
-
       {/* Footer */}
-      <div className="mt-3 pt-3 border-t border-[#D8D2C8] flex items-center justify-between text-[11px] text-[#666666] shrink-0">
-        <span className="text-[#046241] font-semibold flex items-center gap-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#046241]" />
+      <div className="mt-3 pt-3 border-t border-[#D8D2C8] dark:border-[#1E4830] flex items-center justify-between text-[11px] text-[#666666] dark:text-white/60 shrink-0">
+        <span className="text-[#046241] dark:text-[#52B788] font-semibold flex items-center gap-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#046241] dark:bg-[#52B788]" />
 
           <span>
             {view === "months"

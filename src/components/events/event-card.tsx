@@ -82,18 +82,17 @@ export function EventCard({ event }: EventCardProps) {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
-            <PriorityIndicator priority={localized.priorityLevel} />
+          <div className="flex items-center shrink-0">
             {/* Enlarged numeric fit score + High / Mid / Low indicator below */}
             <div
-              className="flex flex-col items-center justify-center min-w-[44px] px-2 py-1 rounded-[8px] bg-[#F5EEDB]/50 border border-[#D8D2C8]"
+              className="flex flex-col items-center justify-center min-w-[44px] px-2.5 py-1 rounded-[8px] bg-[#F9F7F7] dark:bg-[#133020] border border-[#D8D2C8] dark:border-[#1E4830]"
               title={
                 locale === "zh"
                   ? `战略适配度：${localized.fitScore}/5 (${fitLevel})`
                   : `Fit score: ${localized.fitScore}/5 (${fitLevel} fit)`
               }
             >
-              <span className="text-[26px] font-extrabold text-[#133020] leading-none">
+              <span className="text-[26px] font-extrabold text-[#133020] dark:text-white leading-none">
                 {localized.fitScore}
               </span>
               <span className={`text-[9.5px] font-bold uppercase tracking-wider mt-0.5 ${fitColor}`}>

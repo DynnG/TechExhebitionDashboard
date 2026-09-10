@@ -55,7 +55,7 @@ export function BusinessLineChart({ data }: BusinessLineChartProps) {
   }, [data, locale]);
 
   return (
-    <div className="bg-white p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] shadow-[0_2px_16px_rgba(0,0,0,0.05)] font-manrope">
+    <div className="bg-white p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] shadow-[0_2px_16px_rgba(0,0,0,0.05)] font-manrope h-[400px] flex flex-col">
       <div className="border-b border-[#D8D2C8] pb-3 mb-4">
         <h3 className="text-[14px] font-semibold text-[#133020]">
           {locale === "zh" ? "业务线展会分布" : "Business line distribution"}
@@ -67,7 +67,7 @@ export function BusinessLineChart({ data }: BusinessLineChartProps) {
         </p>
       </div>
 
-      <div className="h-64 w-full">
+      <div className="flex-1 min-h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             layout="vertical"

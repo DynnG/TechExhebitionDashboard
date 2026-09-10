@@ -37,7 +37,7 @@ export function FitScoreChart({ data }: FitScoreChartProps) {
   }, [data, locale]);
 
   return (
-    <div className="bg-white p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] shadow-[0_2px_16px_rgba(0,0,0,0.05)] font-manrope flex flex-col justify-between">
+    <div className="bg-white p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] shadow-[0_2px_16px_rgba(0,0,0,0.05)] font-manrope h-[400px] flex flex-col justify-between">
       <div>
         <div className="flex items-center justify-between border-b border-[#D8D2C8] pb-3 mb-4">
           <div>
@@ -53,7 +53,7 @@ export function FitScoreChart({ data }: FitScoreChartProps) {
           </span>
         </div>
 
-        <div className="h-48 w-full [&_*:focus]:outline-none [&_path]:outline-none relative">
+                <div className="h-56 w-full [&_*:focus]:outline-none [&_path]:outline-none relative">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart style={{ outline: "none" }}>
               <Pie

@@ -202,10 +202,10 @@ export default function UsersPage() {
               <Users className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-[#133020]">
+              <h2 className="text-2xl text-[#FFB347] font-bold">
                 {locale === "en" ? "User Management & RBAC Governance" : "用户管理与权限控制"}
               </h2>
-              <p className="text-xs text-[#666666] mt-0.5">
+              <p className="text-xs text-black dark:text-white/60 mt-0.5">
                 {locale === "zh"
                   ? "管理系统账号、基于角色的访问权限 (RBAC) 与安全凭证"
                   : "Administer platform accounts, role-based access controls, and security credentials"}

@@ -77,39 +77,39 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
   };
 
   return (
-    <div className="bg-white p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] shadow-[0_2px_16px_rgba(0,0,0,0.05)] font-manrope">
-      <div className="flex items-center justify-between flex-wrap gap-3 mb-4 border-b border-[#D8D2C8] pb-3">
+    <div className="bg-white dark:bg-[#1A3828] p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] dark:border-[#1E4830] shadow-[0_2px_16px_rgba(0,0,0,0.05)] font-manrope h-full min-h-[420px] flex flex-col justify-between transition-colors">
+      <div className="flex items-center justify-between min-h-[52px] flex-wrap gap-3 mb-4 border-b border-[#D8D2C8] dark:border-[#1E4830] pb-3">
         <div>
-          <h3 className="text-[14px] font-semibold text-[#133020]">
+          <h3 className="text-[14px] font-semibold text-[#133020] dark:text-white">
             {locale === "zh" ? "各月份展会分布" : "Exhibitions distribution by month"}
           </h3>
-          <p className="text-[11px] text-[#666666]">
+          <p className="text-[11px] text-[#666666] dark:text-white/60">
             {locale === "zh"
               ? "目标阈值：每月 ≥ 5 场展会（空缺月份以藏红橙高亮）"
               : "Target threshold: ≥ 5 exhibitions per month (gaps highlighted in Saffron)"}
           </p>
         </div>
 
-        {/* Custom Interactive Date Range Pickers (Month, Day, Year) */}
-        <div className="flex items-center gap-2 flex-wrap text-xs">
-          <div className="flex items-center gap-1.5 bg-[#F9F7F7] px-2.5 py-1.5 rounded-[8px] border-[1.5px] border-[#D8D2C8]">
-            <Calendar className="w-3.5 h-3.5 text-[#046241]" />
-            <span className="font-semibold text-[#133020]">{locale === "zh" ? "起始:" : "From:"}</span>
+        {/* Unified Interactive Date Range Picker with Single Icon & Clear From / To Labels */}
+        <div className="flex items-center gap-2 bg-[#F9F7F7] dark:bg-[#133020] px-3 py-1.5 rounded-[8px] border-[1.5px] border-[#D8D2C8] dark:border-[#1E4830] text-xs">
+          <Calendar className="w-4 h-4 text-[#046241] dark:text-[#2EA87A] shrink-0" />
+          <div className="flex items-center gap-1.5">
+            <span className="font-bold text-[#133020] dark:text-white text-[11px]">{locale === "zh" ? "从" : "From"}:</span>
             <input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="bg-transparent text-xs font-semibold text-[#133020] focus:outline-none cursor-pointer"
+              className="bg-transparent text-xs font-semibold text-[#133020] dark:text-white focus:outline-none cursor-pointer"
             />
           </div>
-
-          <div className="flex items-center gap-1.5 bg-[#F9F7F7] px-2.5 py-1.5 rounded-[8px] border-[1.5px] border-[#D8D2C8]">
-            <span className="font-semibold text-[#133020]">{locale === "zh" ? "截止:" : "To:"}</span>
+          <span className="text-[#999999] dark:text-white/40 font-bold">—</span>
+          <div className="flex items-center gap-1.5">
+            <span className="font-bold text-[#133020] dark:text-white text-[11px]">{locale === "zh" ? "至" : "To"}:</span>
             <input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="bg-transparent text-xs font-semibold text-[#133020] focus:outline-none cursor-pointer"
+              className="bg-transparent text-xs font-semibold text-[#133020] dark:text-white focus:outline-none cursor-pointer"
             />
           </div>
 
@@ -117,7 +117,7 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
             <button
               onClick={handleResetDates}
               title={locale === "zh" ? "重置日期范围" : "Reset Date Range"}
-              className="px-2.5 py-1 text-[#046241] bg-[#046241]/10 hover:bg-[#046241]/20 rounded-[8px] transition flex items-center gap-1 font-semibold text-[11px]"
+              className="ml-1 px-1.5 py-0.5 text-[#046241] dark:text-[#2EA87A] bg-[#046241]/10 hover:bg-[#046241]/20 rounded-[6px] transition flex items-center gap-1 font-semibold text-[11px]"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>{locale === "zh" ? "重置" : "Reset"}</span>
@@ -137,7 +137,7 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
         </div>
       </div>
 
-      <div className="h-64 w-full">
+      <div className="flex-1 min-h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={formattedData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <XAxis

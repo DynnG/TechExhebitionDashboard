@@ -12,14 +12,14 @@ export default function LoginPage() {
   const { locale } = useLocaleStore();
 
   return (
-    <div className="min-h-screen font-manrope grid grid-cols-1 lg:grid-cols-2 bg-[#F9F7F7] relative overflow-hidden">
+    <div className="h-screen w-screen overflow-hidden font-manrope grid grid-cols-1 lg:grid-cols-2 bg-[#F9F7F7] relative">
       {/* Top right language switcher */}
-      <div className="absolute top-5 right-5 z-50">
+      <div className="absolute top-4 right-4 z-50">
         <LangToggle />
       </div>
 
       {/* Left Panel */}
-      <div className="hidden lg:flex flex-col p-12 lg:p-16 bg-[#133020] text-white relative overflow-hidden">
+      <div className="hidden lg:flex flex-col justify-between p-8 lg:p-10 xl:p-12 bg-[#133020] text-white relative overflow-hidden h-full">
         {/* Backdrop Image */}
         <div
           className="absolute inset-0 bg-cover bg-center opacity-20 mix-blend-luminosity pointer-events-none z-0 scale-105 transition-transform duration-1000"

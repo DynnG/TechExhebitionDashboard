@@ -439,26 +439,18 @@ export default function EventScraperDashboard() {
   };
 
   return (
-    <div className="p-6 font-manrope space-y-5 bg-white">
+    <div className="p-6 font-manrope space-y-5 bg-white dark:bg-[#1A3828] transition-colors">
       {/* Header bar */}
-      <div className="flex items-start justify-between flex-wrap gap-4 border-b border-[#D8D2C8] pb-4">
+      <div className="flex items-start justify-between flex-wrap gap-4 border-b border-[#D8D2C8] dark:border-[#1E4830] pb-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <h2 className="text-[18px] font-semibold text-[#133020]">
+            <h2 className="text-[18px] font-semibold text-[#133020] dark:text-white">
               {locale === "zh"
-                ? "科技展会智能发现与抓取引擎 (Batch 11)"
-                : "Tech exhibition discovery engine (Batch 11)"}
+                ? "科技展会智能发现与抓取引擎"
+                : "Tech exhibition discovery engine"}
             </h2>
-            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#046241] bg-[#046241]/10 px-2.5 py-0.5 rounded-full">
-              <Sparkles className="w-3 h-3" />
-              <span>
-                {locale === "zh"
-                  ? "实时数据流 · Apify + Gemini 2.5 Flash"
-                  : "Real-Time Stream · Apify + Gemini 2.5 Flash"}
-              </span>
-            </span>
           </div>
-          <p className="text-[12px] text-[#666666]">
+          <p className="text-[12px] text-[#666666] dark:text-white/60">
             {locale === "zh"
               ? "目标范围：2026年9月1日 – 2027年12月31日 · 自动化 27 维度审计 · 最低适配度 3+ 阈值要求"
               : "Target scope: Sep 1, 2026 – Dec 31, 2027 · Automated 27-column audit · Minimum Fit 3+ enforcement"}
@@ -489,24 +481,24 @@ export default function EventScraperDashboard() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            disabled={loading}
+            onKeyDown={(e) => e.key === "Enter" && !loading && handleCrawl()}
             placeholder={
               locale === "zh"
-                ? "例如：tech exhibition 2027 Singapore OR Hong Kong OR United States"
-                : "e.g. tech exhibition 2027 Singapore OR Hong Kong OR United States"
+                ? "搜索关键词（如：AI, Healthcare, IoT, FinTech）..."
+                : "Search keywords (e.g., AI, Healthcare, IoT, FinTech)..."
             }
-            className="w-full px-4 py-2.5 rounded-[8px] border border-[#D8D2C8] bg-white text-xs text-[#133020] placeholder-[#999999] focus:outline-none focus:border-[#046241] focus:ring-2 focus:ring-[#046241]/15 transition disabled:opacity-60"
+            className="w-full bg-[#F9F7F7] dark:bg-[#133020] border border-[#D8D2C8] dark:border-[#1E4830] rounded-[8px] px-3.5 py-2 text-xs text-[#133020] dark:text-white placeholder-[#888888] focus:outline-hidden focus:border-[#046241] focus:ring-1 focus:ring-[#046241] transition-all"
           />
         </div>
 
         {!loading ? (
           <button
             onClick={handleCrawl}
-            className="px-5 py-2.5 rounded-[8px] bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] font-semibold text-xs shadow-xs transition-all duration-180 flex items-center gap-2 shrink-0 cursor-pointer"
+            className="px-5 py-2.5 rounded-[8px] bg-[#046241] hover:bg-[#034d33] text-white font-semibold text-xs shadow-xs transition-all duration-180 flex items-center gap-2 shrink-0 cursor-pointer"
           >
-            <Play className="w-3.5 h-3.5 fill-[#133020]" />
+            <Play className="w-3.5 h-3.5 fill-white" />
             <span>
-              {locale === "zh" ? "启动 AI 智能抓取" : "Start discovery & crawl"}
+              {locale === "zh" ? "开始抓取" : "Start Scraping"}
             </span>
           </button>
         ) : (

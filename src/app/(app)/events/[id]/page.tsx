@@ -50,6 +50,8 @@ export default function EventDetailPage() {
   const [loading, setLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
 
+  const localized = useMemo(() => (event ? localizeEvent(event, locale) : null), [event, locale]);
+
   useEffect(() => {
     async function fetchEvent() {
       try {
@@ -104,8 +106,6 @@ export default function EventDetailPage() {
       </div>
     );
   }
-
-  const localized = useMemo(() => (event ? localizeEvent(event, locale) : null), [event, locale]);
 
   let businessLines: string[] = [];
   try {
@@ -238,7 +238,6 @@ export default function EventDetailPage() {
                 </span>
               </button>
 
-              <PriorityIndicator priority={localized?.priorityLevel} />
               <FitScoreBadge score={localized?.fitScore} size="xl" showLevel />
             </div>
           </div>

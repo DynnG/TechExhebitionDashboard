@@ -148,14 +148,14 @@ export default function EventsPage() {
   };
 
   return (
-    <div className="space-y-6 font-manrope">
+    <div className="min-h-screen -m-8 p-8 space-y-8 font-manrope bg-[#F5EEDB] dark:bg-[#133020] text-[#133020] dark:text-white transition-colors duration-300">
       {/* Top Section */}
       <div className="flex items-center justify-between flex-wrap gap-4 border-b border-[#D8D2C8] pb-4">
         <div>
-          <h2 className="text-[28px] font-semibold text-[#133020] tracking-tight leading-tight">
+          <h2 className="text-[28px] font-semibold text-[#FFB347] tracking-tight leading-tight">
             {locale === "en" ? "Exhibition records" : "展会记录库"}
           </h2>
-          <p className="text-xs text-[#333333] mt-0.5">
+          <p className="text-xs text-black dark:text-white/60 mt-0.5">
             {locale === "en"
               ? `Showing ${pagination.totalCount} strategic tech exhibition records (fit score 3+)`
               : `显示 ${pagination.totalCount} 条战略科技展会记录（适配分 3+）`}
@@ -189,23 +189,17 @@ export default function EventsPage() {
             </button>
           </div>
 
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-1.5 px-4 py-2 bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] font-medium text-xs rounded-[8px] transition-all duration-180 shadow-2xs cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>{locale === "en" ? "Add event" : "+ 添加展会"}</span>
-          </button>
-        </div>
+                </div>
       </div>
 
-      {/* Filter Bar */}
+      {/* Filter Bar (includes Add Event beside search) */}
       <EventFilters
         filters={filters}
         onChange={handleFilterChange}
         onClear={handleClearFilters}
+        onAddEvent={() => setShowAddModal(true)}
       />
-
+      
       {/* Loading state */}
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
