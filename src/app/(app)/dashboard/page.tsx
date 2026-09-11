@@ -109,9 +109,9 @@ export default function DashboardPage() {
           icon={CalendarDays}
         />
         <StatCard
-          title={locale === "en" ? "2027 forward pipeline" : "2027 战略展会储备"}
+          title={locale === "en" ? "Monthly Pipeline Target" : "2027 战略展会储备"}
           value={stats.events2027}
-          subtitle={locale === "en" ? "Forward-looking target" : "前瞻储备展会指标"}
+          subtitle={locale === "en" ? "2027 target" : "前瞻储备展会指标"}
           icon={CalendarCheck}
         />
         <StatCard
