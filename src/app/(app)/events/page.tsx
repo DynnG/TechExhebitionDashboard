@@ -59,14 +59,30 @@ export default function EventsPage() {
     fitScore: "ALL",
     priority: "ALL",
     search: "",
+    sortBy: "NUMBER_ASC",
   });
 
   const [pagination, setPagination] = useState({
     page: 1,
-    limit: 25,
+    limit: 10,
     totalCount: 0,
     totalPages: 1,
   });
+
+  const [pageInput, setPageInput] = useState<string>("1");
+
+  useEffect(() => {
+    setPageInput(pagination.page.toString());
+  }, [pagination.page]);
+
+  const handlePageInputSubmit = () => {
+    const p = parseInt(pageInput, 10);
+    if (!isNaN(p) && p >= 1 && p <= pagination.totalPages) {
+      setPagination((prev) => ({ ...prev, page: p }));
+    } else {
+      setPageInput(pagination.page.toString());
+    }
+  };
 
   const fetchEvents = useCallback(async () => {
     setLoading(true);
@@ -79,6 +95,7 @@ export default function EventsPage() {
         fitScore: filters.fitScore,
         priority: filters.priority,
         search: filters.search,
+        sortBy: filters.sortBy,
       });
 
       const res = await fetch(`/api/events?${params.toString()}`);
@@ -123,6 +140,7 @@ export default function EventsPage() {
       fitScore: "ALL",
       priority: "ALL",
       search: "",
+      sortBy: "NUMBER_ASC",
     });
     setPagination((prev) => ({ ...prev, page: 1 }));
   };
@@ -208,6 +226,7 @@ export default function EventsPage() {
       {/* Filter Bar (includes Add Event beside search) */}
       <EventFilters
         filters={filters}
+        viewMode={viewMode}
         onChange={handleFilterChange}
         onClear={handleClearFilters}
         onAddEvent={() => setShowAddModal(true)}
@@ -254,30 +273,43 @@ export default function EventsPage() {
             <EventTable events={events} onDelete={handleDeleteClick} onEdit={(evt: any) => setEditingEvent(evt)} />
           )}
 
-          {/* Pagination Controls */}
+          {/* Interactive Pagination Controls with Centered Navigation */}
           {pagination.totalPages > 1 && (
-            <div className="mt-8 flex items-center justify-between text-xs text-[#666666] font-manrope">
-              <span>
-                {locale === "zh"
-                  ? `第 ${pagination.page} 页 / 共 ${pagination.totalPages} 页`
-                  : `Page ${pagination.page} of ${pagination.totalPages}`}
-              </span>
-              <div className="flex gap-2">
+            <div className="mt-8 flex items-center justify-center gap-4 text-xs font-manrope bg-white dark:bg-[#133020] p-4 rounded-xl border border-[#D8D2C8] dark:border-[#1E4830] shadow-2xs">
+              {/* Centered Prev / Input Page / Next Block */}
+              <div className="flex items-center justify-center gap-3">
                 <button
+                  type="button"
                   disabled={pagination.page <= 1}
-                  onClick={() =>
-                    setPagination((prev) => ({ ...prev, page: prev.page - 1 }))
-                  }
-                  className="px-3.5 py-1.5 rounded-[8px] border-[1.5px] border-[#D8D2C8] bg-white font-medium disabled:opacity-50 hover:bg-[#F9F7F7] transition"
+                  onClick={() => setPagination((prev) => ({ ...prev, page: prev.page - 1 }))}
+                  className="px-3.5 py-1.5 rounded-lg border border-[#D8D2C8] dark:border-[#235338] bg-[#F9F7F7] dark:bg-[#1A3D2A] text-[#133020] dark:text-white font-bold text-xs disabled:opacity-40 hover:bg-[#046241] hover:text-white transition cursor-pointer"
                 >
-                  {locale === "zh" ? "上一页" : "Previous"}
+                  {locale === "zh" ? "上一页" : "Prev"}
                 </button>
+
+                <div className="flex items-center gap-1.5 text-xs text-[#133020] dark:text-slate-200">
+                  <span>{locale === "zh" ? "第" : "Page"}</span>
+                  <input
+                    type="number"
+                    min={1}
+                    max={pagination.totalPages}
+                    value={pageInput}
+                    onChange={(e) => setPageInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handlePageInputSubmit();
+                    }}
+                    onBlur={handlePageInputSubmit}
+                    className="w-12 py-1 text-center font-bold text-xs bg-white dark:bg-[#1A3D2A] border border-[#D8D2C8] dark:border-[#235338] rounded-md text-[#133020] dark:text-white focus:outline-none focus:border-[#046241] focus:ring-1 focus:ring-[#046241] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    title={locale === "zh" ? "输入页码按 Enter 跳转" : "Type page number and press Enter"}
+                  />
+                  <span>{locale === "zh" ? `页 / 共 ${pagination.totalPages} 页` : `of ${pagination.totalPages}`}</span>
+                </div>
+
                 <button
+                  type="button"
                   disabled={pagination.page >= pagination.totalPages}
-                  onClick={() =>
-                    setPagination((prev) => ({ ...prev, page: prev.page + 1 }))
-                  }
-                  className="px-3.5 py-1.5 rounded-[8px] border-[1.5px] border-[#D8D2C8] bg-white font-medium disabled:opacity-50 hover:bg-[#F9F7F7] transition"
+                  onClick={() => setPagination((prev) => ({ ...prev, page: prev.page + 1 }))}
+                  className="px-3.5 py-1.5 rounded-lg border border-[#D8D2C8] dark:border-[#235338] bg-[#F9F7F7] dark:bg-[#1A3D2A] text-[#133020] dark:text-white font-bold text-xs disabled:opacity-40 hover:bg-[#046241] hover:text-white transition cursor-pointer"
                 >
                   {locale === "zh" ? "下一页" : "Next"}
                 </button>

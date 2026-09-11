@@ -15,8 +15,9 @@ export async function GET(req: Request) {
     const status = searchParams.get("status");
     const isAttendedParam = searchParams.get("isAttended");
 
+    const sortBy = searchParams.get("sortBy") || "NUMBER_ASC";
     const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "25");
+    const limit = parseInt(searchParams.get("limit") || "10");
     const skip = (page - 1) * limit;
 
     const where: any = {};
@@ -28,16 +29,27 @@ export async function GET(req: Request) {
     }
 
     if (region && region !== "ALL") {
-      where.region = region;
+      const regionsList = region.split(",").map((r) => r.trim()).filter(Boolean);
+      if (regionsList.length > 0) {
+        where.region = { in: regionsList };
+      }
     }
 
     if (priority && priority !== "ALL") {
-      where.priorityLevel = priority;
+      const prioritiesList = priority.split(",").map((p) => p.trim()).filter(Boolean);
+      if (prioritiesList.length > 0) {
+        where.priorityLevel = { in: prioritiesList };
+      }
     }
 
     if (fitScore && fitScore !== "ALL") {
-      const scores = fitScore.split(",").map(Number);
-      where.fitScore = { in: scores };
+      const scores = fitScore
+        .split(",")
+        .map(Number)
+        .filter((n) => !isNaN(n));
+      if (scores.length > 0) {
+        where.fitScore = { in: scores };
+      }
     }
 
     if (status && status !== "ALL") {
@@ -57,10 +69,19 @@ export async function GET(req: Request) {
       ];
     }
 
+    // Determine sorting order
+    let orderBy: any = { eventNumber: "asc" };
+    if (sortBy === "NUMBER_DESC") orderBy = { eventNumber: "desc" };
+    else if (sortBy === "NAME_ASC") orderBy = { eventName: "asc" };
+    else if (sortBy === "NAME_DESC") orderBy = { eventName: "desc" };
+    else if (sortBy === "DATE_ASC") orderBy = { startDate: "asc" };
+    else if (sortBy === "DATE_DESC") orderBy = { startDate: "desc" };
+    else if (sortBy === "FIT_DESC") orderBy = { fitScore: "desc" };
+
     // Fetch events
     let events = await db.event.findMany({
       where,
-      orderBy: { startDate: "asc" },
+      orderBy,
       skip,
       take: limit,
       include: {
@@ -70,16 +91,16 @@ export async function GET(req: Request) {
       },
     });
 
-    // Client side filter for JSON string businessLines array
+    // Client side filter for JSON string businessLines array (supports multi-select comma-separated list)
     if (businessLine && businessLine !== "ALL") {
+      const blList = businessLine.split(",").map((b) => b.trim().toLowerCase()).filter(Boolean);
       events = events.filter((evt) => {
         try {
-          const lines: string[] = JSON.parse(evt.businessLines);
-          return lines.some(
-            (l) => l.toLowerCase() === businessLine.toLowerCase()
-          );
+          const lines: string[] = JSON.parse(evt.businessLines).map((l: string) => l.toLowerCase());
+          return lines.some((l) => blList.some((b) => l.includes(b) || b.includes(l)));
         } catch {
-          return evt.businessLines.includes(businessLine);
+          const raw = evt.businessLines.toLowerCase();
+          return blList.some((b) => raw.includes(b));
         }
       });
     }
