@@ -39,7 +39,7 @@ export default function LoginPage() {
           <div className="flex flex-col items-start gap-1">
             <img
               src="/Logo 2.png"
-              alt="Lifewood"
+              alt="Lifewood Data Technology"
               className="h-10 sm:h-14 w-auto object-contain drop-shadow-md"
             />
             <p className="text-[10px] text-[#F5EEDB]/70 tracking-widest font-semibold uppercase">
@@ -107,14 +107,20 @@ export default function LoginPage() {
 
         {/* Bottom Tagline */}
         <div className="relative z-10 pt-4 border-t border-white/10 flex items-center justify-between text-[11px] text-[#F5EEDB]/60">
-          <span className="text-[#FFB347]">© 2026 Lifewood 活树</span>
+          <span className="text-[#FFB347]">
+            {locale === "zh"
+              ? "由 Lifewood PH 提供支持"
+              : "Powered by Lifewood PH"}
+          </span>
         </div>
       </div>
 
-      {/* Right Panel */}
+      {/* Right Panel - Clean White Background */}
       <div className="flex items-center justify-center p-4 sm:p-8 relative bg-[#F9F7F7] h-full overflow-hidden">
+        {/* Animated Nodes Canvas */}
         <LivingWoodNetwork variant="dark" />
 
+        {/* Login Form Container */}
         <div className="relative z-10 w-full max-w-md">
           <Suspense
             fallback={

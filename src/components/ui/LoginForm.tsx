@@ -81,12 +81,6 @@ export function LoginForm() {
     }
   };
 
-  const setQuickUser = (userEmail: string, pass: string) => {
-    if (cooldownSeconds > 0) return;
-    setEmail(userEmail);
-    setPassword(pass);
-  };
-
   const formatTime = (secs: number) => {
     const mins = Math.floor(secs / 60);
     const remainingSecs = secs % 60;
@@ -94,10 +88,15 @@ export function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-lg bg-white rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] p-6 sm:p-8 border border-[#D8D2C8] relative font-manrope">
-      {/* Top Header with Logo at Top Left */}
-      <div className="flex items-center justify-between mb-4">
-        <span className="text-[10px] font-bold text-[#046241] uppercase tracking-wider bg-[#046241]/10 px-2.5 py-1 rounded-full">
+    <div className="w-full max-w-lg bg-white/95 backdrop-blur-md rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] p-6 sm:p-8 border border-[#D8D2C8] relative font-manrope z-10">
+      {/* Brand Logo & Portal Access Badge Side-by-Side */}
+      <div className="flex items-center justify-between gap-4 mb-5">
+        <img
+          src="/LifeScout Light Mode.png"
+          alt="Lifewood Data Technology"
+          className="h-12 sm:h-20 w-auto object-contain shrink-0"
+        />
+        <span className="text-[10px] font-bold text-[#046241] uppercase tracking-wider bg-[#046241]/10 px-3 py-1.5 rounded-full shrink-0">
           Portal Access
         </span>
       </div>
@@ -189,48 +188,9 @@ export function LoginForm() {
 
       <SocialLinks />
 
-      <div className="mt-4 pt-3 border-t border-[#D8D2C8]">
-        <p className="text-[11px] text-[#666666] mb-2 font-medium">
-          {locale === "zh"
-            ? "快速切换演示账号："
-            : "Quick switch demo account:"}
-        </p>
-        <div className="grid grid-cols-3 gap-2">
-          <button
-            type="button"
-            disabled={cooldownSeconds > 0}
-            onClick={() => setQuickUser("admin@lifewood.com", "admin123")}
-            className="py-1.5 px-2.5 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-xl border border-[#D8D2C8] transition text-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {locale === "zh" ? "超级管理员 (Superadmin)" : "Superadmin"}
-          </button>
-          <button
-            type="button"
-            disabled={cooldownSeconds > 0}
-            onClick={() =>
-              setQuickUser("supervisor@lifewood.com", "supervisor123")
-            }
-            className="py-1.5 px-2.5 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-xl border border-[#D8D2C8] transition text-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {locale === "zh" ? "管理员 (Admin)" : "Admin"}
-          </button>
-          <button
-            type="button"
-            disabled={cooldownSeconds > 0}
-            onClick={() => setQuickUser("intern@lifewood.com", "intern123")}
-            className="py-1.5 px-2.5 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-xl border border-[#D8D2C8] transition text-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {locale === "zh" ? "普通用户 (User)" : "User"}
-          </button>
-        </div>
-      </div>
-
-      <div className="mt-4 pt-2 flex items-center justify-between text-[10px] font-semibold text-[#8C9B9E] tracking-wider uppercase">
+      <div className="mt-6 pt-3 flex items-center justify-between text-[10px] font-semibold text-[#8C9B9E] tracking-wider uppercase border-t border-[#D8D2C8]">
         <span>© 2026 LIFEWOOD DATA TECHNOLOGY</span>
-        <div className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#046241] inline-block"></span>
-          <span>V 1.0</span>
-        </div>
+        <div className="flex items-center gap-1.5"></div>
       </div>
     </div>
   );

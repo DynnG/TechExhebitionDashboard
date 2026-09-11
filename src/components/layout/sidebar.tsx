@@ -113,26 +113,26 @@ export function Sidebar() {
 
       {/* Top Header & Logo Placeholder */}
       <div>
-        <div className="py-4 px-3 flex flex-col items-center border-b border-[#133020]/10 dark:border-white/10 transition-colors">
-    <div className="relative flex items-center justify-center w-full h-6">
-      {/* Light Mode Logo */}
-      <Image
-        src="/LifeScout Dark Mode.png"
-        alt="LifeScout logo"
-        width={150}
-        height={20}
-        className="object-contain dark:hidden"
-      />
-      {/* Dark Mode Logo */}
-      <Image
-        src="/LifeScout Light Mode.png"
-        alt="LifeScout logo"
-        width={150}
-        height={20}
-        className="object-contain hidden dark:block"
-      />
-    </div>
-  </div>
+        <div className="py-5 px-3 flex flex-col items-center border-b border-[#133020]/10 dark:border-white/10 transition-colors">
+          <div className="relative flex items-center justify-center w-full h-6">
+            {/* Light Mode Logo */}
+            <Image
+              src="/LifeScout Light Mode.png"
+              alt="LifeScout logo"
+              width={150}
+              height={20}
+              className="object-contain dark:hidden"
+            />
+            {/* Dark Mode Logo */}
+            <Image
+              src="/LifeScout Dark Mode.png"
+              alt="LifeScout logo"
+              width={150}
+              height={20}
+              className="object-contain hidden dark:block"
+            />
+          </div>
+        </div>
 
         {/* Navigation Items */}
         <nav className="p-3 space-y-1.5 mt-2">
