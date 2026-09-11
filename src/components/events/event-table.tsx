@@ -137,9 +137,6 @@ export function EventTable({ events, onDelete, onEdit }: EventTableProps) {
                 {renderSortIcon("priorityLevel")}
               </div>
             </th>
-            <th className="py-3.5 px-4 min-w-[100px]">
-              {t("events.table.action", "Action")}
-            </th>
             <th className="py-3.5 px-4 text-right min-w-[100px]">
               {t("events.table.manage", "Manage")}
             </th>
@@ -207,11 +204,6 @@ export function EventTable({ events, onDelete, onEdit }: EventTableProps) {
                   <div className="flex justify-center">
                     <PriorityIndicator priority={evt.priorityLevel} />
                   </div>
-                </td>
-                <td className="py-3 px-4 whitespace-nowrap">
-                  <span className="inline-block px-2.5 py-1 rounded-[6px] bg-[#FFB347]/30 text-[#133020] dark:text-slate-100 font-semibold text-[11px]">
-                    {evt.participationRec}
-                  </span>
                 </td>
                 <td className="py-3 px-4 text-right whitespace-nowrap">
                   <div className="flex items-center justify-end gap-2">

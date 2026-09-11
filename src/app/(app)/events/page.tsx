@@ -69,6 +69,21 @@ export default function EventsPage() {
     totalPages: 1,
   });
 
+  const [pageInput, setPageInput] = useState<string>("1");
+
+  useEffect(() => {
+    setPageInput(pagination.page.toString());
+  }, [pagination.page]);
+
+  const handlePageInputSubmit = () => {
+    const p = parseInt(pageInput, 10);
+    if (!isNaN(p) && p >= 1 && p <= pagination.totalPages) {
+      setPagination((prev) => ({ ...prev, page: p }));
+    } else {
+      setPageInput(pagination.page.toString());
+    }
+  };
+
   const fetchEvents = useCallback(async () => {
     setLoading(true);
     try {
@@ -257,39 +272,55 @@ export default function EventsPage() {
             <EventTable events={events} onDelete={handleDeleteClick} onEdit={(evt: any) => setEditingEvent(evt)} />
           )}
 
-          {/* Pagination Controls */}
+          {/* Interactive Pagination Controls with Direct Page Input */}
           {pagination.totalPages > 1 && (
-            <div className="mt-8 flex items-center justify-between text-xs text-[#666666] dark:text-slate-300 font-manrope bg-white dark:bg-[#133020] p-4 rounded-xl border border-[#D8D2C8] dark:border-[#1E4830]">
+            <div className="mt-8 flex flex-wrap items-center justify-between gap-4 text-xs font-manrope bg-white dark:bg-[#133020] p-4 rounded-xl border border-[#D8D2C8] dark:border-[#1E4830] shadow-2xs">
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-[#133020] dark:text-white">
                   {locale === "zh"
-                    ? `第 ${pagination.page} 页 / 共 ${pagination.totalPages} 页 (共 ${pagination.totalCount} 条记录)`
-                    : `Page ${pagination.page} of ${pagination.totalPages} (${pagination.totalCount} total events)`}
+                    ? `显示本页 ${events.length} 条展会 (共 ${pagination.totalCount} 条)`
+                    : `Showing ${events.length} events on this page (${pagination.totalCount} total)`}
                 </span>
                 <span className="px-2 py-0.5 rounded bg-[#F9F7F7] dark:bg-[#1A3D2A] border border-[#D8D2C8] dark:border-[#235338] text-[10px] text-[#046241] dark:text-[#FFB347] font-bold">
                   {locale === "zh" ? "每页 10 条" : "10 per page"}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
+
+              <div className="flex items-center gap-3">
                 <button
                   type="button"
                   disabled={pagination.page <= 1}
-                  onClick={() =>
-                    setPagination((prev) => ({ ...prev, page: prev.page - 1 }))
-                  }
-                  className="px-4 py-2 rounded-[8px] border-[1.5px] border-[#D8D2C8] dark:border-[#235338] bg-white dark:bg-[#1A3D2A] text-[#133020] dark:text-white font-bold disabled:opacity-40 hover:bg-[#F9F7F7] dark:hover:bg-[#046241] transition cursor-pointer"
+                  onClick={() => setPagination((prev) => ({ ...prev, page: prev.page - 1 }))}
+                  className="px-3.5 py-1.5 rounded-lg border border-[#D8D2C8] dark:border-[#235338] bg-[#F9F7F7] dark:bg-[#1A3D2A] text-[#133020] dark:text-white font-bold text-xs disabled:opacity-40 hover:bg-[#046241] hover:text-white transition cursor-pointer"
                 >
-                  {locale === "zh" ? "← 上一页" : "← Previous"}
+                  {locale === "zh" ? "上一页" : "Prev"}
                 </button>
+
+                <div className="flex items-center gap-1.5 text-xs text-[#133020] dark:text-slate-200">
+                  <span>{locale === "zh" ? "第" : "Page"}</span>
+                  <input
+                    type="number"
+                    min={1}
+                    max={pagination.totalPages}
+                    value={pageInput}
+                    onChange={(e) => setPageInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handlePageInputSubmit();
+                    }}
+                    onBlur={handlePageInputSubmit}
+                    className="w-12 py-1 text-center font-bold text-xs bg-white dark:bg-[#1A3D2A] border border-[#D8D2C8] dark:border-[#235338] rounded-md text-[#133020] dark:text-white focus:outline-none focus:border-[#046241] focus:ring-1 focus:ring-[#046241]"
+                    title={locale === "zh" ? "输入页码按 Enter 跳转" : "Type page number and press Enter"}
+                  />
+                  <span>{locale === "zh" ? `页 / 共 ${pagination.totalPages} 页` : `of ${pagination.totalPages}`}</span>
+                </div>
+
                 <button
                   type="button"
                   disabled={pagination.page >= pagination.totalPages}
-                  onClick={() =>
-                    setPagination((prev) => ({ ...prev, page: prev.page + 1 }))
-                  }
-                  className="px-4 py-2 rounded-[8px] border-[1.5px] border-[#D8D2C8] dark:border-[#235338] bg-white dark:bg-[#1A3D2A] text-[#133020] dark:text-white font-bold disabled:opacity-40 hover:bg-[#F9F7F7] dark:hover:bg-[#046241] transition cursor-pointer"
+                  onClick={() => setPagination((prev) => ({ ...prev, page: prev.page + 1 }))}
+                  className="px-3.5 py-1.5 rounded-lg border border-[#D8D2C8] dark:border-[#235338] bg-[#F9F7F7] dark:bg-[#1A3D2A] text-[#133020] dark:text-white font-bold text-xs disabled:opacity-40 hover:bg-[#046241] hover:text-white transition cursor-pointer"
                 >
-                  {locale === "zh" ? "下一页 →" : "Next →"}
+                  {locale === "zh" ? "下一页" : "Next"}
                 </button>
               </div>
             </div>
