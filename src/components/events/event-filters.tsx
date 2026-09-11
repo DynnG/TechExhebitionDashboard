@@ -5,7 +5,7 @@ import { REGIONS, BUSINESS_LINES, PRIORITIES } from "@/lib/constants/business-li
 import { Search, X, Filter, Plus, ArrowUpDown, ChevronDown, SlidersHorizontal } from "lucide-react";
 import { useTranslation } from "@/lib/i18n/use-translation";
 import { REGIONS_MAP, BUSINESS_LINES_MAP, PRIORITIES_MAP } from "@/lib/i18n/event-localization";
-import { LifewoodDropdown } from "@/components/shared/lifewood-dropdown";
+import { LifewoodDropdown, LifewoodMultiSelectDropdown } from "@/components/shared/lifewood-dropdown";
 
 interface EventFiltersProps {
   filters: {
@@ -182,13 +182,13 @@ export function EventFilters({ filters, viewMode = "card", onChange, onClear, on
             )}
           </div>
 
-          {/* Filter Dropdowns Grid */}
+          {/* Filter Dropdowns Grid (Multi-Select Enabled) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-wider text-[#666666] dark:text-slate-300 mb-1">
-                {locale === "zh" ? "大区 Region" : "Region"}
+                {locale === "zh" ? "大区 Region (多选)" : "Region (Multi-Select)"}
               </label>
-              <LifewoodDropdown
+              <LifewoodMultiSelectDropdown
                 value={filters.region}
                 onChange={(val) => onChange("region", val)}
                 options={regionOptions}
@@ -198,9 +198,9 @@ export function EventFilters({ filters, viewMode = "card", onChange, onClear, on
 
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-wider text-[#666666] dark:text-slate-300 mb-1">
-                {locale === "zh" ? "业务线 Business Line" : "Business Line"}
+                {locale === "zh" ? "业务线 Business Line (多选)" : "Business Line (Multi-Select)"}
               </label>
-              <LifewoodDropdown
+              <LifewoodMultiSelectDropdown
                 value={filters.businessLine}
                 onChange={(val) => onChange("businessLine", val)}
                 options={businessLineOptions}
@@ -210,9 +210,9 @@ export function EventFilters({ filters, viewMode = "card", onChange, onClear, on
 
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-wider text-[#666666] dark:text-slate-300 mb-1">
-                {locale === "zh" ? "契合度 Fit Score" : "Fit Score"}
+                {locale === "zh" ? "契合度 Fit Score (多选)" : "Fit Score (Multi-Select)"}
               </label>
-              <LifewoodDropdown
+              <LifewoodMultiSelectDropdown
                 value={filters.fitScore}
                 onChange={(val) => onChange("fitScore", val)}
                 options={fitScoreOptions}
@@ -222,9 +222,9 @@ export function EventFilters({ filters, viewMode = "card", onChange, onClear, on
 
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-wider text-[#666666] dark:text-slate-300 mb-1">
-                {locale === "zh" ? "优先级 Priority" : "Priority"}
+                {locale === "zh" ? "优先级 Priority (多选)" : "Priority (Multi-Select)"}
               </label>
-              <LifewoodDropdown
+              <LifewoodMultiSelectDropdown
                 value={filters.priority}
                 onChange={(val) => onChange("priority", val)}
                 options={priorityOptions}
