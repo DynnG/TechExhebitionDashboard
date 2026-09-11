@@ -14,7 +14,6 @@ export function Topbar() {
 
   const [isDark, setIsDark] = useState(false);
 
-  // Load saved theme
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
     const dark = savedTheme === "dark";
@@ -35,7 +34,8 @@ export function Topbar() {
     if (path.startsWith("/dashboard"))
       return locale === "en" ? "Dashboard" : "仪表板";
 
-    if (path === "/events") return locale === "en" ? "Events" : "展会列表";
+    if (path === "/events")
+      return locale === "en" ? "Events" : "展会列表";
 
     if (path === "/events/new")
       return locale === "en" ? "Add Event" : "添加展会记录";
@@ -89,7 +89,6 @@ export function Topbar() {
 
       {/* Right Actions */}
       <div className="flex items-center gap-3">
-        {/* Dark / Light Theme Toggle */}
         <motion.button
           onClick={toggleTheme}
           whileTap={{ scale: 0.95 }}
