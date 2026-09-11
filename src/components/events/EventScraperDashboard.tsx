@@ -32,7 +32,12 @@ import { toast } from "sonner";
 import { sanitizeEventUrl } from "@/lib/url";
 import { useTranslation } from "@/lib/i18n/use-translation";
 import { localizeEvent } from "@/lib/i18n/event-localization";
-import { ALL_COUNTRIES } from "@/lib/constants/countries";
+import {
+  ALL_COUNTRIES,
+  REGION_OPTIONS,
+  getCountriesByRegion,
+  getRegionByCountry,
+} from "@/lib/constants/countries";
 
 export interface EventRecord {
   no: number;
@@ -68,11 +73,11 @@ export interface EventRecord {
 }
 
 const YEAR_OPTIONS = [
-  { value: "2025", label: "2025" },
   { value: "2026", label: "2026" },
   { value: "2027", label: "2027" },
   { value: "2028", label: "2028" },
   { value: "2029", label: "2029" },
+  { value: "2030", label: "2030" },
 ];
 
 const MONTH_OPTIONS = [
@@ -92,18 +97,24 @@ const MONTH_OPTIONS = [
 
 const COUNTRY_OPTIONS = ALL_COUNTRIES;
 
-// Helper to calculate default date window: execution date + 1 month ahead
+// Helper to calculate default date window: execution date + 1 month ahead (strictly >= 2026)
 function calculateTargetDateWindow() {
   const executionDate = new Date();
+  if (executionDate.getFullYear() < 2026) {
+    executionDate.setFullYear(2026);
+  }
   const targetDate = new Date(executionDate);
   targetDate.setMonth(targetDate.getMonth() + 1);
+  if (targetDate.getFullYear() < 2026) {
+    targetDate.setFullYear(2026);
+  }
 
   const monthNamesEn = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
   ];
   const targetMonth = monthNamesEn[targetDate.getMonth()];
-  const targetYear = targetDate.getFullYear().toString();
+  const targetYear = Math.max(2026, targetDate.getFullYear()).toString();
 
   return {
     executionDate,
@@ -121,17 +132,16 @@ export default function EventScraperDashboard() {
   const [candidateUrls, setCandidateUrls] = useState<string[]>([]);
   const [events, setEvents] = useState<EventRecord[]>([]);
 
-  // Target Date Window (+1 month ahead from execution date)
+  // Target Date Window (+1 month ahead from execution date, strictly >= 2026)
   const initialWindow = useRef(calculateTargetDateWindow()).current;
 
-  // Preset Filters (Multi-Select Dropdowns)
-  const [selectedYears, setSelectedYears] = useState<string[]>([initialWindow.targetYear]);
-  const [selectedMonths, setSelectedMonths] = useState<string[]>([initialWindow.targetMonth]);
-  const [selectedCountries, setSelectedCountries] = useState<string[]>([
-    "Singapore",
-    "Malaysia",
-    "Philippines",
+  // Preset Filters (start with no pre-filled target for region & country)
+  const [selectedYears, setSelectedYears] = useState<string[]>([
+    parseInt(initialWindow.targetYear, 10) >= 2026 ? initialWindow.targetYear : "2026",
   ]);
+  const [selectedMonths, setSelectedMonths] = useState<string[]>([initialWindow.targetMonth || "January"]);
+  const [selectedRegion, setSelectedRegion] = useState<string>("");
+  const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
 
   // Optional Text Search
   const [optionalPrompt, setOptionalPrompt] = useState("");
@@ -168,7 +178,7 @@ export default function EventScraperDashboard() {
   const startIndex = (currentPage - 1) * pageSize;
   const paginatedEvents = displayedEvents.slice(startIndex, startIndex + pageSize);
 
-  // Dynamic query builder combining presets and optional prompt
+  // Dynamic query builder combining presets, region, countries, and optional prompt
   const buildScrapeQuery = () => {
     const parts: string[] = [];
 
@@ -182,12 +192,26 @@ export default function EventScraperDashboard() {
       parts.push(selectedMonths.join(" OR "));
     }
 
-    if (selectedYears.length > 0) {
-      parts.push(selectedYears.join(" OR "));
+    // Strictly ensure no year below 2026 is included
+    const validYears = selectedYears.filter((y) => parseInt(y, 10) >= 2026);
+    if (validYears.length > 0) {
+      parts.push(validYears.join(" OR "));
+    } else {
+      parts.push("2026");
     }
 
     if (selectedCountries.length > 0) {
-      parts.push(selectedCountries.join(" OR "));
+      if (selectedCountries.length > 8) {
+        if (selectedRegion && selectedRegion !== "All Regions") {
+          parts.push(`"${selectedRegion}"`);
+        } else {
+          parts.push(selectedCountries.slice(0, 5).map((c) => `"${c}"`).join(" OR "));
+        }
+      } else {
+        parts.push(selectedCountries.map((c) => `"${c}"`).join(" OR "));
+      }
+    } else if (selectedRegion && selectedRegion !== "All Regions") {
+      parts.push(`"${selectedRegion}"`);
     }
 
     return parts.join(" ");
@@ -260,8 +284,9 @@ export default function EventScraperDashboard() {
         targetDate: initialWindow.targetDate.toISOString(),
       },
       filters: {
-        years: selectedYears,
+        years: selectedYears.filter((y) => parseInt(y, 10) >= 2026),
         months: selectedMonths,
+        region: selectedRegion,
         countries: selectedCountries,
         optionalPrompt: optionalPrompt.trim(),
       },
@@ -599,44 +624,46 @@ export default function EventScraperDashboard() {
       </div>
 
       {/* Target Date Window & Preset Filters Control Card */}
-      <div className="bg-[#F9F7F7] border border-[#D8D2C8] rounded-2xl p-4.5 space-y-3.5 shadow-2xs">
+      <div className="bg-[#fcfdfc] border border-[#e5e7eb] rounded-2xl p-5 md:p-6 space-y-4 shadow-sm">
         {/* Target Date Window Banner */}
-        <div className="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-[#D8D2C8]/70">
-          <div className="flex items-center gap-2.5 text-xs">
-            <div className="w-7 h-7 rounded-xl bg-[#046241]/10 flex items-center justify-center text-[#046241]">
-              <Calendar className="w-4 h-4" />
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-[#e6f4ea] text-[#0f5132] flex items-center justify-center border border-[#d1e7dd] shrink-0">
+              <Calendar className="w-4 h-4 text-[#0f5132]" />
             </div>
-            <div>
-              <span className="font-bold text-[#133020]">
+            <div className="flex items-center flex-wrap text-sm">
+              <span className="font-normal text-[#1f2937]">
                 {locale === "zh" ? "自动化抓取目标时间窗口：" : "Target Scraping Date Window:"}
               </span>
-              <span className="ml-1.5 text-[#046241] font-extrabold text-xs">
+              <span className="ml-2 font-semibold text-[#046241]">
                 {initialWindow.executionDate.toLocaleDateString(locale === "zh" ? "zh-CN" : "en-US", { month: "short", day: "numeric", year: "numeric" })}
-                {" → "}
+                {" – "}
                 {initialWindow.targetDate.toLocaleDateString(locale === "zh" ? "zh-CN" : "en-US", { month: "short", day: "numeric", year: "numeric" })}
               </span>
             </div>
           </div>
-          <span className="px-2.5 py-0.5 rounded-full bg-[#046241]/10 text-[#046241] text-[11px] font-bold border border-[#046241]/20">
+          <span className="px-3 py-1 rounded-full bg-[#eaf5ee] text-[#0f5132] text-xs font-medium border border-[#cbe5d5]">
             {locale === "zh" ? "默认目标窗口：执行日 +1 个月" : "Default Target: +1 Month Ahead"}
           </span>
         </div>
 
-        {/* Preset Filters (Multi-Select Dropdowns) */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {/* Preset Filters (4-Column Layout: Year | Month | Country | Region) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <LifewoodMultiSelect
-            label={locale === "zh" ? "目标年份 (多选)" : "Target Year (Multi-Select)"}
-            placeholder={locale === "zh" ? "选择年份..." : "Select Year(s)..."}
+            label={locale === "zh" ? "目标年份" : "Target Year"}
+            placeholder={locale === "zh" ? "选择年份..." : "Select Year..."}
             options={YEAR_OPTIONS}
             selected={selectedYears}
             onChange={(val) => {
-              setSelectedYears(val);
+              const valid = val.filter((y) => parseInt(y, 10) >= 2026);
+              setSelectedYears(valid.length > 0 ? valid : ["2026"]);
               setCurrentPage(1);
             }}
           />
+
           <LifewoodMultiSelect
-            label={locale === "zh" ? "目标月份 (多选)" : "Target Month (Multi-Select)"}
-            placeholder={locale === "zh" ? "选择月份..." : "Select Month(s)..."}
+            label={locale === "zh" ? "目标月份" : "Target Month"}
+            placeholder={locale === "zh" ? "选择月份..." : "Select Month..."}
             options={MONTH_OPTIONS}
             selected={selectedMonths}
             onChange={(val) => {
@@ -644,60 +671,108 @@ export default function EventScraperDashboard() {
               setCurrentPage(1);
             }}
           />
+
           <LifewoodMultiSelect
-            label={locale === "zh" ? "目标国家/地区 (多选)" : "Target Country (Multi-Select)"}
-            placeholder={locale === "zh" ? "选择国家/地区..." : "Select Country(ies)..."}
+            label={locale === "zh" ? "目标国家" : "Target Country"}
+            placeholder={locale === "zh" ? "无目标国家 (不限)" : "No Target Country"}
             options={COUNTRY_OPTIONS}
             selected={selectedCountries}
             onChange={(val) => {
               setSelectedCountries(val);
+              // Auto-sync region if all selected countries belong to a region or if single country
+              if (val.length === 1) {
+                const reg = getRegionByCountry(val[0]);
+                if (reg) setSelectedRegion(reg);
+              }
               setCurrentPage(1);
             }}
             searchable={true}
+            activeRegion={selectedRegion}
+            onSelectAllRegion={
+              selectedRegion && selectedRegion !== "All Regions"
+                ? () => {
+                    const regionCountries = getCountriesByRegion(selectedRegion);
+                    setSelectedCountries(regionCountries);
+                  }
+                : undefined
+            }
+          />
+
+          <LifewoodMultiSelect
+            label={locale === "zh" ? "目标大区" : "Target Region"}
+            placeholder={locale === "zh" ? "无目标大区 (不限)" : "No Target Region"}
+            options={REGION_OPTIONS}
+            selected={selectedRegion ? [selectedRegion] : []}
+            singleSelect={true}
+            onChange={(val) => {
+              const regionName = val[0] || "";
+              setSelectedRegion(regionName);
+              if (regionName) {
+                const countriesInRegion = getCountriesByRegion(regionName);
+                setSelectedCountries(countriesInRegion);
+                toast.success(
+                  locale === "zh"
+                    ? `已选定【${regionName}】：自动选取该区域 ${countriesInRegion.length} 个国家。您可在【目标国家】中随时增删！`
+                    : `Selected ${regionName}: Automatically picked all ${countriesInRegion.length} countries. You can add or remove countries in Target Country!`
+                );
+              } else {
+                toast.info(
+                  locale === "zh"
+                    ? "已切换为【无目标大区】"
+                    : "Set to No Target Region."
+                );
+              }
+              setCurrentPage(1);
+            }}
           />
         </div>
 
         {/* Optional Text Search & Scrape Action Button */}
-        <div className="pt-1 flex items-center gap-3 flex-wrap sm:flex-nowrap">
-          <div className="relative flex-1">
-            <input
-              type="text"
-              value={optionalPrompt}
-              onChange={(e) => setOptionalPrompt(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && !loading && handleCrawl()}
-              placeholder={
-                locale === "zh"
-                  ? "可选关键词提示（如：AI, Healthcare, IoT - 选填，留空则依据预设过滤器抓取）..."
-                  : "Optional keyword prompt (e.g. AI, Healthcare, IoT - strictly optional)..."
-              }
-              className="w-full bg-white border border-[#D8D2C8] rounded-xl px-3.5 py-2 text-xs text-[#133020] placeholder-[#888888] focus:outline-none focus:border-[#046241] focus:ring-1 focus:ring-[#046241] transition-all shadow-2xs"
-            />
-          </div>
+        <div className="space-y-1.5">
+          <label className="block text-xs font-medium text-[#4b5563]">
+            {locale === "zh" ? "可选关键词提示" : "Optional keyword prompt"}
+          </label>
+          <div className="flex items-center gap-3">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={optionalPrompt}
+                onChange={(e) => setOptionalPrompt(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && !loading && handleCrawl()}
+                placeholder={
+                  locale === "zh"
+                    ? "可选关键词提示（如：AI, Healthcare, IoT - 选填）..."
+                    : "e.g. AI, Healthcare, IoT - strictly optional..."
+                }
+                className="w-full h-[42px] px-3.5 rounded-xl border border-[#d1d5db] bg-white text-sm text-[#111827] placeholder-[#9ca3af] focus:outline-none focus:border-[#046241] focus:ring-1 focus:ring-[#046241] transition-all"
+              />
+            </div>
 
-          {!loading ? (
-            <button
-              onClick={handleCrawl}
-              className="px-5 py-2.5 rounded-xl bg-[#FACC15] hover:bg-[#EAB308] text-[#133020] font-bold text-xs shadow-xs transition-all duration-180 flex items-center gap-2 shrink-0 cursor-pointer border border-[#EAB308]/60"
-            >
-              <Play className="w-3.5 h-3.5 fill-[#133020] text-[#133020]" />
-              <span>
-                {locale === "zh" ? "开始抓取" : "Start Scraping"}
-              </span>
-            </button>
-          ) : (
-            <button
-              onClick={handleStop}
-              className="px-5 py-2.5 rounded-xl bg-[#B91C1C] hover:bg-[#991B1B] text-white font-semibold text-xs shadow-xs transition-all duration-180 flex items-center gap-2 shrink-0 cursor-pointer animate-pulse"
-              title="Stop crawl and keep whatever events were already discovered"
-            >
-              <Square className="w-3.5 h-3.5 fill-white" />
-              <span>
-                {locale === "zh"
-                  ? `停止并保留 (${events.length})`
-                  : `Stop & keep (${events.length})`}
-              </span>
-            </button>
-          )}
+            {!loading ? (
+              <button
+                onClick={handleCrawl}
+                className="h-[42px] px-5 rounded-xl bg-[#046241] hover:bg-[#034d33] text-white font-medium text-xs shadow-xs transition-colors flex items-center gap-2 shrink-0 cursor-pointer"
+              >
+                <Play className="w-3.5 h-3.5 fill-white text-white" />
+                <span>
+                  {locale === "zh" ? "开始抓取" : "Start Scraping"}
+                </span>
+              </button>
+            ) : (
+              <button
+                onClick={handleStop}
+                className="h-[42px] px-4 rounded-xl bg-[#be4b49] hover:bg-[#a83f3e] text-white font-medium text-xs shadow-xs transition-colors flex items-center gap-2 shrink-0 cursor-pointer animate-pulse"
+                title="Stop crawl and keep whatever events were already discovered"
+              >
+                <Square className="w-3.5 h-3.5 fill-white text-white" />
+                <span>
+                  {locale === "zh"
+                    ? `停止并保留 (${events.length})`
+                    : `Stop & keep (${events.length})`}
+                </span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
