@@ -54,12 +54,16 @@ export const DICTIONARIES = {
     "common.fitScore": "Fit Score",
 
     // Roles
+    "role.superadmin": "Superadmin",
     "role.admin": "Admin",
-    "role.supervisor": "Supervisor",
-    "role.intern": "Intern",
-    "role.adminDesc": "ADMIN (Full Control)",
-    "role.supervisorDesc": "SUPERVISOR (Approve & Manage)",
-    "role.internDesc": "INTERN (Submit & View Only)",
+    "role.user": "User",
+    "role.superadminDesc": "SUPERADMIN (Full Control)",
+    "role.adminDesc": "ADMIN (Approve & Manage)",
+    "role.userDesc": "USER (Submit & View Only)",
+    "role.supervisor": "Admin",
+    "role.intern": "User",
+    "role.supervisorDesc": "ADMIN (Approve & Manage)",
+    "role.internDesc": "USER (Submit & View Only)",
 
     // Priorities
     "priority.high": "High",
@@ -255,9 +259,10 @@ export const DICTIONARIES = {
 
     // Queues Page
     "queues.title": "Review & Approval Queues",
-    "queues.subtitle": "Supervisor & Admin governance workflow for fit score rulings and data corrections",
-    "queues.internAwaiting": "Intern Submissions Awaiting Approval",
-    "queues.tabForReview": "For Review (Scraped & Intern Submissions)",
+    "queues.subtitle": "Admin & Superadmin governance workflow for fit score rulings and data corrections",
+    "queues.internAwaiting": "User Submissions Awaiting Approval",
+    "queues.userAwaiting": "User Submissions Awaiting Approval",
+    "queues.tabForReview": "For Review (Scraped & User Submissions)",
     "queues.tabCorrection": "Corrections Requested (Flagged Edits)",
     "queues.approve": "Approve & Publish",
     "queues.reject": "Reject",
@@ -282,7 +287,7 @@ export const DICTIONARIES = {
 
     // Users Page
     "users.title": "User Governance & Administration",
-    "users.subtitle": "Role-based access control (RBAC) management for Administrators, Supervisors, and Interns",
+    "users.subtitle": "Role-based access control (RBAC) management for Superadmins, Admins, and Users",
     "users.addUser": "Add User",
     "users.table.name": "User",
     "users.table.email": "Email",
@@ -363,12 +368,16 @@ export const DICTIONARIES = {
     "common.fitScore": "战略适配度",
 
     // Roles
+    "role.superadmin": "超级管理员",
     "role.admin": "管理员",
-    "role.supervisor": "主管",
-    "role.intern": "实习生",
-    "role.adminDesc": "管理员 (最高控制权限)",
-    "role.supervisorDesc": "主管 (审核与管理权限)",
-    "role.internDesc": "实习生 (仅录入与查看)",
+    "role.user": "普通用户",
+    "role.superadminDesc": "超级管理员 (最高控制权限)",
+    "role.adminDesc": "管理员 (审核与管理权限)",
+    "role.userDesc": "普通用户 (仅录入与查看)",
+    "role.supervisor": "管理员",
+    "role.intern": "普通用户",
+    "role.supervisorDesc": "管理员 (审核与管理权限)",
+    "role.internDesc": "普通用户 (仅录入与查看)",
 
     // Priorities
     "priority.high": "高",
@@ -564,9 +573,10 @@ export const DICTIONARIES = {
 
     // Queues Page
     "queues.title": "审核与更正队列",
-    "queues.subtitle": "主管与管理员双重审核流，确保战略契合度裁定与数据修正无误",
-    "queues.internAwaiting": "实习专员提交待审核",
-    "queues.tabForReview": "待审核展会 (抓取及实习生录入)",
+    "queues.subtitle": "管理员与超级管理员审核流，确保战略契合度裁定与数据修正无误",
+    "queues.internAwaiting": "普通用户提交待审核",
+    "queues.userAwaiting": "普通用户提交待审核",
+    "queues.tabForReview": "待审核展会 (抓取及用户录入)",
     "queues.tabCorrection": "申请修正项 (问题标记与修改)",
     "queues.approve": "审核通过并发布",
     "queues.reject": "驳回申请",
@@ -591,7 +601,7 @@ export const DICTIONARIES = {
 
     // Users Page
     "users.title": "用户权限与团队管理",
-    "users.subtitle": "基于角色的权限访问控制 (RBAC)，涵盖管理员、主管及实习专员账户",
+    "users.subtitle": "基于角色的权限访问控制 (RBAC)，涵盖超级管理员、管理员及普通用户账户",
     "users.addUser": "+ 添加用户",
     "users.table.name": "用户姓名",
     "users.table.email": "电子邮箱",

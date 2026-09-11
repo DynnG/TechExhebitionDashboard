@@ -202,7 +202,7 @@ export function LoginForm() {
             onClick={() => setQuickUser("admin@lifewood.com", "admin123")}
             className="py-1.5 px-2.5 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-xl border border-[#D8D2C8] transition text-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {locale === "zh" ? "管理员 (Admin)" : "Admin"}
+            {locale === "zh" ? "超级管理员 (Superadmin)" : "Superadmin"}
           </button>
           <button
             type="button"
@@ -212,7 +212,7 @@ export function LoginForm() {
             }
             className="py-1.5 px-2.5 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-xl border border-[#D8D2C8] transition text-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {locale === "zh" ? "审核主管 (Supervisor)" : "Supervisor"}
+            {locale === "zh" ? "管理员 (Admin)" : "Admin"}
           </button>
           <button
             type="button"
@@ -220,7 +220,7 @@ export function LoginForm() {
             onClick={() => setQuickUser("intern@lifewood.com", "intern123")}
             className="py-1.5 px-2.5 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-xl border border-[#D8D2C8] transition text-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {locale === "zh" ? "录入实习生 (Intern)" : "Intern"}
+            {locale === "zh" ? "普通用户 (User)" : "User"}
           </button>
         </div>
       </div>

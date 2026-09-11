@@ -27,7 +27,7 @@ export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const { locale } = useLocaleStore();
 
-  const userRole = (session?.user as any)?.role || "INTERN";
+  const userRole = (session?.user as any)?.role || "USER";
   const userName = session?.user?.name || "User";
 
   const navItems = [
@@ -75,9 +75,9 @@ export function Sidebar() {
 
   const getRoleBadgeStyle = (role: string) => {
     switch (role) {
-      case "ADMIN":
+      case "SUPERADMIN":
         return "bg-[#FFB347] text-[#133020] font-bold";
-      case "SUPERVISOR":
+      case "ADMIN":
         return "bg-[#046241] text-white font-bold";
       default:
         return "bg-[#708E7C] text-white font-medium";
@@ -218,12 +218,16 @@ export function Sidebar() {
                   )}`}
                 >
                   {locale === "zh"
-                    ? userRole === "ADMIN"
-                      ? "管理员"
-                      : userRole === "SUPERVISOR"
-                        ? "主管"
-                        : "实习生"
-                    : userRole}
+                    ? userRole === "SUPERADMIN"
+                      ? "超级管理员"
+                      : userRole === "ADMIN"
+                        ? "管理员"
+                        : "普通用户"
+                    : userRole === "SUPERADMIN"
+                      ? "Superadmin"
+                      : userRole === "ADMIN"
+                        ? "Admin"
+                        : "User"}
                 </span>
               </div>
             </div>

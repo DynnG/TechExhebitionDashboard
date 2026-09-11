@@ -9,11 +9,11 @@ export async function PUT(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const userRole = (session?.user as any)?.role || "INTERN";
+    const userRole = (session?.user as any)?.role || "USER";
 
-    if (!session || userRole === "INTERN") {
+    if (!session || userRole === "USER") {
       return NextResponse.json(
-        { error: "Forbidden: Supervisor or Admin role required." },
+        { error: "Forbidden: Admin or Superadmin role required." },
         { status: 403 }
       );
     }

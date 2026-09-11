@@ -95,5 +95,5 @@ export function dossierValues(event: DossierEvent, key: DossierKey, locale: Loca
 }
 
 export function sessionRole(user: unknown): string {
-  return user && typeof user === "object" && "role" in user && typeof user.role === "string" ? user.role : "INTERN";
+  return user && typeof user === "object" && "role" in user && typeof user.role === "string" ? user.role : "USER";
 }
