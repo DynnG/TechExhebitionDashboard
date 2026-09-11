@@ -226,6 +226,7 @@ export default function EventsPage() {
       {/* Filter Bar (includes Add Event beside search) */}
       <EventFilters
         filters={filters}
+        viewMode={viewMode}
         onChange={handleFilterChange}
         onClear={handleClearFilters}
         onAddEvent={() => setShowAddModal(true)}
@@ -272,9 +273,9 @@ export default function EventsPage() {
             <EventTable events={events} onDelete={handleDeleteClick} onEdit={(evt: any) => setEditingEvent(evt)} />
           )}
 
-          {/* Interactive Pagination Controls with Direct Page Input */}
+          {/* Interactive Pagination Controls with Centered Navigation */}
           {pagination.totalPages > 1 && (
-            <div className="mt-8 flex flex-wrap items-center justify-between gap-4 text-xs font-manrope bg-white dark:bg-[#133020] p-4 rounded-xl border border-[#D8D2C8] dark:border-[#1E4830] shadow-2xs">
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-manrope bg-white dark:bg-[#133020] p-4 rounded-xl border border-[#D8D2C8] dark:border-[#1E4830] shadow-2xs">
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-[#133020] dark:text-white">
                   {locale === "zh"
@@ -286,7 +287,8 @@ export default function EventsPage() {
                 </span>
               </div>
 
-              <div className="flex items-center gap-3">
+              {/* Centered Prev / Input Page / Next Block */}
+              <div className="flex items-center justify-center gap-3 sm:mx-auto">
                 <button
                   type="button"
                   disabled={pagination.page <= 1}
