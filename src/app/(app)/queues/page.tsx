@@ -130,13 +130,13 @@ export default function QueuesPage() {
       <div className="flex items-center justify-between flex-wrap gap-4 border-b border-[#D8D2C8] pb-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#046241]/10 border border-[#046241]/30 flex items-center justify-center text-[#046241]">
-              <ListTodo className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-xl bg-[#046241]/10 dark:bg-[#046241]/25 border border-[#046241]/30 flex items-center justify-center text-[#046241] dark:text-[#52B788]">
+            <ListTodo className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-[#FFB347]">
-                {locale === "en" ? "Review & Governance Queues" : "审核与更正队列"}
-              </h2>
+              <h2 className="text-2xl font-bold text-[#133020] dark:text-white">
+            {locale === "en" ? "Review & Governance Queues" : "审核与更正队列"}
+            </h2>
               <p className="text-xs text-black dark:text-white/60 mt-0.5">
                 {locale === "zh"
                   ? "主管与管理员审核流水线，用于评估手动录入记录、草稿与抓取提交"

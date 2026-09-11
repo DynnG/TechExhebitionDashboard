@@ -208,13 +208,13 @@ export default function UsersPage() {
       <div className="flex items-center justify-between flex-wrap gap-4 border-b border-[#D8D2C8] pb-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#046241]/10 border border-[#046241]/30 flex items-center justify-center text-[#046241]">
+            <div className="w-9 h-9 rounded-xl bg-[#046241]/10 dark:bg-[#046241]/25 border border-[#046241]/30 flex items-center justify-center text-[#046241] dark:text-[#52B788]">
               <Users className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-2xl text-[#FFB347] font-bold">
+              <h2 className="text-2xl font-bold text-[#133020] dark:text-white">
                 {locale === "en" ? "User Management & RBAC Governance" : "用户管理与权限控制"}
-              </h2>
+                </h2>
               <p className="text-xs text-black dark:text-white/60 mt-0.5">
                 {locale === "zh"
                   ? "管理系统账号、基于角色的访问权限 (RBAC) 与安全凭证"

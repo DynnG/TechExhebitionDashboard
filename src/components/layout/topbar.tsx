@@ -88,9 +88,9 @@ export function Topbar() {
           </span>
         </div>
 
-        <h1 className="text-xl font-bold text-[#133020] dark:text-white tracking-tight mt-0.5 font-manrope">
+        <span className="text-[#133020] dark:text-white font-semibold">
           {title}
-        </h1>
+        </span>
       </div>
 
       {/* Right Actions */}
