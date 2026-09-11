@@ -299,7 +299,7 @@ export default function EventsPage() {
                       if (e.key === "Enter") handlePageInputSubmit();
                     }}
                     onBlur={handlePageInputSubmit}
-                    className="w-12 py-1 text-center font-bold text-xs bg-white dark:bg-[#1A3D2A] border border-[#D8D2C8] dark:border-[#235338] rounded-md text-[#133020] dark:text-white focus:outline-none focus:border-[#046241] focus:ring-1 focus:ring-[#046241]"
+                    className="w-12 py-1 text-center font-bold text-xs bg-white dark:bg-[#1A3D2A] border border-[#D8D2C8] dark:border-[#235338] rounded-md text-[#133020] dark:text-white focus:outline-none focus:border-[#046241] focus:ring-1 focus:ring-[#046241] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     title={locale === "zh" ? "输入页码按 Enter 跳转" : "Type page number and press Enter"}
                   />
                   <span>{locale === "zh" ? `页 / 共 ${pagination.totalPages} 页` : `of ${pagination.totalPages}`}</span>
