@@ -93,19 +93,18 @@ export function LoginForm() {
   };
 
   return (
-    <>
-      <div className="w-full max-w-lg bg-white/95 backdrop-blur-md rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] p-6 sm:p-8 border border-[#D8D2C8] relative font-manrope z-10">
-        {/* Brand Logo & Portal Access Badge Side-by-Side */}
-        <div className="flex items-center justify-between gap-4 mb-5">
-          <img
-            src="/LifeScout Light Mode.png"
-            alt="Lifewood Data Technology"
-            className="h-12 sm:h-20 w-auto object-contain shrink-0"
-          />
-          <span className="text-[10px] font-bold text-[#046241] uppercase tracking-wider bg-[#046241]/10 px-3 py-1.5 rounded-full shrink-0">
-            Portal Access
-          </span>
-        </div>
+    <div className="w-full max-w-lg bg-white/95 backdrop-blur-md rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] p-6 sm:p-8 border border-[#D8D2C8] relative font-manrope z-10">
+      {/* Brand Logo & Portal Access Badge Side-by-Side */}
+      <div className="flex items-center justify-between gap-4 mb-5">
+        <img
+          src="/LifeScout Light Mode.png"
+          alt="Lifewood Data Technology"
+          className="h-12 sm:h-20 w-auto object-contain shrink-0"
+        />
+        <span className="text-[10px] font-bold text-[#046241] uppercase tracking-wider bg-[#046241]/10 px-3 py-1.5 rounded-full shrink-0">
+          Portal Access
+        </span>
+      </div>
 
         <div className="mb-4">
           <h2 className="text-2xl sm:text-3xl font-bold text-[#133020] tracking-tight">
@@ -168,36 +167,35 @@ export function LoginForm() {
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={loading || cooldownSeconds > 0}
-            className="w-full py-3 px-5 rounded-xl bg-[#046241] hover:bg-[#133020] text-white border border-[#046241] font-semibold text-xs transition-all duration-200 shadow-sm flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed mt-2 cursor-pointer"
-          >
-            {loading ? (
-              <span>{locale === "zh" ? "登录中..." : "Signing in..."}</span>
-            ) : cooldownSeconds > 0 ? (
+        <button
+          type="submit"
+          disabled={loading || cooldownSeconds > 0}
+          className="w-full py-3 px-5 rounded-xl bg-[#046241] hover:bg-[#133020] text-white border border-[#046241] font-semibold text-xs transition-all duration-200 shadow-sm flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed mt-2 cursor-pointer"
+        >
+          {loading ? (
+            <span>{locale === "zh" ? "登录中..." : "Signing in..."}</span>
+          ) : cooldownSeconds > 0 ? (
+            <span>
+              {locale === "zh"
+                ? `已锁定 (${formatTime(cooldownSeconds)})`
+                : `Locked (${formatTime(cooldownSeconds)})`}
+            </span>
+          ) : (
+            <>
               <span>
-                {locale === "zh"
-                  ? `已锁定 (${formatTime(cooldownSeconds)})`
-                  : `Locked (${formatTime(cooldownSeconds)})`}
+                {locale === "zh" ? "登录进入工作台" : "Sign in to Dashboard"}
               </span>
-            ) : (
-              <>
-                <span>
-                  {locale === "zh" ? "登录进入工作台" : "Sign in to Dashboard"}
-                </span>
-                <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition text-[#FFB347]" />
-              </>
-            )}
-          </button>
-        </form>
+              <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition text-[#FFB347]" />
+            </>
+          )}
+        </button>
+      </form>
 
-        <SocialLinks />
+      <SocialLinks />
 
-        <div className="mt-6 pt-3 flex items-center justify-between text-[10px] font-semibold text-[#8C9B9E] tracking-wider uppercase border-t border-[#D8D2C8]">
-          <span>© 2026 LIFEWOOD DATA TECHNOLOGY</span>
-          <div className="flex items-center gap-1.5"></div>
-        </div>
+      <div className="mt-6 pt-3 flex items-center justify-between text-[10px] font-semibold text-[#8C9B9E] tracking-wider uppercase border-t border-[#D8D2C8]">
+        <span>© 2026 LIFEWOOD DATA TECHNOLOGY</span>
+        <div className="flex items-center gap-1.5"></div>
       </div>
 
       {/* Post-login Intro Splash */}

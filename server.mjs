@@ -333,7 +333,7 @@ const PROMPT_SYSTEM = `
 You are a strategic intelligence data auditor for Lifewood PH.
 Audit and extract event information strictly against these parameters:
 
-1. Target Date Range: Start date MUST be between Sep 1, 2026 and Dec 31, 2027.
+1. Target Date Range: Start date MUST be in the year 2026 or later (e.g. 2026-2028). Any event taking place prior to the year of 2026 MUST NOT be included (strictly out of scope, mark is_in_scope: false).
 2. Lifewood Core Business Lines (Must match at least one):
    - 1. Global Scanning + Indexing (digitization, archives, OCR/HTR, libraries)
    - 2. Global AI Data (training data, annotation, labeling, RLHF, datasets, LLM)
@@ -648,8 +648,16 @@ app.post('/api/crawl-events', scrapeLimiter, async (req, res) => {
 
         const parsed = JSON.parse(response.text);
 
-        // Quality Gate: Within date scope and Fit Score >= 3
+        // Quality Gate: Within date scope, Year >= 2026, and Fit Score >= 3
         if (parsed.is_in_scope && parsed.fit_score >= 3 && parsed.data) {
+          // Reject any event taking place below the year 2026
+          const dateStr = (parsed.data.dates || '');
+          const yearsFound = dateStr.match(/\b(19\d\d|20\d\d)\b/g);
+          if (yearsFound && yearsFound.some((y) => parseInt(y, 10) < 2026)) {
+            console.log(`[Quality Gate] Excluded event dated before 2026: "${parsed.data.event_name}" (${dateStr})`);
+            continue;
+          }
+
           // Check for duplicate against database records, local cache, and current batch
           const dupCheck = checkIsDuplicate(parsed.data, [...allKnownEvents, ...eventsList]);
 
