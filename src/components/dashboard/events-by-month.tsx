@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import {
   BarChart,
   Bar,
@@ -9,6 +9,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
+  LabelList,
 } from "recharts";
 import { RotateCcw, Calendar } from "lucide-react";
 import { useLocaleStore } from "@/stores/locale-store";
@@ -21,42 +22,30 @@ interface EventsByMonthProps {
 const CustomTooltip = ({ active, payload, label, locale }: any) => {
   if (active && payload && payload.length) {
     const val = payload[0].value;
+
     return (
       <div className="bg-[#133020] text-white p-3 rounded-[8px] border border-[#FFB347] shadow-[0_4px_20px_rgba(0,0,0,0.12)] text-xs font-manrope space-y-1">
         <p className="font-semibold text-[#FFB347]">{label}</p>
+
         <p className="font-medium text-white">
           {locale === "zh" ? "展会数量：" : "Exhibitions: "}
-          <span className="text-[#FFB347] font-bold text-xs">{val}</span>
+          <span className="text-[#FFB347] font-bold text-xs">
+            {val}
+          </span>
         </p>
       </div>
     );
   }
+
   return null;
 };
 
 export function EventsByMonthChart({ data }: EventsByMonthProps) {
   const { locale } = useLocaleStore();
-  const [startDate, setStartDate] = useState("");
+
+  const DEFAULT_START_DATE = "2026-09-01";
+  const [startDate, setStartDate] = useState(DEFAULT_START_DATE);
   const [endDate, setEndDate] = useState("");
-
-  // Track dark mode by watching the `dark` class on <html>
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    const check = () =>
-      setIsDark(document.documentElement.classList.contains("dark"));
-
-    check();
-
-    const observer = new MutationObserver(check);
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
-    return () => observer.disconnect();
-  }, []);
 
   const axisTickColor = "#133020";
   const axisLineColor = "#D8D2C8";
@@ -67,6 +56,7 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
     return data
       .map((d) => {
         const parts = d.month.split(" ");
+
         const monthNames = [
           "Jan",
           "Feb",
@@ -111,7 +101,7 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
   }, [data, startDate, endDate, locale]);
 
   const handleResetDates = () => {
-    setStartDate("");
+    setStartDate(DEFAULT_START_DATE);
     setEndDate("");
   };
 
@@ -120,8 +110,11 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
       <div className="flex items-center justify-between min-h-[52px] flex-wrap gap-3 mb-4 border-b border-[#D8D2C8] pb-3">
         <div>
           <h3 className="text-[14px] font-semibold text-[#133020]">
-            {locale === "zh" ? "各月份展会分布" : "Exhibitions distribution by month"}
+            {locale === "zh"
+              ? "各月份展会分布"
+              : "Exhibitions distribution by month"}
           </h3>
+
           <p className="text-[11px] text-[#666666]">
             {locale === "zh"
               ? "目标阈值：每月 ≥ 5 场展会（空缺月份以藏红橙高亮）"
@@ -129,11 +122,13 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
           </p>
         </div>
 
-        {/* Unified Interactive Date Range Picker with Single Icon & Clear From / To Labels */}
+        {/* Date Range Picker */}
         <div className="flex items-center gap-2 bg-[#F9F7F7] px-3 py-1.5 rounded-[8px] border-[1.5px] border-[#D8D2C8] text-xs">
-          <Calendar className="w-4 h-4 text-[#046241] shrink-0" />
           <div className="flex items-center gap-1.5">
-            <span className="font-bold text-[#133020] text-[11px]">{locale === "zh" ? "从" : "From"}:</span>
+            <span className="font-bold text-[#133020] text-[11px]">
+              {locale === "zh" ? "从" : "From"}:
+            </span>
+
             <input
               type="date"
               value={startDate}
@@ -141,9 +136,14 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
               className="bg-transparent text-xs font-semibold text-[#133020] focus:outline-none cursor-pointer"
             />
           </div>
+
           <span className="text-[#999999] font-bold">—</span>
+
           <div className="flex items-center gap-1.5">
-            <span className="font-bold text-[#133020] text-[11px]">{locale === "zh" ? "至" : "To"}:</span>
+            <span className="font-bold text-[#133020] text-[11px]">
+              {locale === "zh" ? "至" : "To"}:
+            </span>
+
             <input
               type="date"
               value={endDate}
@@ -155,11 +155,18 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
           {(startDate || endDate) && (
             <button
               onClick={handleResetDates}
-              title={locale === "zh" ? "重置日期范围" : "Reset Date Range"}
+              title={
+                locale === "zh"
+                  ? "重置日期范围"
+                  : "Reset Date Range"
+              }
               className="ml-1 px-1.5 py-0.5 text-[#046241] bg-[#046241]/10 hover:bg-[#046241]/20 rounded-[6px] transition flex items-center gap-1 font-semibold text-[11px]"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>{locale === "zh" ? "重置" : "Reset"}</span>
+
+              <span>
+                {locale === "zh" ? "重置" : "Reset"}
+              </span>
             </button>
           )}
         </div>
@@ -168,12 +175,22 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
       <div className="flex items-center justify-end gap-3 mb-2 text-xs font-medium">
         <div className="flex items-center gap-1.5 text-[11px]">
           <span className="w-2.5 h-2.5 rounded-[2px] bg-[#046241] inline-block" />
-          <span className="text-[#133020]">{locale === "zh" ? "达标 (≥ 5 场展会)" : "Target met (≥ 5 exhibitions)"}</span>
+
+          <span className="text-[#133020]">
+            {locale === "zh"
+              ? "达标 (≥ 5 场展会)"
+              : "Target met (≥ 5 exhibitions)"}
+          </span>
         </div>
 
         <div className="flex items-center gap-1.5 text-[11px]">
           <span className="w-2.5 h-2.5 rounded-[2px] bg-[#FFB347] inline-block" />
-          <span className="text-[#C17110]">{locale === "zh" ? "空缺 (< 5 场展会)" : "Gap (< 5 exhibitions)"}</span>
+
+          <span className="text-[#C17110]">
+            {locale === "zh"
+              ? "空缺 (< 5 场展会)"
+              : "Gap (< 5 exhibitions)"}
+          </span>
         </div>
       </div>
 
@@ -181,7 +198,12 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={formattedData}
-            margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+            margin={{
+              top: 20,
+              right: 10,
+              left: -20,
+              bottom: 0,
+            }}
           >
             <XAxis
               dataKey="month"
@@ -203,17 +225,29 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
               allowDecimals={false}
             />
 
-            <Tooltip content={<CustomTooltip locale={locale} />} />
+            <Tooltip
+              content={<CustomTooltip locale={locale} />}
+            />
 
-            <Bar dataKey="exhibitions" radius={[4, 4, 0, 0]}>
+            <Bar
+              dataKey="exhibitions"
+              radius={[4, 4, 0, 0]}
+            >
               {formattedData.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={
-                    entry.exhibitions < 5 ? "#FFB347" : "#046241"
+                    entry.exhibitions < 5
+                      ? "#FFB347"
+                      : "#046241"
                   }
                 />
               ))}
+              <LabelList
+                dataKey="exhibitions"
+                position="top"
+                style={{ fontSize: 10, fontWeight: 700, fill: "#133020" }}
+              />
             </Bar>
           </BarChart>
         </ResponsiveContainer>

@@ -81,18 +81,18 @@ const YEAR_OPTIONS = [
 ];
 
 const MONTH_OPTIONS = [
-  { value: "January", label: "January (01)" },
-  { value: "February", label: "February (02)" },
-  { value: "March", label: "March (03)" },
-  { value: "April", label: "April (04)" },
-  { value: "May", label: "May (05)" },
-  { value: "June", label: "June (06)" },
-  { value: "July", label: "July (07)" },
-  { value: "August", label: "August (08)" },
-  { value: "September", label: "September (09)" },
-  { value: "October", label: "October (10)" },
-  { value: "November", label: "November (11)" },
-  { value: "December", label: "December (12)" },
+  { value: "January", label: "January" },
+  { value: "February", label: "February" },
+  { value: "March", label: "March" },
+  { value: "April", label: "April" },
+  { value: "May", label: "May" },
+  { value: "June", label: "June" },
+  { value: "July", label: "July" },
+  { value: "August", label: "August" },
+  { value: "September", label: "September" },
+  { value: "October", label: "October" },
+  { value: "November", label: "November" },
+  { value: "December", label: "December" },
 ];
 
 const COUNTRY_OPTIONS = ALL_COUNTRIES;
