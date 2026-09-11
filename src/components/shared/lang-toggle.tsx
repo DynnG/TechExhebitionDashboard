@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useLocaleStore } from "@/stores/locale-store";
 import { Globe } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
 export function LangToggle() {
   const { locale, toggleLocale } = useLocaleStore();
+  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
     if (typeof document !== "undefined") {
@@ -20,54 +21,76 @@ export function LangToggle() {
     }
   }, [locale]);
 
-  const handleToggle = () => {
-    const nextLang = locale === "en" ? "zh" : "en";
-    toggleLocale();
-    toast.success(
-      nextLang === "en" ? "Language switched to English" : "语言已切换为 中文"
-    );
+  const handleSelect = (targetLang: "en" | "zh") => {
+    if (locale !== targetLang) {
+      toggleLocale();
+      toast.success(
+        targetLang === "en"
+          ? "Language switched to English"
+          : "语言已切换为 中文",
+      );
+    }
   };
 
   return (
-    <div
-      onClick={handleToggle}
-      title={locale === "en" ? "Current: English (Click to switch to 中文)" : "当前: 中文 (点击切换至 English)"}
-      className="flex items-center gap-1.5 p-1 rounded-full bg-white border border-[#D8D2C8] shadow-xs cursor-pointer select-none transition-all hover:border-[#046241]/60"
+    <motion.div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      initial={false}
+      animate={{
+        width: isHovered ? "auto" : "2.5rem",
+      }}
+      transition={{ type: "spring", stiffness: 350, damping: 25 }}
+      className="relative flex items-center h-10 border rounded-full px-2.5 cursor-pointer shadow-xs overflow-hidden select-none transition-colors duration-300 bg-[#133020] border-[#046241] text-[#FFB347] dark:bg-[#061A10] dark:border-[#046241]/60 dark:text-[#34D399]"
     >
-      <div className="w-6 h-6 rounded-full bg-[#046241]/10 flex items-center justify-center text-[#046241] ml-0.5">
-        <Globe className="w-3.5 h-3.5 text-[#046241]" />
-      </div>
+      {/* Globe Icon */}
+      <motion.div
+        animate={{
+          rotate: isHovered ? 180 : 0,
+          scale: isHovered ? [1, 1.15, 1] : 1,
+        }}
+        transition={{ duration: 0.4 }}
+        className="flex items-center justify-center shrink-0"
+      >
+        <Globe className="w-5 h-5 text-[#FFB347] dark:text-[#34D399] transition-colors" />
+      </motion.div>
 
-      <div className="relative flex items-center bg-[#F9F7F7] rounded-full p-0.5 text-xs font-bold text-[#133020]">
-        {/* Animated active language background indicator pill */}
-        <motion.div
-          className="absolute top-0.5 bottom-0.5 rounded-full bg-[#046241] shadow-xs"
-          initial={false}
-          animate={{
-            left: locale === "en" ? "2px" : "calc(50% + 1px)",
-            width: "calc(50% - 3px)",
-          }}
-          transition={{ type: "spring", stiffness: 400, damping: 30 }}
-        />
-
-        <button
-          type="button"
-          className={`relative z-10 px-2.5 py-0.5 text-[11px] font-extrabold transition-colors ${
-            locale === "en" ? "text-white" : "text-[#666666] hover:text-[#133020]"
-          }`}
-        >
-          EN
-        </button>
-
-        <button
-          type="button"
-          className={`relative z-10 px-2.5 py-0.5 text-[11px] font-extrabold transition-colors ${
-            locale === "zh" ? "text-white" : "text-[#666666] hover:text-[#133020]"
-          }`}
-        >
-          中文
-        </button>
-      </div>
-    </div>
+      {/* Expanding Pill Content */}
+      <AnimatePresence>
+        {isHovered && (
+          <motion.div
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -8 }}
+            transition={{ duration: 0.2 }}
+            className="flex items-center gap-2 ml-2 pr-1 text-xs font-bold whitespace-nowrap"
+          >
+            <button
+              type="button"
+              onClick={() => handleSelect("en")}
+              className={`transition-colors hover:text-[#FFB347] cursor-pointer ${
+                locale === "en"
+                  ? "text-[#FFB347]"
+                  : "text-white/80 dark:text-white/70"
+              }`}
+            >
+              EN
+            </button>
+            <span className="text-[#046241] font-normal">|</span>
+            <button
+              type="button"
+              onClick={() => handleSelect("zh")}
+              className={`transition-colors hover:text-[#FFB347] cursor-pointer ${
+                locale === "zh"
+                  ? "text-[#FFB347]"
+                  : "text-white/80 dark:text-white/70"
+              }`}
+            >
+              中文
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }

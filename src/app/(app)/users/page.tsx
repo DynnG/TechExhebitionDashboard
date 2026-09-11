@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ModalPortal } from "@/components/shared/modal-portal";
+import { DeleteEventModal } from "@/components/events/delete-event-modal";
 import { Users, UserPlus, Shield, Trash2, Edit, Loader2, Check, X, Key, Search, Sparkles, Lock, UserCheck } from "lucide-react";
 import { toast } from "sonner";
 import { useLocaleStore } from "@/stores/locale-store";
@@ -36,6 +37,8 @@ export default function UsersPage() {
   const [resetPasswordUser, setResetPasswordUser] = useState<any | null>(null);
   const [newPasswordValue, setNewPasswordValue] = useState("");
   const [resetting, setResetting] = useState(false);
+  const [deletingUser, setDeletingUser] = useState<{ id: number; name: string } | null>(null);
+  const [isDeletingUser, setIsDeletingUser] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -118,20 +121,27 @@ export default function UsersPage() {
     }
   };
 
-  const handleDeleteUser = async (userId: number, userName: string) => {
-    if (!confirm(locale === "zh" ? `确定要删除用户 "${userName}" 吗？` : `Are you sure you want to delete user "${userName}"?`)) return;
+  const handleDeleteUser = (userId: number, userName: string) => {
+    setDeletingUser({ id: userId, name: userName });
+  };
 
+  const handleConfirmDeleteUser = async () => {
+    if (!deletingUser) return;
+    setIsDeletingUser(true);
     try {
-      const res = await fetch(`/api/users/${userId}`, { method: "DELETE" });
+      const res = await fetch(`/api/users/${deletingUser.id}`, { method: "DELETE" });
       const data = await res.json();
       if (res.ok) {
-        toast.success(locale === "zh" ? `用户 "${userName}" 已删除。` : `User "${userName}" deleted.`);
+        toast.success(locale === "zh" ? `用户 "${deletingUser.name}" 已删除。` : `User "${deletingUser.name}" deleted.`);
+        setDeletingUser(null);
         fetchUsers();
       } else {
         toast.error(data.error || (locale === "zh" ? "删除用户失败" : "Failed to delete user"));
       }
     } catch {
       toast.error(locale === "zh" ? "删除用户账户出错" : "Error deleting user account");
+    } finally {
+      setIsDeletingUser(false);
     }
   };
 
@@ -568,6 +578,21 @@ export default function UsersPage() {
           </form>
         </div>
       </ModalPortal>
+
+      {/* Delete User Modal */}
+      <DeleteEventModal
+        isOpen={!!deletingUser}
+        onClose={() => setDeletingUser(null)}
+        onConfirm={handleConfirmDeleteUser}
+        title={locale === "zh" ? "确认删除用户" : "Confirm Delete User"}
+        eventName={deletingUser?.name}
+        description={
+          locale === "zh"
+            ? "此操作不可逆。该用户账户将被从系统中永久删除。"
+            : "This action cannot be undone. This user account will be permanently removed from the system."
+        }
+        isDeleting={isDeletingUser}
+      />
     </div>
   );
 }
