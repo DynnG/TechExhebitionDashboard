@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { REGIONS } from "@/lib/constants/business-lines";
+import { REGIONS, BUSINESS_LINES } from "@/lib/constants/business-lines";
 import { FileSpreadsheet, Download, Eye, Sparkles, RefreshCw, Calendar } from "lucide-react";
 import { toast } from "sonner";
 import { useLocaleStore } from "@/stores/locale-store";
@@ -12,6 +12,7 @@ export default function ReportsPage() {
   const { locale } = useLocaleStore();
   const [reportType, setReportType] = useState("regional");
   const [region, setRegion] = useState("Asia");
+  const [businessLine, setBusinessLine] = useState(BUSINESS_LINES[0]?.name || "Global AI Data");
   const [timeRange, setTimeRange] = useState("ALL");
   const [customStartDate, setCustomStartDate] = useState("");
   const [customEndDate, setCustomEndDate] = useState("");
@@ -42,6 +43,11 @@ export default function ReportsPage() {
       label: localizeRegionName(r, locale),
     })),
   ];
+  
+  const businessLineOptions = BUSINESS_LINES.map((b) => ({
+    value: b.name,
+    label: b.name,
+  }));
 
   const timeRangeOptions = [
     {
@@ -108,9 +114,10 @@ export default function ReportsPage() {
   const handleGenerate = async () => {
     setLoading(true);
     try {
-      const payload = {
+       const payload = {
         reportType,
         region,
+        businessLine,
         timeRange,
         customStartDate,
         customEndDate,
@@ -218,17 +225,40 @@ export default function ReportsPage() {
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-[#133020] uppercase tracking-wider mb-2">
-              {locale === "zh" ? "选择区域" : "Region Selection"}
-            </label>
-            <LifewoodDropdown
-              value={region}
-              onChange={(val) => setRegion(val)}
-              options={regionOptions}
-              aria-label={locale === "zh" ? "选择区域" : "Region Selection"}
-            />
-          </div>
+                  {reportType === "businessLine" ? (
+            <div>
+              <label className="block text-xs font-bold text-[#133020] uppercase tracking-wider mb-2">
+                {locale === "zh" ? "选择业务线" : "Business Line Selection"}
+              </label>
+              <LifewoodDropdown
+                value={businessLine}
+                onChange={(val) => setBusinessLine(val)}
+                options={businessLineOptions}
+                aria-label={locale === "zh" ? "选择业务线" : "Business Line Selection"}
+              />
+            </div>
+          ) : reportType === "full" ? (
+            <div>
+              <label className="block text-xs font-bold text-[#133020] uppercase tracking-wider mb-2">
+                {locale === "zh" ? "范围" : "Scope"}
+              </label>
+              <div className="w-full px-3.5 py-2.5 rounded-lg border border-[#D8D2C8] bg-[#F5EEDB] text-xs text-[#666666] italic">
+                {locale === "zh" ? "包含全部区域与业务线" : "Includes all regions & business lines"}
+              </div>
+            </div>
+          ) : (
+            <div>
+              <label className="block text-xs font-bold text-[#133020] uppercase tracking-wider mb-2">
+                {locale === "zh" ? "选择区域" : "Region Selection"}
+              </label>
+              <LifewoodDropdown
+                value={region}
+                onChange={(val) => setRegion(val)}
+                options={regionOptions}
+                aria-label={locale === "zh" ? "选择区域" : "Region Selection"}
+              />
+            </div>
+          )}
 
           <div>
             <label className="block text-xs font-bold text-[#133020] uppercase tracking-wider mb-2">
