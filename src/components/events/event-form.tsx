@@ -22,7 +22,7 @@ export function EventForm({ initialData, isEditing = false, onSuccess, onCancel 
   const router = useRouter();
   const { locale } = useLocaleStore();
   const { data: session } = useSession();
-  const userRole = (session?.user as any)?.role || "INTERN";
+  const userRole = (session?.user as any)?.role || "USER";
 
   // Parse initial businessLines & sourceLinks
   let parsedBL: string[] = ["Global AI Data"];

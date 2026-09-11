@@ -12,19 +12,19 @@ import { LifewoodDropdown } from "@/components/shared/lifewood-dropdown";
 
 export default function UsersPage() {
   const { data: session } = useSession();
-  const userRole = (session?.user as any)?.role || "INTERN";
+  const userRole = (session?.user as any)?.role || "USER";
   const { locale } = useLocaleStore();
 
   const roleOptionsTable = [
+    { value: "SUPERADMIN", label: locale === "zh" ? "超级管理员 (SUPERADMIN)" : "SUPERADMIN" },
     { value: "ADMIN", label: locale === "zh" ? "管理员 (ADMIN)" : "ADMIN" },
-    { value: "SUPERVISOR", label: locale === "zh" ? "主管 (SUPERVISOR)" : "SUPERVISOR" },
-    { value: "INTERN", label: locale === "zh" ? "实习生 (INTERN)" : "INTERN" },
+    { value: "USER", label: locale === "zh" ? "普通用户 (USER)" : "USER" },
   ];
 
   const roleOptionsModal = [
-    { value: "INTERN", label: locale === "zh" ? "实习生 (仅录入与查看)" : "INTERN (Submit & View Only)" },
-    { value: "SUPERVISOR", label: locale === "zh" ? "主管 (审核与管理)" : "SUPERVISOR (Approve & Manage)" },
-    { value: "ADMIN", label: locale === "zh" ? "系统管理员 (全部权限)" : "ADMIN (Full Control)" },
+    { value: "USER", label: locale === "zh" ? "普通用户 (仅录入与查看)" : "USER (Submit & View Only)" },
+    { value: "ADMIN", label: locale === "zh" ? "管理员 (审核与管理)" : "ADMIN (Approve & Manage)" },
+    { value: "SUPERADMIN", label: locale === "zh" ? "超级管理员 (全部权限)" : "SUPERADMIN (Full Control)" },
   ];
 
   const [users, setUsers] = useState<any[]>([]);
@@ -44,7 +44,7 @@ export default function UsersPage() {
     name: "",
     email: "",
     password: "",
-    role: "INTERN",
+    role: "USER",
   });
 
   const fetchUsers = async () => {
@@ -90,7 +90,7 @@ export default function UsersPage() {
             : `User "${formData.name}" created successfully!`
         );
         setShowAddModal(false);
-        setFormData({ name: "", email: "", password: "", role: "INTERN" });
+        setFormData({ name: "", email: "", password: "", role: "USER" });
         fetchUsers();
       } else {
         toast.error(data.error || (locale === "zh" ? "创建用户失败" : "Failed to create user"));
@@ -187,15 +187,15 @@ export default function UsersPage() {
       u.role.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const superadminCount = users.filter((u) => u.role === "SUPERADMIN").length;
   const adminCount = users.filter((u) => u.role === "ADMIN").length;
-  const supervisorCount = users.filter((u) => u.role === "SUPERVISOR").length;
-  const internCount = users.filter((u) => u.role === "INTERN").length;
+  const userCount = users.filter((u) => u.role === "USER").length;
 
   const getRoleBadgeStyle = (role: string) => {
     switch (role) {
-      case "ADMIN":
+      case "SUPERADMIN":
         return "bg-[#FFB347] text-[#133020] font-extrabold";
-      case "SUPERVISOR":
+      case "ADMIN":
         return "bg-[#046241] text-white font-extrabold";
       default:
         return "bg-[#708E7C] text-white font-semibold";
@@ -224,7 +224,7 @@ export default function UsersPage() {
           </div>
         </div>
 
-        {userRole === "ADMIN" && (
+        {userRole === "SUPERADMIN" && (
           <button
             onClick={() => setShowAddModal(true)}
             className="flex items-center gap-1.5 px-4 py-2 bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] font-bold text-xs rounded-xl transition shadow-sm cursor-pointer"
@@ -252,9 +252,9 @@ export default function UsersPage() {
         <div className="bg-white p-4 rounded-2xl border border-[#D8D2C8] shadow-xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-[#666666] uppercase tracking-wider block">
-              {locale === "zh" ? "管理员" : "Admins"}
+              {locale === "zh" ? "超级管理员" : "Superadmins"}
             </span>
-            <span className="text-2xl font-extrabold text-[#133020]">{adminCount}</span>
+            <span className="text-2xl font-extrabold text-[#133020]">{superadminCount}</span>
           </div>
           <div className="w-9 h-9 rounded-xl bg-[#FFB347]/20 flex items-center justify-center text-[#133020]">
             <Shield className="w-5 h-5 text-[#C17110]" />
@@ -264,9 +264,9 @@ export default function UsersPage() {
         <div className="bg-white p-4 rounded-2xl border border-[#D8D2C8] shadow-xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-[#666666] uppercase tracking-wider block">
-              {locale === "zh" ? "审核主管" : "Supervisors"}
+              {locale === "zh" ? "管理员" : "Admins"}
             </span>
-            <span className="text-2xl font-extrabold text-[#133020]">{supervisorCount}</span>
+            <span className="text-2xl font-extrabold text-[#133020]">{adminCount}</span>
           </div>
           <div className="w-9 h-9 rounded-xl bg-[#046241]/10 flex items-center justify-center text-[#046241]">
             <UserCheck className="w-5 h-5" />
@@ -276,9 +276,9 @@ export default function UsersPage() {
         <div className="bg-white p-4 rounded-2xl border border-[#D8D2C8] shadow-xs flex items-center justify-between">
           <div>
             <span className="text-[11px] font-bold text-[#666666] uppercase tracking-wider block">
-              {locale === "zh" ? "实习生" : "Interns"}
+              {locale === "zh" ? "普通用户" : "Users"}
             </span>
-            <span className="text-2xl font-extrabold text-[#133020]">{internCount}</span>
+            <span className="text-2xl font-extrabold text-[#133020]">{userCount}</span>
           </div>
           <div className="w-9 h-9 rounded-xl bg-[#708E7C]/15 flex items-center justify-center text-[#708E7C]">
             <Users className="w-5 h-5" />
@@ -354,7 +354,7 @@ export default function UsersPage() {
                     {new Date(u.createdAt).toLocaleDateString(locale === "zh" ? "zh-CN" : "en-US")}
                   </td>
                   <td className="p-3.5 px-4 text-right">
-                    {userRole === "ADMIN" ? (
+                    {userRole === "SUPERADMIN" ? (
                       <div className="flex items-center justify-end gap-2">
                         {editingUser?.id === u.id ? (
                           <>

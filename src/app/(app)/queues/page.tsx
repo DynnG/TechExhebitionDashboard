@@ -39,65 +39,75 @@ import { localizeEvent } from "@/lib/i18n/event-localization";
 
 export default function QueuesPage() {
   const { data: session } = useSession();
-  const userRole = (session?.user as any)?.role || "INTERN";
+  const userRole = (session?.user as any)?.role || "USER";
   const { locale } = useLocaleStore();
 
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<number | null>(null);
   const [inspectItem, setInspectItem] = useState<any | null>(null);
+  const [reasonModal, setReasonModal] = useState<{ id: number; action: "REJECT"; reason: string } | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
 
-  const fetchQueues = async () => {
+  const [filterType, setFilterType] = useState<string>("ALL");
+  const [activeTab, setActiveTab] = useState<"FOR_REVIEW" | "CORRECTION">("FOR_REVIEW");
+
+  const fetchQueue = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/queues?status=PENDING");
+      const res = await fetch("/api/queues");
       const data = await res.json();
       if (res.ok) {
         setItems(data.queueItems || []);
+      } else {
+        toast.error(data.error || (locale === "zh" ? "获取审核队列失败" : "Failed to fetch queue items"));
       }
     } catch {
-      toast.error(locale === "zh" ? "加载队列记录失败" : "Failed to load queue items");
+      toast.error(locale === "zh" ? "加载审核队列出错" : "Error loading queue items");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchQueues();
+    fetchQueue();
   }, []);
 
-  async function handleAction(id: number, action: "APPROVE" | "REJECT") {
-    if (busy !== null) return;
+  const handleAction = async (id: number, action: "APPROVE" | "REJECT", reason?: string) => {
     setBusy(id);
     try {
       const res = await fetch(`/api/queues/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify({ action, reason }),
       });
-
+      const data = await res.json();
       if (res.ok) {
         toast.success(
-          action === "APPROVE"
-            ? (locale === "zh" ? "记录已批准并发布至展会库！" : "Item approved & published to catalog!")
-            : (locale === "zh" ? "记录已被驳回" : "Item rejected")
+          locale === "zh"
+            ? `记录已${action === "APPROVE" ? "批准发布" : "驳回"}`
+            : `Record ${action === "APPROVE" ? "Approved & Published" : "Rejected"}`
         );
         if (inspectItem?.id === id) {
           setInspectItem(null);
         }
-        fetchQueues();
+        fetchQueue();
       } else {
-        const data = await res.json();
-        toast.error(data.error || (locale === "zh" ? "操作失败" : "Action failed"));
+        toast.error(data.error || (locale === "zh" ? "队列更新失败" : "Failed to update queue"));
       }
     } catch {
-      toast.error(locale === "zh" ? "处理队列操作出错" : "Error processing queue action");
+      toast.error(locale === "zh" ? "处理队列操作出错" : "Error updating queue record");
     } finally {
       setBusy(null);
     }
-  }
+  };
 
-  const filteredItems = items.filter((i) => i.status === "PENDING");
+  const filteredItems = items.filter((item) => {
+    if (activeTab === "FOR_REVIEW" && item.type !== "FOR_REVIEW") return false;
+    if (activeTab === "CORRECTION" && item.type !== "CORRECTION") return false;
+    if (filterType !== "ALL" && item.status !== filterType) return false;
+    return true;
+  });
 
   // Specs helper for modal
   const inspectEventData = inspectItem ? localizeEvent(inspectItem.event, locale) : null;
@@ -125,36 +135,35 @@ export default function QueuesPage() {
   }
 
   return (
-    <div className="min-h-screen -m-8 p-8 space-y-8 font-manrope bg-[#F5EEDB] dark:bg-[#133020] text-[#133020] dark:text-white transition-colors duration-300">
-      {/* Page Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4 border-b border-[#D8D2C8] pb-4">
+    <div className="space-y-6 font-manrope">
+      {/* Header Bar */}
+      <div className="flex items-center justify-between flex-wrap gap-4 border-b border-[#D8D2C8] dark:border-[#1E4830] pb-4">
         <div>
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-[#046241]/10 dark:bg-[#046241]/25 border border-[#046241]/30 flex items-center justify-center text-[#046241] dark:text-[#52B788]">
-            <ListTodo className="w-5 h-5" />
+              <ListTodo className="w-5 h-5" />
             </div>
             <div>
               <h2 className="text-2xl font-bold text-[#133020] dark:text-white">
-            {locale === "en" ? "Review & Governance Queues" : "审核与更正队列"}
-            </h2>
-              <p className="text-xs text-black dark:text-white/60 mt-0.5">
+                {locale === "en" ? "Review & Governance Queues" : "展会审核与战略治理队列"}
+              </h2>
+              <p className="text-xs text-[#666666] dark:text-white/60 mt-0.5">
                 {locale === "zh"
-                  ? "主管与管理员审核流水线，用于评估手动录入记录、草稿与抓取提交"
-                  : "Supervisor & Admin approval pipeline for manual submissions, intern drafts, and AI records"}
+                  ? "评估新抓取展会、核实实习专员录入项，并裁定战略适配度评级 (1-5)"
+                  : "Evaluate newly scraped exhibitions, verify user draft entries, and adjudicate strategic fit ratings"}
               </p>
             </div>
           </div>
         </div>
 
-        {userRole === "INTERN" && (
+        {userRole === "USER" && (
           <div className="px-3.5 py-2 bg-[#FFB347]/20 border border-[#FFB347] text-[#133020] dark:text-white text-xs font-bold rounded-xl flex items-center gap-2">
             <Clock className="w-4 h-4 text-[#C17110] dark:text-[#FFB347]" />
-            <span>{locale === "zh" ? "手动提交待主管审核" : "Manual Submissions Awaiting Review"}</span>
+            <span>{locale === "zh" ? "手动提交待管理员审核" : "Manual Submissions Awaiting Admin Review"}</span>
           </div>
         )}
       </div>
 
-      {/* Queue Header Summary */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-sm font-bold text-[#133020] dark:text-white">
@@ -233,12 +242,12 @@ export default function QueuesPage() {
               const submitterName = item.submittedBy?.name || (locale === "zh" ? "内部员工" : "Staff");
               const submitterRole =
                 locale === "zh"
-                  ? item.submittedBy?.role === "ADMIN"
+                  ? item.submittedBy?.role === "SUPERADMIN"
+                    ? "超级管理员"
+                    : item.submittedBy?.role === "ADMIN"
                     ? "管理员"
-                    : item.submittedBy?.role === "SUPERVISOR"
-                    ? "主管"
-                    : "实习生"
-                  : item.submittedBy?.role || "INTERN";
+                    : "普通用户"
+                  : item.submittedBy?.role || "USER";
 
               return (
                 <motion.div
@@ -373,7 +382,7 @@ export default function QueuesPage() {
 
                   {/* ACTION FOOTER */}
                   <div className="border-t border-[#D8D2C8] dark:border-[#1E4830] bg-[#F9F7F7] dark:bg-[#1A3D2A]/80 px-5 pl-6 py-3 flex items-center justify-end gap-3 text-xs">
-                    {(userRole === "ADMIN" || userRole === "SUPERVISOR") && (
+                    {(userRole === "SUPERADMIN" || userRole === "ADMIN") && (
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
@@ -755,7 +764,7 @@ export default function QueuesPage() {
                 {locale === "zh" ? "关闭" : "Close"}
               </button>
 
-              {(userRole === "ADMIN" || userRole === "SUPERVISOR") && inspectItem.status === "PENDING" && (
+              {(userRole === "SUPERADMIN" || userRole === "ADMIN") && inspectItem.status === "PENDING" && (
                 <div className="flex items-center gap-3">
                   <button
                     type="button"

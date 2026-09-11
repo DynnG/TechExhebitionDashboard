@@ -148,7 +148,7 @@ export async function POST(req: Request) {
     const nextNumber = (maxEvent?.eventNumber || 0) + 1;
 
     const userId = parseInt((session.user as any).id);
-    const userRole = (session.user as any).role || "INTERN";
+    const userRole = (session.user as any).role || "USER";
 
     // Manually added events go through the review queue (PENDING_REVIEW)
     const initialStatus = body.status === "DRAFT" ? "DRAFT" : "PENDING_REVIEW";

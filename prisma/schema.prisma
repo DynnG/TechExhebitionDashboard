@@ -62,7 +62,7 @@ model User {
   email        String   @unique
   name         String
   passwordHash String
-  role         String   @default("INTERN") // ADMIN, SUPERVISOR, INTERN
+  role         String   @default("USER") // SUPERADMIN, ADMIN, USER
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

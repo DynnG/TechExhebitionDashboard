@@ -12,8 +12,8 @@ export async function PUT(
     const session = await getServerSession(authOptions);
     const userRole = (session?.user as any)?.role;
 
-    if (userRole !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized access: Admin permissions required." }, { status: 403 });
+    if (userRole !== "SUPERADMIN") {
+      return NextResponse.json({ error: "Unauthorized access: Superadmin permissions required." }, { status: 403 });
     }
 
     const userId = parseInt(params.id, 10);
@@ -56,15 +56,15 @@ export async function DELETE(
     const session = await getServerSession(authOptions);
     const userRole = (session?.user as any)?.role;
 
-    if (userRole !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized access: Admin permissions required." }, { status: 403 });
+    if (userRole !== "SUPERADMIN") {
+      return NextResponse.json({ error: "Unauthorized access: Superadmin permissions required." }, { status: 403 });
     }
 
     const userId = parseInt(params.id, 10);
     const currentUserId = parseInt((session?.user as any)?.id || "0", 10);
 
     if (userId === currentUserId) {
-      return NextResponse.json({ error: "Cannot delete your own admin account." }, { status: 400 });
+      return NextResponse.json({ error: "Cannot delete your own superadmin account." }, { status: 400 });
     }
 
     await db.user.delete({ where: { id: userId } });

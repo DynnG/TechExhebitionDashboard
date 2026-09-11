@@ -33,8 +33,8 @@ export async function POST(req: Request) {
     const session = await getServerSession(authOptions);
     const userRole = (session?.user as any)?.role;
 
-    if (userRole !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized access: Admin permissions required." }, { status: 403 });
+    if (userRole !== "SUPERADMIN") {
+      return NextResponse.json({ error: "Unauthorized access: Superadmin permissions required." }, { status: 403 });
     }
 
     const body = await req.json();
@@ -57,7 +57,7 @@ export async function POST(req: Request) {
         name,
         email: normalizedEmail,
         passwordHash: hashedPassword,
-        role: role || "INTERN",
+        role: role || "USER",
       },
       select: {
         id: true,
