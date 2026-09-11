@@ -47,7 +47,7 @@ export function EventsByRegionChart({ data }: EventsByRegionProps) {
             {locale === "zh" ? "战略科技展会地理分布" : "Geographic distribution of strategic tech exhibitions"}
           </p>
         </div>
-        <span className="text-[11px] font-bold px-2 py-1 bg-[#046241]/10 dark:bg-[#046241]/20 text-[#046241] dark:text-[#2EA87A] rounded-[6px] shrink-0">
+        <span className="text-[11px] font-bold px-2 py-1 bg-[#046241]/10 text-[#046241] rounded-[6px] shrink-0">
           {data?.length || 0} {locale === "zh" ? "大区" : "Regions"}
         </span>
       </div>

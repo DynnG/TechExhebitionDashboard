@@ -29,7 +29,7 @@ export default function ScraperPage() {
       </div>
 
       {/* Tech Exhibition Discovery Engine Container */}
-      <div className="bg-white dark:bg-[#1A3828] rounded-xl border border-[#D8D2C8] dark:border-[#1E4830] shadow-xs overflow-hidden transition-colors">
+      <div className="bg-white rounded-xl border border-[#D8D2C8] shadow-xs overflow-hidden">
         <EventScraperDashboard />
       </div>
     </div>
