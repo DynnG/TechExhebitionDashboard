@@ -27,12 +27,37 @@ export function CoverageGapsWidget({
   const [view, setView] = useState<ViewMode>("months");
 
   const monthGaps = useMemo(() => {
-    return (gaps || []).map((g) => ({
-      id: g.month,
-      name: localizeMonthYear(g.month, locale),
-      count: g.count,
-      needed: Math.max(0, 5 - g.count),
-    }));
+    const monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+
+    return (gaps || [])
+      .filter((g) => {
+        const parts = g.month.split(" ");
+        const mIdx = monthNames.indexOf(parts[0]);
+        const year = parseInt(parts[1] || "2026", 10);
+        // Start from September 2026 (year > 2026 or (year === 2026 and month index >= 8))
+        if (year < 2026) return false;
+        if (year === 2026 && mIdx < 8) return false;
+        return true;
+      })
+      .map((g) => ({
+        id: g.month,
+        name: localizeMonthYear(g.month, locale),
+        count: g.count,
+        needed: Math.max(0, 5 - g.count),
+      }));
   }, [gaps, locale]);
 
   const regionGaps = useMemo(() => {
