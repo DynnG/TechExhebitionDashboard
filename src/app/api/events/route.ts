@@ -15,8 +15,9 @@ export async function GET(req: Request) {
     const status = searchParams.get("status");
     const isAttendedParam = searchParams.get("isAttended");
 
+    const sortBy = searchParams.get("sortBy") || "NUMBER_ASC";
     const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "25");
+    const limit = parseInt(searchParams.get("limit") || "10");
     const skip = (page - 1) * limit;
 
     const where: any = {};
@@ -57,10 +58,19 @@ export async function GET(req: Request) {
       ];
     }
 
+    // Determine sorting order
+    let orderBy: any = { eventNumber: "asc" };
+    if (sortBy === "NUMBER_DESC") orderBy = { eventNumber: "desc" };
+    else if (sortBy === "NAME_ASC") orderBy = { eventName: "asc" };
+    else if (sortBy === "NAME_DESC") orderBy = { eventName: "desc" };
+    else if (sortBy === "DATE_ASC") orderBy = { startDate: "asc" };
+    else if (sortBy === "DATE_DESC") orderBy = { startDate: "desc" };
+    else if (sortBy === "FIT_DESC") orderBy = { fitScore: "desc" };
+
     // Fetch events
     let events = await db.event.findMany({
       where,
-      orderBy: { startDate: "asc" },
+      orderBy,
       skip,
       take: limit,
       include: {

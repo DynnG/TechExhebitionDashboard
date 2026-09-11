@@ -59,11 +59,12 @@ export default function EventsPage() {
     fitScore: "ALL",
     priority: "ALL",
     search: "",
+    sortBy: "NUMBER_ASC",
   });
 
   const [pagination, setPagination] = useState({
     page: 1,
-    limit: 25,
+    limit: 10,
     totalCount: 0,
     totalPages: 1,
   });
@@ -79,6 +80,7 @@ export default function EventsPage() {
         fitScore: filters.fitScore,
         priority: filters.priority,
         search: filters.search,
+        sortBy: filters.sortBy,
       });
 
       const res = await fetch(`/api/events?${params.toString()}`);
@@ -123,6 +125,7 @@ export default function EventsPage() {
       fitScore: "ALL",
       priority: "ALL",
       search: "",
+      sortBy: "NUMBER_ASC",
     });
     setPagination((prev) => ({ ...prev, page: 1 }));
   };
@@ -256,30 +259,37 @@ export default function EventsPage() {
 
           {/* Pagination Controls */}
           {pagination.totalPages > 1 && (
-            <div className="mt-8 flex items-center justify-between text-xs text-[#666666] font-manrope">
-              <span>
-                {locale === "zh"
-                  ? `第 ${pagination.page} 页 / 共 ${pagination.totalPages} 页`
-                  : `Page ${pagination.page} of ${pagination.totalPages}`}
-              </span>
-              <div className="flex gap-2">
+            <div className="mt-8 flex items-center justify-between text-xs text-[#666666] dark:text-slate-300 font-manrope bg-white dark:bg-[#133020] p-4 rounded-xl border border-[#D8D2C8] dark:border-[#1E4830]">
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-[#133020] dark:text-white">
+                  {locale === "zh"
+                    ? `第 ${pagination.page} 页 / 共 ${pagination.totalPages} 页 (共 ${pagination.totalCount} 条记录)`
+                    : `Page ${pagination.page} of ${pagination.totalPages} (${pagination.totalCount} total events)`}
+                </span>
+                <span className="px-2 py-0.5 rounded bg-[#F9F7F7] dark:bg-[#1A3D2A] border border-[#D8D2C8] dark:border-[#235338] text-[10px] text-[#046241] dark:text-[#FFB347] font-bold">
+                  {locale === "zh" ? "每页 10 条" : "10 per page"}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
                 <button
+                  type="button"
                   disabled={pagination.page <= 1}
                   onClick={() =>
                     setPagination((prev) => ({ ...prev, page: prev.page - 1 }))
                   }
-                  className="px-3.5 py-1.5 rounded-[8px] border-[1.5px] border-[#D8D2C8] bg-white font-medium disabled:opacity-50 hover:bg-[#F9F7F7] transition"
+                  className="px-4 py-2 rounded-[8px] border-[1.5px] border-[#D8D2C8] dark:border-[#235338] bg-white dark:bg-[#1A3D2A] text-[#133020] dark:text-white font-bold disabled:opacity-40 hover:bg-[#F9F7F7] dark:hover:bg-[#046241] transition cursor-pointer"
                 >
-                  {locale === "zh" ? "上一页" : "Previous"}
+                  {locale === "zh" ? "← 上一页" : "← Previous"}
                 </button>
                 <button
+                  type="button"
                   disabled={pagination.page >= pagination.totalPages}
                   onClick={() =>
                     setPagination((prev) => ({ ...prev, page: prev.page + 1 }))
                   }
-                  className="px-3.5 py-1.5 rounded-[8px] border-[1.5px] border-[#D8D2C8] bg-white font-medium disabled:opacity-50 hover:bg-[#F9F7F7] transition"
+                  className="px-4 py-2 rounded-[8px] border-[1.5px] border-[#D8D2C8] dark:border-[#235338] bg-white dark:bg-[#1A3D2A] text-[#133020] dark:text-white font-bold disabled:opacity-40 hover:bg-[#F9F7F7] dark:hover:bg-[#046241] transition cursor-pointer"
                 >
-                  {locale === "zh" ? "下一页" : "Next"}
+                  {locale === "zh" ? "下一页 →" : "Next →"}
                 </button>
               </div>
             </div>
