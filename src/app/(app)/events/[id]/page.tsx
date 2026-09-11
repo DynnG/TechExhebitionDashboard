@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useEffect, useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -9,6 +11,7 @@ import { BusinessLineChip } from "@/components/events/business-line-chip";
 import { BUSINESS_LINES } from "@/lib/constants/business-lines";
 import { EventForm } from "@/components/events/event-form";
 import { ModalPortal } from "@/components/shared/modal-portal";
+import { DeleteEventModal } from "@/components/events/delete-event-modal";
 import { sanitizeEventUrl } from "@/lib/url";
 import {
   MapPin,
@@ -49,6 +52,8 @@ export default function EventDetailPage() {
   const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const localized = useMemo(() => (event ? localizeEvent(event, locale) : null), [event, locale]);
 
@@ -71,20 +76,21 @@ export default function EventDetailPage() {
     fetchEvent();
   }, [id, locale]);
 
-  const handleDelete = async () => {
-    const confirmMsg = locale === "zh" ? "确定要永久删除该展会记录吗？" : "Are you sure you want to permanently delete this event record?";
-    if (!confirm(confirmMsg)) return;
-
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true);
     try {
       const res = await fetch(`/api/events/${id}`, { method: "DELETE" });
       if (res.ok) {
         toast.success(locale === "zh" ? "展会记录已删除" : "Event record deleted");
+        setShowDeleteModal(false);
         router.push("/events");
       } else {
         toast.error(locale === "zh" ? "删除展会失败" : "Failed to delete event");
       }
     } catch {
       toast.error(locale === "zh" ? "删除展会出错" : "Error deleting event");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -202,15 +208,21 @@ export default function EventDetailPage() {
                     });
                     if (res.ok) {
                       setEvent({ ...event, isAttended: newAttended });
-                      toast.success(
-                        newAttended
-                          ? locale === "zh"
-                            ? "展会已标记为已参展！"
-                            : "Event marked as Attended!"
-                          : locale === "zh"
-                          ? "已取消展会参展标记"
-                          : "Event attendance removed"
-                      );
+                      if (newAttended) {
+                        toast.success(
+                          locale === "zh"
+                            ? "展会已成功标记为已参展，正跳转至参展历史档案库！"
+                            : "Event marked as Attended! Redirecting to Attendance History..."
+                        );
+                        router.push("/history?tab=ATTENDED");
+                        router.refresh();
+                      } else {
+                        toast.success(
+                          locale === "zh"
+                            ? "已取消展会参展标记"
+                            : "Event attendance removed"
+                        );
+                      }
                     }
                   } catch {
                     toast.error(
@@ -494,8 +506,8 @@ export default function EventDetailPage() {
 
             {userRole === "ADMIN" && (
               <button
-                onClick={handleDelete}
-                className="flex items-center gap-1.5 px-4 py-2 bg-[#B91C1C] hover:bg-[#B91C1C]/90 text-white font-medium text-xs rounded-[8px] transition"
+                onClick={() => setShowDeleteModal(true)}
+                className="flex items-center gap-1.5 px-4 py-2 bg-[#B91C1C] hover:bg-[#B91C1C]/90 text-white font-medium text-xs rounded-[8px] transition cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>{locale === "zh" ? "删除" : "Delete"}</span>
@@ -541,6 +553,15 @@ export default function EventDetailPage() {
           />
         </div>
       </ModalPortal>
+
+      {/* Delete Event Modal */}
+      <DeleteEventModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleConfirmDelete}
+        eventName={localized?.eventName}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 }

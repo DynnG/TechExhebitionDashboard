@@ -1,23 +1,28 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { EventCard } from "@/components/events/event-card";
 import { EventTable } from "@/components/events/event-table";
 import { EventFilters } from "@/components/events/event-filters";
 import { EventForm } from "@/components/events/event-form";
 import { ModalPortal } from "@/components/shared/modal-portal";
+import { DeleteEventModal } from "@/components/events/delete-event-modal";
 import { Skeleton } from "@/components/shared/skeleton";
 import { LayoutGrid, Table as TableIcon, Plus, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { useLocaleStore } from "@/stores/locale-store";
 
 export default function EventsPage() {
+  const router = useRouter();
   const [viewMode, setViewMode] = useState<"table" | "card">("card");
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingEvent, setEditingEvent] = useState<any>(null);
+  const [deletingEvent, setDeletingEvent] = useState<{ id: number; eventName: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { locale } = useLocaleStore();
 
   const handleToggleAttended = async (id: number, currentStatus: boolean) => {
@@ -28,16 +33,20 @@ export default function EventsPage() {
         body: JSON.stringify({ isAttended: !currentStatus }),
       });
       if (res.ok) {
-        toast.success(
-          locale === "zh"
-            ? !currentStatus
-              ? "已标记为已参展！"
-              : "已更新参展状态"
-            : !currentStatus
-            ? "Event marked as Attended!"
-            : "Attendance status updated"
-        );
-        fetchEvents();
+        if (!currentStatus) {
+          toast.success(
+            locale === "zh"
+              ? "已成功标记为已参展，正跳转至参展历史档案库！"
+              : "Event marked as Attended! Redirecting to Attendance History..."
+          );
+          router.push("/history?tab=ATTENDED");
+          router.refresh();
+        } else {
+          toast.success(
+            locale === "zh" ? "已更新参展状态" : "Attendance status updated"
+          );
+          fetchEvents();
+        }
       }
     } catch {
       toast.error(locale === "zh" ? "更新参展状态失败" : "Error updating attendance");
@@ -118,22 +127,24 @@ export default function EventsPage() {
     setPagination((prev) => ({ ...prev, page: 1 }));
   };
 
-  const handleDelete = async (id: number) => {
-    if (
-      !confirm(
-        locale === "zh"
-          ? "确定要删除此展会记录吗？此操作无法撤销。"
-          : "Are you sure you want to delete this event record?"
-      )
-    )
-      return;
+  const handleDeleteClick = (id: number) => {
+    const target = events.find((e) => e.id === id);
+    setDeletingEvent({
+      id,
+      eventName: target?.eventName || `#${target?.eventNumber || id}`,
+    });
+  };
 
+  const handleConfirmDelete = async () => {
+    if (!deletingEvent) return;
+    setIsDeleting(true);
     try {
-      const res = await fetch(`/api/events/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/events/${deletingEvent.id}`, { method: "DELETE" });
       if (res.ok) {
         toast.success(
           locale === "zh" ? "展会记录已成功删除" : "Event deleted successfully"
         );
+        setDeletingEvent(null);
         fetchEvents();
       } else {
         const data = await res.json();
@@ -144,6 +155,8 @@ export default function EventsPage() {
       }
     } catch {
       toast.error(locale === "zh" ? "删除展会记录异常" : "Error deleting event");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -238,7 +251,7 @@ export default function EventsPage() {
               ))}
             </div>
           ) : (
-            <EventTable events={events} onDelete={handleDelete} onEdit={(evt: any) => setEditingEvent(evt)} />
+            <EventTable events={events} onDelete={handleDeleteClick} onEdit={(evt: any) => setEditingEvent(evt)} />
           )}
 
           {/* Pagination Controls */}
@@ -345,6 +358,15 @@ export default function EventsPage() {
           />
         </div>
       </ModalPortal>
+
+      {/* Delete Event Modal */}
+      <DeleteEventModal
+        isOpen={!!deletingEvent}
+        onClose={() => setDeletingEvent(null)}
+        onConfirm={handleConfirmDelete}
+        eventName={deletingEvent?.eventName}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 }

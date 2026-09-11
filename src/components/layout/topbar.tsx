@@ -35,8 +35,7 @@ export function Topbar() {
     if (path.startsWith("/dashboard"))
       return locale === "en" ? "Dashboard" : "仪表板";
 
-    if (path === "/events")
-      return locale === "en" ? "Events" : "展会列表";
+    if (path === "/events") return locale === "en" ? "Events" : "展会列表";
 
     if (path === "/events/new")
       return locale === "en" ? "Add Event" : "添加展会记录";
@@ -72,7 +71,6 @@ export function Topbar() {
 
   return (
     <header className="h-16 bg-[#F5EEDB]/95 dark:bg-[#133020]/95 backdrop-blur-md border-b border-[#D8D2C8] dark:border-[#1E4830] px-6 lg:px-8 flex items-center justify-between sticky top-0 z-30 shadow-xs transition-colors font-manrope">
-
       {/* Breadcrumbs */}
       <div className="flex items-center gap-1.5 text-xs text-[#666666] dark:text-white/60">
         <Link
@@ -91,13 +89,12 @@ export function Topbar() {
 
       {/* Right Actions */}
       <div className="flex items-center gap-3">
-
         {/* Dark / Light Theme Toggle */}
         <motion.button
           onClick={toggleTheme}
           whileTap={{ scale: 0.95 }}
           whileHover={{ scale: 1.02 }}
-          className="flex items-center gap-2 px-3 py-2 border-[1.5px] border-[#D8D2C8] dark:border-[#405449] bg-white dark:bg-[#17231C] text-[#133020] dark:text-[#F9F7F7] hover:bg-[#F9F7F7] dark:hover:bg-[#22352A] text-xs font-medium rounded-[8px] transition-colors"
+          className="flex items-center gap-2 px-3 py-2 border-[1.5px] border-[#D8D2C8] dark:border-[#405449] bg-white dark:bg-[#17231C] text-[#133020] dark:text-[#F9F7F7] hover:bg-[#F9F7F7] dark:hover:bg-[#22352A] text-xs font-medium rounded-[8px] transition-colors cursor-pointer"
           aria-label="Toggle dark mode"
         >
           <motion.div
@@ -117,7 +114,6 @@ export function Topbar() {
         </motion.button>
 
         <LangToggle />
-
       </div>
     </header>
   );

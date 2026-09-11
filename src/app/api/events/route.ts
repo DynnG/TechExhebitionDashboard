@@ -126,10 +126,11 @@ export async function POST(req: Request) {
     });
     const nextNumber = (maxEvent?.eventNumber || 0) + 1;
 
+    const userId = parseInt((session.user as any).id);
     const userRole = (session.user as any).role || "INTERN";
-    // Interns submit as DRAFT / PENDING_REVIEW; Admin & Supervisor submit as PUBLISHED
-    const initialStatus =
-      userRole === "INTERN" ? "PENDING_REVIEW" : body.status || "PUBLISHED";
+
+    // Manually added events go through the review queue (PENDING_REVIEW)
+    const initialStatus = body.status === "DRAFT" ? "DRAFT" : "PENDING_REVIEW";
 
     const newEvent = await db.event.create({
       data: {
@@ -164,9 +165,22 @@ export async function POST(req: Request) {
         sourceLinks: JSON.stringify(body.sourceLinks || []),
         status: initialStatus,
         source: "MANUAL",
-        createdById: parseInt((session.user as any).id),
+        createdById: userId,
       },
     });
+
+    // Automatically submit to Queue for review if pending review
+    if (initialStatus === "PENDING_REVIEW") {
+      await db.queueItem.create({
+        data: {
+          type: "FOR_REVIEW",
+          eventId: newEvent.id,
+          submittedById: userId,
+          reason: `Manually added exhibition record #${newEvent.eventNumber} awaiting review`,
+          status: "PENDING",
+        },
+      });
+    }
 
     return NextResponse.json({ event: newEvent }, { status: 201 });
   } catch (error: any) {

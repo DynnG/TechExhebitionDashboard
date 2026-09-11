@@ -1,17 +1,11 @@
 "use client";
 
 import { useState } from "react";
-
 import Link from "next/link";
-
 import { usePathname } from "next/navigation";
-
 import { useSession, signOut } from "next-auth/react";
-
 import Image from "next/image";
-
-import { motion, AnimatePresence } from "framer-motion";
-
+import { motion } from "framer-motion";
 import {
   LayoutDashboard,
   CalendarDays,
@@ -25,20 +19,15 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-
 import { useLocaleStore } from "@/stores/locale-store";
 
 export function Sidebar() {
   const pathname = usePathname();
-
   const { data: session } = useSession();
-
   const [collapsed, setCollapsed] = useState(false);
-
   const { locale } = useLocaleStore();
 
   const userRole = (session?.user as any)?.role || "INTERN";
-
   const userName = session?.user?.name || "User";
 
   const navItems = [
@@ -88,10 +77,8 @@ export function Sidebar() {
     switch (role) {
       case "ADMIN":
         return "bg-[#FFB347] text-[#133020] font-bold";
-
       case "SUPERVISOR":
         return "bg-[#046241] text-white font-bold";
-
       default:
         return "bg-[#708E7C] text-white font-medium";
     }
@@ -101,13 +88,21 @@ export function Sidebar() {
     <motion.aside
       animate={{ width: collapsed ? 80 : 256 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      className="bg-[#F9F7F7] dark:bg-[#1C452E] text-[#133020] dark:text-white flex flex-col justify-between relative z-50 h-screen sticky top-0 shadow-xl border-r border-[#D8D2C8] dark:border-[#27593D] font-manrope transition-colors duration-300"
+      className="bg-[#F9F7F7] dark:bg-[#081C12] text-[#133020] dark:text-white flex flex-col justify-between relative z-50 h-screen sticky top-0 shadow-xl border-r border-[#D8D2C8] dark:border-[#046241]/40 font-manrope transition-colors duration-300"
     >
-      {/* Collapse Toggle Button (Prominent & Always Visible above Header) */}
+      {/* Collapse Toggle Button */}
       <button
         onClick={() => setCollapsed(!collapsed)}
         className="absolute -right-3.5 top-5 w-7 h-7 bg-[#FFB347] text-[#133020] border border-[#133020]/20 dark:border-white/20 rounded-full flex items-center justify-center shadow-lg hover:bg-[#FFC370] hover:scale-110 transition z-[60] cursor-pointer"
-        title={locale === "zh" ? (collapsed ? "展开侧边栏" : "折叠侧边栏") : (collapsed ? "Expand sidebar" : "Collapse sidebar")}
+        title={
+          locale === "zh"
+            ? collapsed
+              ? "展开侧边栏"
+              : "折叠侧边栏"
+            : collapsed
+              ? "Expand sidebar"
+              : "Collapse sidebar"
+        }
       >
         {collapsed ? (
           <ChevronRight className="w-4.5 h-4.5" />
@@ -118,19 +113,33 @@ export function Sidebar() {
 
       {/* Top Header & Logo */}
       <div>
-        <div className="p-2 flex flex-col items-center gap-2 border-b border-[#133020]/10 dark:border-white/10 bg-[#F9F7F7]">
-          <div className="relative w-full h-6">
+        <div className="py-4 px-3 flex flex-col items-center border-b border-[#133020]/10 dark:border-white/10 transition-colors">
+          {/* Dynamic Theme Logo */}
+          <div className="relative flex items-center justify-center w-full h-7">
+            {/* Light Mode Logo (Green Text) */}
             <Image
               src="/logo.png"
               alt="Lifewood logo"
-              fill
-              className="object-contain object-center"
+              width={140}
+              height={28}
+              priority
+              className="object-contain dark:hidden"
+            />
+
+            {/* Dark Mode Logo (White Text) */}
+            <Image
+              src="/Logo 2.png"
+              alt="Lifewood logo"
+              width={140}
+              height={28}
+              priority
+              className="object-contain hidden dark:block"
             />
           </div>
 
           {!collapsed && (
-            <div className="text-center">
-              <p className="text-[10.5px] text-[#133020]/60 uppercase tracking-wider font-bold">
+            <div className="mt-2 text-center">
+              <p className="text-[9.5px] text-[#046241] dark:text-[#34D399] uppercase tracking-[0.18em] font-bold leading-none">
                 {locale === "en"
                   ? "Exhibition Intelligence"
                   : "全球展会智能平台"}
@@ -143,7 +152,6 @@ export function Sidebar() {
         <nav className="p-3 space-y-1.5 mt-2">
           {navItems.map((item) => {
             const Icon = item.icon;
-
             const isActive =
               pathname === item.href ||
               (item.href !== "/dashboard" &&
@@ -182,9 +190,7 @@ export function Sidebar() {
                 />
 
                 {!collapsed && (
-                  <span className="truncate tracking-wide">
-                    {item.label}
-                  </span>
+                  <span className="truncate tracking-wide">{item.label}</span>
                 )}
               </Link>
             );
@@ -208,11 +214,15 @@ export function Sidebar() {
 
                 <span
                   className={`inline-block px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wider mt-0.5 ${getRoleBadgeStyle(
-                    userRole
+                    userRole,
                   )}`}
                 >
                   {locale === "zh"
-                    ? (userRole === "ADMIN" ? "管理员" : userRole === "SUPERVISOR" ? "主管" : "实习生")
+                    ? userRole === "ADMIN"
+                      ? "管理员"
+                      : userRole === "SUPERVISOR"
+                        ? "主管"
+                        : "实习生"
                     : userRole}
                 </span>
               </div>
@@ -229,8 +239,13 @@ export function Sidebar() {
         ) : (
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
-            title={locale === "zh" ? `退出登录 (${userName})` : `Sign Out (${userName})`}
-            className="w-full flex justify-center p-2 text-[#133020]/60 dark:text-white/60 hover:text-[#FFB347] hover:bg-[#133020]/5 dark:hover:bg-white/5 rounded-lg transition">
+            title={
+              locale === "zh"
+                ? `退出登录 (${userName})`
+                : `Sign Out (${userName})`
+            }
+            className="w-full flex justify-center p-2 text-[#133020]/60 dark:text-white/60 hover:text-[#FFB347] hover:bg-[#133020]/5 dark:hover:bg-white/5 rounded-lg transition"
+          >
             <LogOut className="w-5 h-5" />
           </button>
         )}

@@ -8,9 +8,10 @@ interface ModalPortalProps {
   isOpen: boolean;
   onClose: () => void;
   children: ReactNode;
+  maxWidthClass?: string;
 }
 
-export function ModalPortal({ isOpen, onClose, children }: ModalPortalProps) {
+export function ModalPortal({ isOpen, onClose, children, maxWidthClass = "max-w-4xl" }: ModalPortalProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -44,7 +45,7 @@ export function ModalPortal({ isOpen, onClose, children }: ModalPortalProps) {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 10 }}
             transition={{ type: "spring", stiffness: 350, damping: 25 }}
-            className="relative max-w-4xl w-full max-h-[92vh] overflow-y-auto no-scrollbar rounded-2xl bg-white dark:bg-[#133020] text-emerald-950 dark:text-slate-100 border border-[#D8D2C8] dark:border-[#1E4830] shadow-2xl my-auto overflow-hidden transition-colors"
+            className={`relative ${maxWidthClass} w-full max-h-[92vh] overflow-y-auto no-scrollbar rounded-2xl bg-white dark:bg-[#133020] text-emerald-950 dark:text-slate-100 border border-[#D8D2C8] dark:border-[#1E4830] shadow-2xl my-auto overflow-hidden transition-colors`}
             onClick={(e) => e.stopPropagation()}
           >
             {children}
