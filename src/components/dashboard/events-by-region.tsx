@@ -37,13 +37,13 @@ export function EventsByRegionChart({ data }: EventsByRegionProps) {
   }, [data, locale]);
 
   return (
-    <div className="bg-white dark:bg-[#1A3828] p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] dark:border-[#1E4830] shadow-[0_2px_16px_rgba(0,0,0,0.05)] font-manrope h-full min-h-[420px] flex flex-col justify-between transition-colors">
+    <div className="bg-white dark:bg-[#fefefe] p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] dark:border-[#1E4830] shadow-[0_2px_16px_rgba(0,0,0,0.05)] font-manrope h-full min-h-[420px] flex flex-col justify-between transition-colors">
       <div className="flex items-center justify-between min-h-[52px] border-b border-[#D8D2C8] dark:border-[#1E4830] pb-3 mb-4">
         <div>
-          <h3 className="text-[14px] font-semibold text-[#133020] dark:text-white">
+            <h3 className="text-[14px] font-semibold text-[#133020]">
             {locale === "zh" ? "各区域展会分布" : "Events by region"}
           </h3>
-          <p className="text-[11px] text-[#666666] dark:text-white/60">
+            <p className="text-[11px] text-[#666666]">
             {locale === "zh" ? "战略科技展会地理分布" : "Geographic distribution of strategic tech exhibitions"}
           </p>
         </div>
