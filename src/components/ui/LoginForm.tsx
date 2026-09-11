@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AlertCircle, ArrowRight, Clock } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { SocialLinks } from "@/components/ui/SocialLinks";
 import { useLocaleStore } from "@/stores/locale-store";
 
@@ -18,6 +20,7 @@ export function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [cooldownSeconds, setCooldownSeconds] = useState<number>(0);
+  const [showIntro, setShowIntro] = useState(false);
 
   useEffect(() => {
     if (cooldownSeconds <= 0) return;
@@ -68,15 +71,18 @@ export function LoginForm() {
                 : "Failed to sign in. Please check credentials."),
           );
         }
+        setLoading(false);
       } else if (res?.ok) {
-        router.push(callbackUrl);
-        router.refresh();
+        setShowIntro(true);
+        setTimeout(() => {
+          router.push(callbackUrl);
+          router.refresh();
+        }, 1400);
       }
     } catch {
       setError(
         locale === "zh" ? "发生未知错误。" : "An unexpected error occurred.",
       );
-    } finally {
       setLoading(false);
     }
   };
@@ -94,144 +100,174 @@ export function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-lg bg-white rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] p-6 sm:p-8 border border-[#D8D2C8] relative font-manrope">
-      {/* Top Header with Logo at Top Left */}
-      <div className="flex items-center justify-between mb-4">
-        <span className="text-[10px] font-bold text-[#046241] uppercase tracking-wider bg-[#046241]/10 px-2.5 py-1 rounded-full">
-          Portal Access
-        </span>
-      </div>
+    <>
+      <div className="w-full max-w-lg bg-white rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] p-6 sm:p-8 border border-[#D8D2C8] relative font-manrope">
+        {/* Top Header with Logo at Top Left */}
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-[10px] font-bold text-[#046241] uppercase tracking-wider bg-[#046241]/10 px-2.5 py-1 rounded-full">
+            Portal Access
+          </span>
+        </div>
 
-      <div className="mb-4">
-        <h2 className="text-2xl sm:text-3xl font-bold text-[#133020] tracking-tight">
-          {locale === "zh" ? "欢迎回来" : "Welcome back"}
-        </h2>
-        <p className="text-xs text-[#666666] mt-1">
-          {locale === "zh"
-            ? "请输入您的安全凭证以访问展会情报工作台"
-            : "Enter your credentials to access the intelligence platform"}
-        </p>
-      </div>
+        <div className="mb-4">
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#133020] tracking-tight">
+            {locale === "zh" ? "欢迎回来" : "Welcome back"}
+          </h2>
+          <p className="text-xs text-[#666666] mt-1">
+            {locale === "zh"
+              ? "请输入您的安全凭证以访问展会情报工作台"
+              : "Enter your credentials to access the intelligence platform"}
+          </p>
+        </div>
 
-      {error && (
-        <div className="mb-4 p-3 bg-[#B91C1C]/10 border border-[#B91C1C]/30 rounded-xl flex items-start gap-2.5 text-xs text-[#B91C1C]">
-          {cooldownSeconds > 0 ? (
-            <Clock className="w-4 h-4 shrink-0 mt-0.5 text-[#B91C1C]" />
-          ) : (
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-          )}
-          <div className="flex-1">
-            <span className="font-semibold block">{error}</span>
-            {cooldownSeconds > 0 && (
-              <span className="text-[11px] text-[#B91C1C]/90 font-mono mt-0.5 block">
-                {locale === "zh" ? "请稍候重试：" : "Try again in: "}{" "}
-                {formatTime(cooldownSeconds)}
-              </span>
+        {error && (
+          <div className="mb-4 p-3 bg-[#B91C1C]/10 border border-[#B91C1C]/30 rounded-xl flex items-start gap-2.5 text-xs text-[#B91C1C]">
+            {cooldownSeconds > 0 ? (
+              <Clock className="w-4 h-4 shrink-0 mt-0.5 text-[#B91C1C]" />
+            ) : (
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
             )}
+            <div className="flex-1">
+              <span className="font-semibold block">{error}</span>
+              {cooldownSeconds > 0 && (
+                <span className="text-[11px] text-[#B91C1C]/90 font-mono mt-0.5 block">
+                  {locale === "zh" ? "请稍候重试：" : "Try again in: "}{" "}
+                  {formatTime(cooldownSeconds)}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-3.5">
+          <div>
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-[#133020] mb-1">
+              {locale === "zh" ? "电子邮箱或用户名" : "Email or Username"}
+            </label>
+            <input
+              type="email"
+              required
+              disabled={cooldownSeconds > 0}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="user@lifewood.com"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#D8D2C8] text-xs text-[#133020] bg-white placeholder-[#999999] focus:outline-none focus:border-[#046241] focus:ring-1 focus:ring-[#046241]/20 transition disabled:bg-gray-100 disabled:cursor-not-allowed"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-[#133020] mb-1">
+              {locale === "zh" ? "密码" : "Password"}
+            </label>
+            <input
+              type="password"
+              required
+              disabled={cooldownSeconds > 0}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#D8D2C8] text-xs text-[#133020] bg-white placeholder-[#999999] focus:outline-none focus:border-[#046241] focus:ring-1 focus:ring-[#046241]/20 transition disabled:bg-gray-100 disabled:cursor-not-allowed"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading || cooldownSeconds > 0}
+            className="w-full py-3 px-5 rounded-xl bg-[#046241] hover:bg-[#133020] text-white border border-[#046241] font-semibold text-xs transition-all duration-200 shadow-sm flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed mt-2 cursor-pointer"
+          >
+            {loading ? (
+              <span>{locale === "zh" ? "登录中..." : "Signing in..."}</span>
+            ) : cooldownSeconds > 0 ? (
+              <span>
+                {locale === "zh"
+                  ? `已锁定 (${formatTime(cooldownSeconds)})`
+                  : `Locked (${formatTime(cooldownSeconds)})`}
+              </span>
+            ) : (
+              <>
+                <span>
+                  {locale === "zh" ? "登录进入工作台" : "Sign in to Dashboard"}
+                </span>
+                <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition text-[#FFB347]" />
+              </>
+            )}
+          </button>
+        </form>
+
+        <SocialLinks />
+
+        <div className="mt-4 pt-3 border-t border-[#D8D2C8]">
+          <p className="text-[11px] text-[#666666] mb-2 font-medium">
+            {locale === "zh"
+              ? "快速切换演示账号："
+              : "Quick switch demo account:"}
+          </p>
+          <div className="grid grid-cols-3 gap-2">
+            <button
+              type="button"
+              disabled={cooldownSeconds > 0}
+              onClick={() => setQuickUser("admin@lifewood.com", "admin123")}
+              className="py-1.5 px-2.5 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-xl border border-[#D8D2C8] transition text-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {locale === "zh" ? "超级管理员 (Superadmin)" : "Superadmin"}
+            </button>
+            <button
+              type="button"
+              disabled={cooldownSeconds > 0}
+              onClick={() =>
+                setQuickUser("supervisor@lifewood.com", "supervisor123")
+              }
+              className="py-1.5 px-2.5 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-xl border border-[#D8D2C8] transition text-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {locale === "zh" ? "管理员 (Admin)" : "Admin"}
+            </button>
+            <button
+              type="button"
+              disabled={cooldownSeconds > 0}
+              onClick={() => setQuickUser("intern@lifewood.com", "intern123")}
+              className="py-1.5 px-2.5 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-xl border border-[#D8D2C8] transition text-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {locale === "zh" ? "普通用户 (User)" : "User"}
+            </button>
           </div>
         </div>
-      )}
 
-      <form onSubmit={handleSubmit} className="space-y-3.5">
-        <div>
-          <label className="block text-[11px] font-bold uppercase tracking-wider text-[#133020] mb-1">
-            {locale === "zh" ? "电子邮箱或用户名" : "Email or Username"}
-          </label>
-          <input
-            type="email"
-            required
-            disabled={cooldownSeconds > 0}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="user@lifewood.com"
-            className="w-full px-3.5 py-2.5 rounded-xl border border-[#D8D2C8] text-xs text-[#133020] bg-white placeholder-[#999999] focus:outline-none focus:border-[#046241] focus:ring-1 focus:ring-[#046241]/20 transition disabled:bg-gray-100 disabled:cursor-not-allowed"
-          />
-        </div>
-
-        <div>
-          <label className="block text-[11px] font-bold uppercase tracking-wider text-[#133020] mb-1">
-            {locale === "zh" ? "密码" : "Password"}
-          </label>
-          <input
-            type="password"
-            required
-            disabled={cooldownSeconds > 0}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            className="w-full px-3.5 py-2.5 rounded-xl border border-[#D8D2C8] text-xs text-[#133020] bg-white placeholder-[#999999] focus:outline-none focus:border-[#046241] focus:ring-1 focus:ring-[#046241]/20 transition disabled:bg-gray-100 disabled:cursor-not-allowed"
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading || cooldownSeconds > 0}
-          className="w-full py-3 px-5 rounded-xl bg-[#046241] hover:bg-[#133020] text-white border border-[#046241] font-semibold text-xs transition-all duration-200 shadow-sm flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed mt-2 cursor-pointer"
-        >
-          {loading ? (
-            <span>{locale === "zh" ? "登录中..." : "Signing in..."}</span>
-          ) : cooldownSeconds > 0 ? (
-            <span>
-              {locale === "zh"
-                ? `已锁定 (${formatTime(cooldownSeconds)})`
-                : `Locked (${formatTime(cooldownSeconds)})`}
-            </span>
-          ) : (
-            <>
-              <span>
-                {locale === "zh" ? "登录进入工作台" : "Sign in to Dashboard"}
-              </span>
-              <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition text-[#FFB347]" />
-            </>
-          )}
-        </button>
-      </form>
-
-      <SocialLinks />
-
-      <div className="mt-4 pt-3 border-t border-[#D8D2C8]">
-        <p className="text-[11px] text-[#666666] mb-2 font-medium">
-          {locale === "zh"
-            ? "快速切换演示账号："
-            : "Quick switch demo account:"}
-        </p>
-        <div className="grid grid-cols-3 gap-2">
-          <button
-            type="button"
-            disabled={cooldownSeconds > 0}
-            onClick={() => setQuickUser("admin@lifewood.com", "admin123")}
-            className="py-1.5 px-2.5 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-xl border border-[#D8D2C8] transition text-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {locale === "zh" ? "超级管理员 (Superadmin)" : "Superadmin"}
-          </button>
-          <button
-            type="button"
-            disabled={cooldownSeconds > 0}
-            onClick={() =>
-              setQuickUser("supervisor@lifewood.com", "supervisor123")
-            }
-            className="py-1.5 px-2.5 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-xl border border-[#D8D2C8] transition text-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {locale === "zh" ? "管理员 (Admin)" : "Admin"}
-          </button>
-          <button
-            type="button"
-            disabled={cooldownSeconds > 0}
-            onClick={() => setQuickUser("intern@lifewood.com", "intern123")}
-            className="py-1.5 px-2.5 bg-[#F9F7F7] hover:bg-[#F5EEDB] text-xs font-semibold text-[#133020] rounded-xl border border-[#D8D2C8] transition text-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {locale === "zh" ? "普通用户 (User)" : "User"}
-          </button>
+        <div className="mt-4 pt-2 flex items-center justify-between text-[10px] font-semibold text-[#8C9B9E] tracking-wider uppercase">
+          <span>© 2026 LIFEWOOD DATA TECHNOLOGY</span>
+          <div className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#046241] inline-block"></span>
+            <span>V 1.0</span>
+          </div>
         </div>
       </div>
 
-      <div className="mt-4 pt-2 flex items-center justify-between text-[10px] font-semibold text-[#8C9B9E] tracking-wider uppercase">
-        <span>© 2026 LIFEWOOD DATA TECHNOLOGY</span>
-        <div className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#046241] inline-block"></span>
-          <span>V 1.0</span>
-        </div>
-      </div>
-    </div>
+      {/* Post-login Intro Splash */}
+      <AnimatePresence>
+        {showIntro && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-[999] bg-[#F5EEDB] flex items-center justify-center"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="relative w-48 h-14"
+            >
+              <Image
+                src="/logo.png"
+                alt="Lifewood logo"
+                fill
+                className="object-contain"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

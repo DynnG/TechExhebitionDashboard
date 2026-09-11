@@ -6,11 +6,16 @@ import { localizeEvent, localizeRegionName } from "@/lib/i18n/event-localization
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { reportType, region, timeRange = "ALL", customStartDate, customEndDate, format, locale = "en" } = body;
+        const body = await req.json();
+    const { reportType, region, businessLine, timeRange = "ALL", customStartDate, customEndDate, format, locale = "en" } = body;
 
     const where: any = { status: "PUBLISHED" };
-    if (region && region !== "ALL") {
+
+    if (reportType === "businessLine" && businessLine) {
+      where.businessLines = { contains: businessLine };
+    } else if (reportType === "full") {
+      // No region/business line filter — full database export
+    } else if (region && region !== "ALL") {
       where.region = region;
     }
 
@@ -81,7 +86,13 @@ export async function POST(req: Request) {
     const events = isZh ? rawEvents.map((e) => localizeEvent(e, "zh")) : rawEvents;
 
     const displayRegion = region === "ALL" ? (isZh ? "全球" : "Global") : (isZh ? localizeRegionName(region, "zh") : region);
-    
+    const displayScope =
+      reportType === "businessLine"
+        ? businessLine
+        : reportType === "full"
+        ? (isZh ? "完整数据库" : "Full Database")
+        : displayRegion;
+
     // Time label for report title
     let timeLabel = "2026–2027";
     if (timeRange === "CUSTOM") {
@@ -97,9 +108,9 @@ export async function POST(req: Request) {
     else if (timeRange === "2026") timeLabel = isZh ? "2026 全年" : "2026 Full Year";
     else if (timeRange === "2027") timeLabel = isZh ? "2027 全年" : "2027 Full Year";
 
-    const reportTitle = isZh
-      ? `${displayRegion} 科技展会情报报告 (${timeLabel})`
-      : `${region === "ALL" ? "Global" : region} Tech Exhibition Intelligence Report (${timeLabel})`;
+        const reportTitle = isZh
+      ? `${displayScope} 科技展会情报报告 (${timeLabel})`
+      : `${displayScope} Tech Exhibition Intelligence Report (${timeLabel})`;
 
     if (format === "xlsx") {
       const buffer = generateExcelReportBuffer(events, reportTitle, region, locale);
@@ -182,8 +193,8 @@ export async function POST(req: Request) {
       });
     }
 
-    // Default HTML format
-    const htmlReport = generateBrandedHTMLReport(events, reportTitle, region, locale, timeLabel);
+        // Default HTML format
+    const htmlReport = generateBrandedHTMLReport(events, reportTitle, displayScope, locale, timeLabel);
     return NextResponse.json({ html: htmlReport, count: events.length });
   } catch (error: any) {
     return NextResponse.json(
