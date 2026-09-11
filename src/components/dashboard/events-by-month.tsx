@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
-import { RotateCcw, Calendar } from "lucide-react";
+import { Calendar, RotateCcw } from "lucide-react";
 import { useLocaleStore } from "@/stores/locale-store";
 import { localizeMonthYear } from "@/lib/i18n/event-localization";
 
