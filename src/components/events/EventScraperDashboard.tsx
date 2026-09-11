@@ -439,18 +439,18 @@ export default function EventScraperDashboard() {
   };
 
   return (
-    <div className="p-6 font-manrope space-y-5 bg-white dark:bg-[#1A3828] transition-colors">
+    <div className="p-6 font-manrope space-y-5 bg-white">
       {/* Header bar */}
       <div className="flex items-start justify-between flex-wrap gap-4 border-b border-[#D8D2C8] dark:border-[#1E4830] pb-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <h2 className="text-[18px] font-semibold text-[#133020] dark:text-white">
+            <h2 className="text-[18px] font-semibold text-[#133020] dark:text-black">
               {locale === "zh"
                 ? "科技展会智能发现与抓取引擎"
                 : "Tech exhibition discovery engine"}
             </h2>
           </div>
-          <p className="text-[12px] text-[#666666] dark:text-white/60">
+          <p className="text-[12px] text-[#666666] dark:text-black/60">
             {locale === "zh"
               ? "目标范围：2026年9月1日 – 2027年12月31日 · 自动化 27 维度审计 · 最低适配度 3+ 阈值要求"
               : "Target scope: Sep 1, 2026 – Dec 31, 2027 · Automated 27-column audit · Minimum Fit 3+ enforcement"}
@@ -494,9 +494,9 @@ export default function EventScraperDashboard() {
         {!loading ? (
           <button
             onClick={handleCrawl}
-            className="px-5 py-2.5 rounded-[8px] bg-[#046241] hover:bg-[#034d33] text-white font-semibold text-xs shadow-xs transition-all duration-180 flex items-center gap-2 shrink-0 cursor-pointer"
+            className="px-5 py-2.5 rounded-[8px] bg-[#FACC15] hover:bg-[#EAB308] text-[#133020] font-bold text-xs shadow-xs transition-all duration-180 flex items-center gap-2 shrink-0 cursor-pointer border border-[#EAB308]/60"
           >
-            <Play className="w-3.5 h-3.5 fill-white" />
+            <Play className="w-3.5 h-3.5 fill-[#133020] text-[#133020]" />
             <span>
               {locale === "zh" ? "开始抓取" : "Start Scraping"}
             </span>
