@@ -52,8 +52,8 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
     return () => observer.disconnect();
   }, []);
 
-  const axisTickColor = isDark ? "#FFFFFF" : "#133020";
-  const axisLineColor = isDark ? "#1E4830" : "#D8D2C8";
+  const axisTickColor = "#133020";
+  const axisLineColor = "#D8D2C8";
 
   const formattedData = useMemo(() => {
     if (!data || data.length === 0) return [];
@@ -94,13 +94,13 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-[#1A3828] p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] dark:border-[#1E4830] shadow-[0_2px_16px_rgba(0,0,0,0.05)] font-manrope h-full min-h-[420px] flex flex-col justify-between transition-colors">
-      <div className="flex items-center justify-between min-h-[52px] flex-wrap gap-3 mb-4 border-b border-[#D8D2C8] dark:border-[#1E4830] pb-3">
+    <div className="bg-white p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] shadow-[0_2px_16px_rgba(0,0,0,0.05)] font-manrope h-full min-h-[420px] flex flex-col justify-between">
+      <div className="flex items-center justify-between min-h-[52px] flex-wrap gap-3 mb-4 border-b border-[#D8D2C8] pb-3">
         <div>
-          <h3 className="text-[14px] font-semibold text-[#133020] dark:text-white">
+          <h3 className="text-[14px] font-semibold text-[#133020]">
             {locale === "zh" ? "各月份展会分布" : "Exhibitions distribution by month"}
           </h3>
-          <p className="text-[11px] text-[#666666] dark:text-white/60">
+          <p className="text-[11px] text-[#666666]">
             {locale === "zh"
               ? "目标阈值：每月 ≥ 5 场展会（空缺月份以藏红橙高亮）"
               : "Target threshold: ≥ 5 exhibitions per month (gaps highlighted in Saffron)"}
@@ -108,25 +108,25 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
         </div>
 
         {/* Unified Interactive Date Range Picker with Single Icon & Clear From / To Labels */}
-        <div className="flex items-center gap-2 bg-[#F9F7F7] dark:bg-[#133020] px-3 py-1.5 rounded-[8px] border-[1.5px] border-[#D8D2C8] dark:border-[#1E4830] text-xs">
-          <Calendar className="w-4 h-4 text-[#046241] dark:text-[#2EA87A] shrink-0" />
+        <div className="flex items-center gap-2 bg-[#F9F7F7] px-3 py-1.5 rounded-[8px] border-[1.5px] border-[#D8D2C8] text-xs">
+          <Calendar className="w-4 h-4 text-[#046241] shrink-0" />
           <div className="flex items-center gap-1.5">
-            <span className="font-bold text-[#133020] dark:text-white text-[11px]">{locale === "zh" ? "从" : "From"}:</span>
+            <span className="font-bold text-[#133020] text-[11px]">{locale === "zh" ? "从" : "From"}:</span>
             <input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="bg-transparent text-xs font-semibold text-[#133020] dark:text-white focus:outline-none cursor-pointer"
+              className="bg-transparent text-xs font-semibold text-[#133020] focus:outline-none cursor-pointer"
             />
           </div>
-          <span className="text-[#999999] dark:text-white/40 font-bold">—</span>
+          <span className="text-[#999999] font-bold">—</span>
           <div className="flex items-center gap-1.5">
-            <span className="font-bold text-[#133020] dark:text-white text-[11px]">{locale === "zh" ? "至" : "To"}:</span>
+            <span className="font-bold text-[#133020] text-[11px]">{locale === "zh" ? "至" : "To"}:</span>
             <input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="bg-transparent text-xs font-semibold text-[#133020] dark:text-white focus:outline-none cursor-pointer"
+              className="bg-transparent text-xs font-semibold text-[#133020] focus:outline-none cursor-pointer"
             />
           </div>
 
@@ -134,7 +134,7 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
             <button
               onClick={handleResetDates}
               title={locale === "zh" ? "重置日期范围" : "Reset Date Range"}
-              className="ml-1 px-1.5 py-0.5 text-[#046241] dark:text-[#2EA87A] bg-[#046241]/10 hover:bg-[#046241]/20 rounded-[6px] transition flex items-center gap-1 font-semibold text-[11px]"
+              className="ml-1 px-1.5 py-0.5 text-[#046241] bg-[#046241]/10 hover:bg-[#046241]/20 rounded-[6px] transition flex items-center gap-1 font-semibold text-[11px]"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>{locale === "zh" ? "重置" : "Reset"}</span>
@@ -146,11 +146,11 @@ export function EventsByMonthChart({ data }: EventsByMonthProps) {
       <div className="flex items-center justify-end gap-3 mb-2 text-xs font-medium">
         <div className="flex items-center gap-1.5 text-[11px]">
           <span className="w-2.5 h-2.5 rounded-[2px] bg-[#046241] inline-block" />
-          <span className="text-[#133020] dark:text-white">{locale === "zh" ? "达标 (≥ 5 场展会)" : "Target met (≥ 5 exhibitions)"}</span>
+          <span className="text-[#133020]">{locale === "zh" ? "达标 (≥ 5 场展会)" : "Target met (≥ 5 exhibitions)"}</span>
         </div>
         <div className="flex items-center gap-1.5 text-[11px]">
           <span className="w-2.5 h-2.5 rounded-[2px] bg-[#FFB347] inline-block" />
-          <span className="text-[#C17110] dark:text-[#FFB347]">{locale === "zh" ? "空缺 (< 5 场展会)" : "Gap (< 5 exhibitions)"}</span>
+          <span className="text-[#C17110]">{locale === "zh" ? "空缺 (< 5 场展会)" : "Gap (< 5 exhibitions)"}</span>
         </div>
       </div>
 

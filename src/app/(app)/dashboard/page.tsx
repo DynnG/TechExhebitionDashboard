@@ -158,15 +158,15 @@ export default function DashboardPage() {
           />
         </div>
 
-        <div className="lg:col-span-7 bg-white dark:bg-[#1A3828] p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] dark:border-[#1E4830] shadow-[0_2px_16px_rgba(0,0,0,0.05)] flex flex-col justify-between font-manrope transition-colors">
+        <div className="lg:col-span-7 bg-white p-5 rounded-[12px] border-[1.5px] border-[#D8D2C8] shadow-[0_2px_16px_rgba(0,0,0,0.05)] flex flex-col justify-between font-manrope">
           <div>
             {/* 1. Card Header */}
-            <div className="flex items-center justify-between border-b border-[#D8D2C8] dark:border-[#1E4830] pb-3 mb-4">
+            <div className="flex items-center justify-between border-b border-[#D8D2C8] pb-3 mb-4">
               <div>
-                <h3 className="text-[15px] font-bold text-[#133020] dark:text-white">
+                <h3 className="text-[15px] font-bold text-[#133020]">
                   {locale === "en" ? "Recently added exhibitions" : "最新录入展会记录"}
                 </h3>
-                <p className="text-[11px] text-[#666666] dark:text-white/60 mt-0.5">
+                <p className="text-[11px] text-[#666666] mt-0.5">
                   {locale === "zh"
                     ? "情报数据库中最新审核的展会"
                     : "Latest verified entries in intelligence database"}
@@ -176,14 +176,14 @@ export default function DashboardPage() {
               {/* Top-right action link */}
               <Link
                 href="/events"
-                className="text-xs font-semibold text-[#046241] dark:text-[#52B788] hover:text-[#133020] dark:hover:text-white flex items-center gap-1 transition group"
+                className="text-xs font-semibold text-[#046241] hover:text-[#133020] flex items-center gap-1 transition group"
               >
                 <span>{locale === "en" ? "View all events →" : "查看全部展会 →"}</span>
               </Link>
             </div>
 
             {/* 2. Event List Rows (Latest 4 verified events) */}
-            <div className="divide-y divide-[#D8D2C8] dark:divide-[#1E4830]">
+            <div className="divide-y divide-[#D8D2C8]">
               {(recentEvents || []).slice(0, 4).map((rawEvt: any) => {
                 const evt = localizeEvent(rawEvt, locale);
                 let businessLines: string[] = [];
@@ -211,7 +211,7 @@ export default function DashboardPage() {
                   <Link
                     key={evt.id}
                     href={`/events/${evt.id}`}
-                    className="py-3 px-2 flex items-center justify-between gap-3 hover:bg-[#F0F5F2] dark:hover:bg-[#133020]/60 rounded-xl transition group relative"
+                    className="py-3 px-2 flex items-center justify-between gap-3 hover:bg-[#F0F5F2] rounded-xl transition group relative"
                   >
                     {/* 4px rounded vertical accent bar colored by primary business line */}
                     <div
@@ -221,8 +221,8 @@ export default function DashboardPage() {
 
                     <div className="min-w-0 flex-1">
                       {/* Event metadata: #EventNumber · Region · Dates */}
-                      <div className="flex items-center gap-1.5 text-[11px] text-[#666666] dark:text-white/60 mb-0.5">
-                        <span className="font-bold text-[#133020] dark:text-white">
+                      <div className="flex items-center gap-1.5 text-[11px] text-[#666666] mb-0.5">
+                        <span className="font-bold text-[#133020]">
                           #{evt.eventNumber}
                         </span>
                         <span>·</span>
@@ -232,12 +232,12 @@ export default function DashboardPage() {
                       </div>
 
                       {/* Event Title: Single-line truncated bold with emerald hover */}
-                      <h4 className="font-bold text-[13px] text-[#133020] dark:text-white group-hover:text-[#046241] dark:group-hover:text-[#52B788] transition truncate">
+                      <h4 className="font-bold text-[13px] text-[#133020] group-hover:text-[#046241] transition truncate">
                         {evt.eventName}
                       </h4>
 
                       {/* Event City & Country */}
-                      <p className="text-[11px] text-[#666666] dark:text-white/60 truncate mt-0.5">
+                      <p className="text-[11px] text-[#666666] truncate mt-0.5">
                         {evt.city}, {evt.country}
                       </p>
                     </div>
@@ -249,16 +249,16 @@ export default function DashboardPage() {
                           priorityLabel.toLowerCase() === "critical"
                             ? "bg-[#B91C1C]/15 text-[#B91C1C] border border-[#B91C1C]/30"
                             : priorityLabel.toLowerCase() === "high"
-                            ? "bg-[#FFB347]/20 text-[#C17110] dark:text-[#FFB347] border border-[#FFB347]/40"
+                            ? "bg-[#FFB347]/20 text-[#C17110] border border-[#FFB347]/40"
                             : priorityLabel.toLowerCase() === "medium"
-                            ? "bg-[#046241]/15 text-[#046241] dark:text-[#52B788] border border-[#046241]/30"
+                            ? "bg-[#046241]/15 text-[#046241] border border-[#046241]/30"
                             : "bg-[#708E7C]/15 text-[#708E7C] border border-[#708E7C]/30"
                         }`}
                       >
                         {priorityLabel}
                       </span>
 
-                      <span className="px-2.5 py-1 rounded-lg bg-[#046241]/10 dark:bg-[#046241]/25 border border-[#046241]/20 text-[#046241] dark:text-[#52B788] text-xs font-bold font-mono">
+                      <span className="px-2.5 py-1 rounded-lg bg-[#046241]/10 border border-[#046241]/20 text-[#046241] text-xs font-bold font-mono">
                         {fitFormatted}
                       </span>
                     </div>
@@ -269,13 +269,13 @@ export default function DashboardPage() {
           </div>
 
           {/* 3. Card Footer */}
-          <div className="pt-3 border-t border-[#D8D2C8] dark:border-[#1E4830] flex items-center justify-between text-[11px] text-[#666666] dark:text-white/60 mt-3 flex-wrap gap-2">
+          <div className="pt-3 border-t border-[#D8D2C8] flex items-center justify-between text-[11px] text-[#666666] mt-3 flex-wrap gap-2">
             <span>
               {locale === "zh"
                 ? "所有展会均已根据 Lifewood 买家画像完成战略评估"
                 : "All entries reviewed for Lifewood buyer alignment"}
             </span>
-            <span className="font-semibold text-[#046241] dark:text-[#52B788]">
+            <span className="font-semibold text-[#046241]">
               {locale === "zh" ? "✓ 27 项审计已核验" : "27-Column Audit Verified"}
             </span>
           </div>
