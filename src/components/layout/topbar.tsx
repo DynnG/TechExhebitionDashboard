@@ -14,7 +14,6 @@ export function Topbar() {
 
   const [isDark, setIsDark] = useState(false);
 
-  // Load saved theme
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
     const dark = savedTheme === "dark";
@@ -35,7 +34,8 @@ export function Topbar() {
     if (path.startsWith("/dashboard"))
       return locale === "en" ? "Dashboard" : "仪表板";
 
-    if (path === "/events") return locale === "en" ? "Events" : "展会列表";
+    if (path === "/events")
+      return locale === "en" ? "Events" : "展会列表";
 
     if (path === "/events/new")
       return locale === "en" ? "Add Event" : "添加展会记录";
@@ -71,22 +71,16 @@ export function Topbar() {
 
   return (
     <header className="h-16 bg-[#F5EEDB]/95 dark:bg-[#133020]/95 backdrop-blur-md border-b border-[#D8D2C8] dark:border-[#1E4830] px-6 lg:px-8 flex items-center justify-between sticky top-0 z-30 shadow-xs transition-colors font-manrope">
-      {/* Page Title & Breadcrumbs */}
-      <div>
-        <div className="flex items-center gap-1.5 text-xs text-[#666666] dark:text-white/60">
-          <Link
-            href="/dashboard"
-            className="hover:text-[#046241] dark:hover:text-[#2EA87A] transition font-medium"
-          >
-            Lifewood 活树
-          </Link>
+      {/* Breadcrumbs */}
+      <div className="flex items-center gap-1.5 text-xs text-[#666666] dark:text-white/60">
+        <Link
+          href="/dashboard"
+          className="hover:text-[#046241] dark:hover:text-[#2EA87A] transition font-medium"
+        >
+          Lifewood 活树
+        </Link>
 
-          <ChevronRight className="w-3 h-3 text-[#999999] dark:text-white/40" />
-
-          <span className="text-[#133020] dark:text-white font-semibold">
-            {title}
-          </span>
-        </div>
+        <ChevronRight className="w-3 h-3 text-[#999999] dark:text-white/40" />
 
         <span className="text-[#133020] dark:text-white font-semibold">
           {title}
@@ -95,7 +89,6 @@ export function Topbar() {
 
       {/* Right Actions */}
       <div className="flex items-center gap-3">
-        {/* Dark / Light Theme Toggle */}
         <motion.button
           onClick={toggleTheme}
           whileTap={{ scale: 0.95 }}

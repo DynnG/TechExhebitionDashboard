@@ -113,7 +113,7 @@ export function Sidebar() {
 
       {/* Top Header & Logo */}
       <div>
-        <div className="py-4 px-3 flex flex-col items-center border-b border-[#133020]/10 dark:border-white/10 transition-colors">
+        <div className="py-2 px-3 flex flex-col items-center border-b border-[#133020]/10 dark:border-white/10 transition-colors">
           {/* Dynamic Theme Logo */}
           <div className="relative flex items-center justify-center w-full h-7">
             {/* Light Mode Logo (Green Text) */}
