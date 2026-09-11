@@ -16,7 +16,7 @@ import { localizeEvent } from "@/lib/i18n/event-localization";
 export default function HistoryPage() {
   const { locale } = useLocaleStore();
   const { data: session } = useSession();
-  const userRole = (session?.user as any)?.role || "INTERN";
+  const userRole = (session?.user as any)?.role || "USER";
 
   const [activeTab, setActiveTab] = useState<"DECISIONS" | "ATTENDED">("DECISIONS");
   const [decisionFilter, setDecisionFilter] = useState<"ALL" | "APPROVED" | "REJECTED">("ALL");
@@ -435,7 +435,7 @@ export default function HistoryPage() {
                         <span>{locale === "zh" ? "查看" : "View"}</span>
                       </button>
 
-                      {(userRole === "ADMIN" || userRole === "SUPERVISOR") && (
+                      {(userRole === "SUPERADMIN" || userRole === "ADMIN") && (
                         <button
                           onClick={(e) => handleDeleteAttended(evt.id, evt.eventName, e)}
                           className="px-3.5 py-1.5 bg-white text-[#B91C1C] hover:bg-[#B91C1C] hover:text-white border border-[#B91C1C]/40 hover:border-[#B91C1C] shadow-xs rounded-lg font-bold transition flex items-center gap-1.5 text-[11px] cursor-pointer"

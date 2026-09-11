@@ -18,7 +18,7 @@ import { useLocaleStore } from "@/stores/locale-store";
 
 export default function SettingsPage() {
   const { data: session } = useSession();
-  const userRole = (session?.user as any)?.role || "INTERN";
+  const userRole = (session?.user as any)?.role || "USER";
   const userName = session?.user?.name || "Lifewood Admin";
   const userEmail = session?.user?.email || "admin@lifewood.com";
   const { locale, setLocale } = useLocaleStore();
@@ -220,8 +220,8 @@ export default function SettingsPage() {
                 </h3>
                 <p className="text-xs text-[#666666]">
                   {locale === "en"
-                    ? "Enforced server-side permissions across Admin, Supervisor, and Intern accounts"
-                    : "平台服务端实施的管理员、审核主管与录入实习生权限边界"}
+                    ? "Enforced server-side permissions across Superadmin, Admin, and User accounts"
+                    : "平台服务端实施的超级管理员、管理员与普通用户权限边界"}
                 </p>
               </div>
             </div>
@@ -231,9 +231,9 @@ export default function SettingsPage() {
                 <thead>
                   <tr className="bg-[#046241] text-white font-semibold uppercase tracking-wider text-[10px]">
                     <th className="p-3 rounded-l-xl">{locale === "zh" ? "平台操作与数据权限" : "Platform Action"}</th>
+                    <th className="p-3 text-center">{locale === "zh" ? "超级管理员 (Superadmin)" : "Superadmin"}</th>
                     <th className="p-3 text-center">{locale === "zh" ? "管理员 (Admin)" : "Admin"}</th>
-                    <th className="p-3 text-center">{locale === "zh" ? "审核主管 (Supervisor)" : "Supervisor"}</th>
-                    <th className="p-3 text-center rounded-r-xl">{locale === "zh" ? "录入实习生 (Intern)" : "Intern"}</th>
+                    <th className="p-3 text-center rounded-r-xl">{locale === "zh" ? "普通用户 (User)" : "User"}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#D8D2C8]">

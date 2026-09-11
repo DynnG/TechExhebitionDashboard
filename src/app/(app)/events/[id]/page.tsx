@@ -46,7 +46,7 @@ export default function EventDetailPage() {
   const router = useRouter();
   const id = params.id as string;
   const { data: session } = useSession();
-  const userRole = (session?.user as any)?.role || "INTERN";
+  const userRole = (session?.user as any)?.role || "USER";
   const { locale, t } = useTranslation();
 
   const [event, setEvent] = useState<any>(null);
@@ -494,7 +494,7 @@ export default function EventDetailPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            {(userRole === "ADMIN" || userRole === "SUPERVISOR") && (
+            {(userRole === "SUPERADMIN" || userRole === "ADMIN") && (
               <button
                 onClick={() => setShowEditModal(true)}
                 className="flex items-center gap-1.5 px-4 py-2 bg-[#FFB347] hover:bg-[#FFC370] text-[#133020] font-medium text-xs rounded-[8px] transition shadow-2xs"
@@ -504,7 +504,7 @@ export default function EventDetailPage() {
               </button>
             )}
 
-            {userRole === "ADMIN" && (
+            {userRole === "SUPERADMIN" && (
               <button
                 onClick={() => setShowDeleteModal(true)}
                 className="flex items-center gap-1.5 px-4 py-2 bg-[#B91C1C] hover:bg-[#B91C1C]/90 text-white font-medium text-xs rounded-[8px] transition cursor-pointer"

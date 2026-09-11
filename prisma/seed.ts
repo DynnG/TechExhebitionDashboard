@@ -13,38 +13,47 @@ async function main() {
 
   const admin = await prisma.user.upsert({
     where: { email: "admin@lifewood.com" },
-    update: {},
+    update: {
+      role: "SUPERADMIN",
+      name: "Superadmin User",
+    },
     create: {
       email: "admin@lifewood.com",
-      name: "Admin User",
+      name: "Superadmin User",
       passwordHash: adminPassword,
-      role: "ADMIN",
+      role: "SUPERADMIN",
     },
   });
 
   const supervisor = await prisma.user.upsert({
     where: { email: "supervisor@lifewood.com" },
-    update: {},
+    update: {
+      role: "ADMIN",
+      name: "Admin User",
+    },
     create: {
       email: "supervisor@lifewood.com",
-      name: "Supervisor User",
+      name: "Admin User",
       passwordHash: supervisorPassword,
-      role: "SUPERVISOR",
+      role: "ADMIN",
     },
   });
 
   await prisma.user.upsert({
     where: { email: "intern@lifewood.com" },
-    update: {},
+    update: {
+      role: "USER",
+      name: "User",
+    },
     create: {
       email: "intern@lifewood.com",
-      name: "Intern User",
+      name: "User",
       passwordHash: internPassword,
-      role: "INTERN",
+      role: "USER",
     },
   });
 
-  console.log("Seeded users: Admin (admin@lifewood.com), Supervisor (supervisor@lifewood.com), Intern (intern@lifewood.com).");
+  console.log("Seeded users: Superadmin (admin@lifewood.com), Admin (supervisor@lifewood.com), User (intern@lifewood.com).");
 
   // Seed sample exhibitions
   const sampleEvents = [

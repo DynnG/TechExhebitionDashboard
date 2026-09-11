@@ -139,9 +139,9 @@ export async function DELETE(
     const session = await getServerSession(authOptions);
     const userRole = (session?.user as any)?.role;
 
-    if (!session || userRole !== "ADMIN") {
+    if (!session || userRole !== "SUPERADMIN") {
       return NextResponse.json(
-        { error: "Forbidden: Admin access required to delete records." },
+        { error: "Forbidden: Superadmin access required to delete records." },
         { status: 403 }
       );
     }

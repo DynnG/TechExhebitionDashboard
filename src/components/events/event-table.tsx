@@ -18,7 +18,7 @@ interface EventTableProps {
 
 export function EventTable({ events, onDelete, onEdit }: EventTableProps) {
   const { data: session } = useSession();
-  const userRole = (session?.user as any)?.role || "INTERN";
+  const userRole = (session?.user as any)?.role || "USER";
   const { locale, t } = useTranslation();
 
   const localizedEvents = useMemo(() => {
@@ -140,7 +140,7 @@ export function EventTable({ events, onDelete, onEdit }: EventTableProps) {
                     >
                       <Eye className="w-4 h-4" />
                     </Link>
-                    {(userRole === "ADMIN" || userRole === "SUPERVISOR") && (
+                    {(userRole === "SUPERADMIN" || userRole === "ADMIN") && (
                       onEdit ? (
                         <button
                           type="button"
@@ -163,7 +163,7 @@ export function EventTable({ events, onDelete, onEdit }: EventTableProps) {
                         </Link>
                       )
                     )}
-                    {userRole === "ADMIN" && onDelete && (
+                    {userRole === "SUPERADMIN" && onDelete && (
                       <button
                         onClick={() => onDelete(evt.id)}
                         title={locale === "zh" ? "删除展会" : "Delete Event"}

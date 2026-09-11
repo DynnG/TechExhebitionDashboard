@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   Bot,
   Play,
@@ -18,14 +18,21 @@ import {
   Trash2,
   Filter,
   X,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
 } from "lucide-react";
 import { FitScoreBadge } from "./fit-score-badge";
 import { PriorityIndicator } from "./priority-indicator";
 import { BusinessLineChip } from "./business-line-chip";
+import { LifewoodMultiSelect } from "@/components/shared/lifewood-multi-select";
 import { toast } from "sonner";
 import { sanitizeEventUrl } from "@/lib/url";
 import { useTranslation } from "@/lib/i18n/use-translation";
 import { localizeEvent } from "@/lib/i18n/event-localization";
+import { ALL_COUNTRIES } from "@/lib/constants/countries";
 
 export interface EventRecord {
   no: number;
@@ -60,6 +67,52 @@ export interface EventRecord {
   duplicate_of?: string;
 }
 
+const YEAR_OPTIONS = [
+  { value: "2025", label: "2025" },
+  { value: "2026", label: "2026" },
+  { value: "2027", label: "2027" },
+  { value: "2028", label: "2028" },
+  { value: "2029", label: "2029" },
+];
+
+const MONTH_OPTIONS = [
+  { value: "January", label: "January (01)" },
+  { value: "February", label: "February (02)" },
+  { value: "March", label: "March (03)" },
+  { value: "April", label: "April (04)" },
+  { value: "May", label: "May (05)" },
+  { value: "June", label: "June (06)" },
+  { value: "July", label: "July (07)" },
+  { value: "August", label: "August (08)" },
+  { value: "September", label: "September (09)" },
+  { value: "October", label: "October (10)" },
+  { value: "November", label: "November (11)" },
+  { value: "December", label: "December (12)" },
+];
+
+const COUNTRY_OPTIONS = ALL_COUNTRIES;
+
+// Helper to calculate default date window: execution date + 1 month ahead
+function calculateTargetDateWindow() {
+  const executionDate = new Date();
+  const targetDate = new Date(executionDate);
+  targetDate.setMonth(targetDate.getMonth() + 1);
+
+  const monthNamesEn = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+  const targetMonth = monthNamesEn[targetDate.getMonth()];
+  const targetYear = targetDate.getFullYear().toString();
+
+  return {
+    executionDate,
+    targetDate,
+    targetMonth,
+    targetYear,
+  };
+}
+
 export default function EventScraperDashboard() {
   const { locale, t } = useTranslation();
   const [loading, setLoading] = useState(false);
@@ -67,7 +120,26 @@ export default function EventScraperDashboard() {
   const [statusText, setStatusText] = useState("");
   const [candidateUrls, setCandidateUrls] = useState<string[]>([]);
   const [events, setEvents] = useState<EventRecord[]>([]);
-  const [query, setQuery] = useState("tech exhibition 2027 Singapore OR Malaysia OR Philippines");
+
+  // Target Date Window (+1 month ahead from execution date)
+  const initialWindow = useRef(calculateTargetDateWindow()).current;
+
+  // Preset Filters (Multi-Select Dropdowns)
+  const [selectedYears, setSelectedYears] = useState<string[]>([initialWindow.targetYear]);
+  const [selectedMonths, setSelectedMonths] = useState<string[]>([initialWindow.targetMonth]);
+  const [selectedCountries, setSelectedCountries] = useState<string[]>([
+    "Singapore",
+    "Malaysia",
+    "Philippines",
+  ]);
+
+  // Optional Text Search
+  const [optionalPrompt, setOptionalPrompt] = useState("");
+
+  // Pagination state (default 10 items per page)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [acceptedEvents, setAcceptedEvents] = useState<Record<string, boolean>>({});
   const [acceptingId, setAcceptingId] = useState<string | null>(null);
@@ -84,6 +156,42 @@ export default function EventScraperDashboard() {
     if (filterMode === "duplicates") return e.is_duplicate;
     return true;
   });
+
+  const totalPages = Math.max(1, Math.ceil(displayedEvents.length / pageSize));
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [totalPages, currentPage]);
+
+  const startIndex = (currentPage - 1) * pageSize;
+  const paginatedEvents = displayedEvents.slice(startIndex, startIndex + pageSize);
+
+  // Dynamic query builder combining presets and optional prompt
+  const buildScrapeQuery = () => {
+    const parts: string[] = [];
+
+    if (optionalPrompt.trim()) {
+      parts.push(optionalPrompt.trim());
+    } else {
+      parts.push("tech exhibition");
+    }
+
+    if (selectedMonths.length > 0) {
+      parts.push(selectedMonths.join(" OR "));
+    }
+
+    if (selectedYears.length > 0) {
+      parts.push(selectedYears.join(" OR "));
+    }
+
+    if (selectedCountries.length > 0) {
+      parts.push(selectedCountries.join(" OR "));
+    }
+
+    return parts.join(" ");
+  };
 
   // Load previously cached events on initial mount
   useEffect(() => {
@@ -142,6 +250,22 @@ export default function EventScraperDashboard() {
 
     const controller = new AbortController();
     abortControllerRef.current = controller;
+    const effectiveQuery = buildScrapeQuery();
+
+    const requestPayload = {
+      query: effectiveQuery,
+      existingEvents: events,
+      targetWindow: {
+        executionDate: initialWindow.executionDate.toISOString(),
+        targetDate: initialWindow.targetDate.toISOString(),
+      },
+      filters: {
+        years: selectedYears,
+        months: selectedMonths,
+        countries: selectedCountries,
+        optionalPrompt: optionalPrompt.trim(),
+      },
+    };
 
     try {
       // Prefer proxy /api/crawl-events with streaming Accept header
@@ -153,7 +277,7 @@ export default function EventScraperDashboard() {
             "Content-Type": "application/json",
             Accept: "text/event-stream",
           },
-          body: JSON.stringify({ query, existingEvents: events }),
+          body: JSON.stringify(requestPayload),
           signal: controller.signal,
         });
       } catch {
@@ -163,7 +287,7 @@ export default function EventScraperDashboard() {
             "Content-Type": "application/json",
             Accept: "text/event-stream",
           },
-          body: JSON.stringify({ query, existingEvents: events }),
+          body: JSON.stringify(requestPayload),
           signal: controller.signal,
         });
       }
@@ -474,47 +598,107 @@ export default function EventScraperDashboard() {
         </div>
       </div>
 
-      {/* Query Search & Control Bar */}
-      <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
-        <div className="relative flex-1">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && !loading && handleCrawl()}
-            placeholder={
-              locale === "zh"
-                ? "搜索关键词（如：AI, Healthcare, IoT, FinTech）..."
-                : "Search keywords (e.g., AI, Healthcare, IoT, FinTech)..."
-            }
-            className="w-full bg-[#F9F7F7] dark:bg-[#133020] border border-[#D8D2C8] dark:border-[#1E4830] rounded-[8px] px-3.5 py-2 text-xs text-[#133020] dark:text-white placeholder-[#888888] focus:outline-hidden focus:border-[#046241] focus:ring-1 focus:ring-[#046241] transition-all"
+      {/* Target Date Window & Preset Filters Control Card */}
+      <div className="bg-[#F9F7F7] border border-[#D8D2C8] rounded-2xl p-4.5 space-y-3.5 shadow-2xs">
+        {/* Target Date Window Banner */}
+        <div className="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-[#D8D2C8]/70">
+          <div className="flex items-center gap-2.5 text-xs">
+            <div className="w-7 h-7 rounded-xl bg-[#046241]/10 flex items-center justify-center text-[#046241]">
+              <Calendar className="w-4 h-4" />
+            </div>
+            <div>
+              <span className="font-bold text-[#133020]">
+                {locale === "zh" ? "自动化抓取目标时间窗口：" : "Target Scraping Date Window:"}
+              </span>
+              <span className="ml-1.5 text-[#046241] font-extrabold text-xs">
+                {initialWindow.executionDate.toLocaleDateString(locale === "zh" ? "zh-CN" : "en-US", { month: "short", day: "numeric", year: "numeric" })}
+                {" → "}
+                {initialWindow.targetDate.toLocaleDateString(locale === "zh" ? "zh-CN" : "en-US", { month: "short", day: "numeric", year: "numeric" })}
+              </span>
+            </div>
+          </div>
+          <span className="px-2.5 py-0.5 rounded-full bg-[#046241]/10 text-[#046241] text-[11px] font-bold border border-[#046241]/20">
+            {locale === "zh" ? "默认目标窗口：执行日 +1 个月" : "Default Target: +1 Month Ahead"}
+          </span>
+        </div>
+
+        {/* Preset Filters (Multi-Select Dropdowns) */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <LifewoodMultiSelect
+            label={locale === "zh" ? "目标年份 (多选)" : "Target Year (Multi-Select)"}
+            placeholder={locale === "zh" ? "选择年份..." : "Select Year(s)..."}
+            options={YEAR_OPTIONS}
+            selected={selectedYears}
+            onChange={(val) => {
+              setSelectedYears(val);
+              setCurrentPage(1);
+            }}
+          />
+          <LifewoodMultiSelect
+            label={locale === "zh" ? "目标月份 (多选)" : "Target Month (Multi-Select)"}
+            placeholder={locale === "zh" ? "选择月份..." : "Select Month(s)..."}
+            options={MONTH_OPTIONS}
+            selected={selectedMonths}
+            onChange={(val) => {
+              setSelectedMonths(val);
+              setCurrentPage(1);
+            }}
+          />
+          <LifewoodMultiSelect
+            label={locale === "zh" ? "目标国家/地区 (多选)" : "Target Country (Multi-Select)"}
+            placeholder={locale === "zh" ? "选择国家/地区..." : "Select Country(ies)..."}
+            options={COUNTRY_OPTIONS}
+            selected={selectedCountries}
+            onChange={(val) => {
+              setSelectedCountries(val);
+              setCurrentPage(1);
+            }}
+            searchable={true}
           />
         </div>
 
-        {!loading ? (
-          <button
-            onClick={handleCrawl}
-            className="px-5 py-2.5 rounded-[8px] bg-[#FACC15] hover:bg-[#EAB308] text-[#133020] font-bold text-xs shadow-xs transition-all duration-180 flex items-center gap-2 shrink-0 cursor-pointer border border-[#EAB308]/60"
-          >
-            <Play className="w-3.5 h-3.5 fill-[#133020] text-[#133020]" />
-            <span>
-              {locale === "zh" ? "开始抓取" : "Start Scraping"}
-            </span>
-          </button>
-        ) : (
-          <button
-            onClick={handleStop}
-            className="px-5 py-2.5 rounded-[8px] bg-[#B91C1C] hover:bg-[#991B1B] text-white font-semibold text-xs shadow-xs transition-all duration-180 flex items-center gap-2 shrink-0 cursor-pointer animate-pulse"
-            title="Stop crawl and keep whatever events were already discovered"
-          >
-            <Square className="w-3.5 h-3.5 fill-white" />
-            <span>
-              {locale === "zh"
-                ? `停止并保留 (${events.length})`
-                : `Stop & keep (${events.length})`}
-            </span>
-          </button>
-        )}
+        {/* Optional Text Search & Scrape Action Button */}
+        <div className="pt-1 flex items-center gap-3 flex-wrap sm:flex-nowrap">
+          <div className="relative flex-1">
+            <input
+              type="text"
+              value={optionalPrompt}
+              onChange={(e) => setOptionalPrompt(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && !loading && handleCrawl()}
+              placeholder={
+                locale === "zh"
+                  ? "可选关键词提示（如：AI, Healthcare, IoT - 选填，留空则依据预设过滤器抓取）..."
+                  : "Optional keyword prompt (e.g. AI, Healthcare, IoT - strictly optional)..."
+              }
+              className="w-full bg-white border border-[#D8D2C8] rounded-xl px-3.5 py-2 text-xs text-[#133020] placeholder-[#888888] focus:outline-none focus:border-[#046241] focus:ring-1 focus:ring-[#046241] transition-all shadow-2xs"
+            />
+          </div>
+
+          {!loading ? (
+            <button
+              onClick={handleCrawl}
+              className="px-5 py-2.5 rounded-xl bg-[#FACC15] hover:bg-[#EAB308] text-[#133020] font-bold text-xs shadow-xs transition-all duration-180 flex items-center gap-2 shrink-0 cursor-pointer border border-[#EAB308]/60"
+            >
+              <Play className="w-3.5 h-3.5 fill-[#133020] text-[#133020]" />
+              <span>
+                {locale === "zh" ? "开始抓取" : "Start Scraping"}
+              </span>
+            </button>
+          ) : (
+            <button
+              onClick={handleStop}
+              className="px-5 py-2.5 rounded-xl bg-[#B91C1C] hover:bg-[#991B1B] text-white font-semibold text-xs shadow-xs transition-all duration-180 flex items-center gap-2 shrink-0 cursor-pointer animate-pulse"
+              title="Stop crawl and keep whatever events were already discovered"
+            >
+              <Square className="w-3.5 h-3.5 fill-white" />
+              <span>
+                {locale === "zh"
+                  ? `停止并保留 (${events.length})`
+                  : `Stop & keep (${events.length})`}
+              </span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Real-Time User Experience & Progress Stepper */}
@@ -664,7 +848,10 @@ export default function EventScraperDashboard() {
             {/* Filter Pills */}
             <div className="inline-flex rounded-lg border border-[#D8D2C8] bg-[#F9F7F7] p-0.5 text-xs">
               <button
-                onClick={() => setFilterMode("all")}
+                onClick={() => {
+                  setFilterMode("all");
+                  setCurrentPage(1);
+                }}
                 className={`px-2.5 py-1 rounded-md font-medium transition cursor-pointer ${
                   filterMode === "all"
                     ? "bg-[#133020] text-white shadow-2xs font-semibold"
@@ -674,7 +861,10 @@ export default function EventScraperDashboard() {
                 {locale === "zh" ? `全部展会 (${events.length})` : `All Events (${events.length})`}
               </button>
               <button
-                onClick={() => setFilterMode("unique")}
+                onClick={() => {
+                  setFilterMode("unique");
+                  setCurrentPage(1);
+                }}
                 className={`px-2.5 py-1 rounded-md font-medium transition cursor-pointer flex items-center gap-1 ${
                   filterMode === "unique"
                     ? "bg-[#046241] text-white shadow-2xs font-semibold"
@@ -687,7 +877,10 @@ export default function EventScraperDashboard() {
                 </span>
               </button>
               <button
-                onClick={() => setFilterMode("duplicates")}
+                onClick={() => {
+                  setFilterMode("duplicates");
+                  setCurrentPage(1);
+                }}
                 className={`px-2.5 py-1 rounded-md font-medium transition cursor-pointer flex items-center gap-1 ${
                   filterMode === "duplicates"
                     ? "bg-[#B87A00] text-white shadow-2xs font-semibold"
@@ -800,7 +993,7 @@ export default function EventScraperDashboard() {
                 </td>
               </tr>
             ) : (
-              displayedEvents.map((rawEvt, idx) => {
+              paginatedEvents.map((rawEvt, idx) => {
                 const e = localizeEvent(rawEvt, locale);
 
                 let blArray: string[] = [];
@@ -827,7 +1020,7 @@ export default function EventScraperDashboard() {
                     }`}
                   >
                     <td className="py-3 px-3.5 text-center font-semibold text-[#666666]">
-                      {idx + 1}
+                      {startIndex + idx + 1}
                     </td>
                     <td className="py-3 px-3.5">
                       <div className="flex items-start gap-1 flex-wrap">
@@ -962,6 +1155,83 @@ export default function EventScraperDashboard() {
             )}
           </tbody>
         </table>
+
+        {/* Table Pagination Controls */}
+        {displayedEvents.length > 0 && (
+          <div className="flex items-center justify-between flex-wrap gap-3 px-4 py-3 border-t border-[#D8D2C8] bg-[#F9F7F7] text-xs font-manrope">
+            <div className="flex items-center gap-2 text-[#666666]">
+              <span className="font-medium">
+                {locale === "zh"
+                  ? `显示第 ${startIndex + 1}–${Math.min(startIndex + pageSize, displayedEvents.length)} 场，共 ${displayedEvents.length} 场展会`
+                  : `Showing ${startIndex + 1}–${Math.min(startIndex + pageSize, displayedEvents.length)} of ${displayedEvents.length} events`}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {/* Page Size Selector */}
+              <div className="flex items-center gap-1.5 text-[#666666]">
+                <span className="text-[11px] font-medium">{locale === "zh" ? "每页显示：" : "Per page:"}</span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="bg-white border border-[#D8D2C8] rounded-lg px-2.5 py-1 text-xs font-bold text-[#133020] focus:outline-none focus:border-[#046241] cursor-pointer shadow-2xs"
+                >
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                </select>
+              </div>
+
+              {/* Navigation Controls */}
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(1)}
+                  className="p-1.5 rounded-lg border border-[#D8D2C8] bg-white text-[#133020] hover:bg-[#F0ECE1] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition shadow-2xs"
+                  title={locale === "zh" ? "首页" : "First Page"}
+                >
+                  <ChevronsLeft className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                  className="p-1.5 rounded-lg border border-[#D8D2C8] bg-white text-[#133020] hover:bg-[#F0ECE1] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition shadow-2xs"
+                  title={locale === "zh" ? "上一页" : "Previous Page"}
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                </button>
+
+                <span className="px-2.5 py-1 font-bold text-xs text-[#133020]">
+                  {locale === "zh" ? `第 ${currentPage} / ${totalPages} 页` : `Page ${currentPage} of ${totalPages}`}
+                </span>
+
+                <button
+                  type="button"
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                  className="p-1.5 rounded-lg border border-[#D8D2C8] bg-white text-[#133020] hover:bg-[#F0ECE1] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition shadow-2xs"
+                  title={locale === "zh" ? "下一页" : "Next Page"}
+                >
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(totalPages)}
+                  className="p-1.5 rounded-lg border border-[#D8D2C8] bg-white text-[#133020] hover:bg-[#F0ECE1] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition shadow-2xs"
+                  title={locale === "zh" ? "末页" : "Last Page"}
+                >
+                  <ChevronsRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
