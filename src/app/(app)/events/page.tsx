@@ -275,20 +275,9 @@ export default function EventsPage() {
 
           {/* Interactive Pagination Controls with Centered Navigation */}
           {pagination.totalPages > 1 && (
-            <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-manrope bg-white dark:bg-[#133020] p-4 rounded-xl border border-[#D8D2C8] dark:border-[#1E4830] shadow-2xs">
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-[#133020] dark:text-white">
-                  {locale === "zh"
-                    ? `显示本页 ${events.length} 条展会 (共 ${pagination.totalCount} 条)`
-                    : `Showing ${events.length} events on this page (${pagination.totalCount} total)`}
-                </span>
-                <span className="px-2 py-0.5 rounded bg-[#F9F7F7] dark:bg-[#1A3D2A] border border-[#D8D2C8] dark:border-[#235338] text-[10px] text-[#046241] dark:text-[#FFB347] font-bold">
-                  {locale === "zh" ? "每页 10 条" : "10 per page"}
-                </span>
-              </div>
-
+            <div className="mt-8 flex items-center justify-center gap-4 text-xs font-manrope bg-white dark:bg-[#133020] p-4 rounded-xl border border-[#D8D2C8] dark:border-[#1E4830] shadow-2xs">
               {/* Centered Prev / Input Page / Next Block */}
-              <div className="flex items-center justify-center gap-3 sm:mx-auto">
+              <div className="flex items-center justify-center gap-3">
                 <button
                   type="button"
                   disabled={pagination.page <= 1}
