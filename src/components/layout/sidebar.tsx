@@ -27,7 +27,7 @@ export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const { locale } = useLocaleStore();
 
-  const userRole = (session?.user as any)?.role || "USER";
+  const userRole = (session?.user as any)?.role || "INTERN";
   const userName = session?.user?.name || "User";
 
   const navItems = [
@@ -75,9 +75,9 @@ export function Sidebar() {
 
   const getRoleBadgeStyle = (role: string) => {
     switch (role) {
-      case "SUPERADMIN":
-        return "bg-[#FFB347] text-[#133020] font-bold";
       case "ADMIN":
+        return "bg-[#FFB347] text-[#133020] font-bold";
+      case "SUPERVISOR":
         return "bg-[#046241] text-white font-bold";
       default:
         return "bg-[#708E7C] text-white font-medium";
@@ -111,41 +111,27 @@ export function Sidebar() {
         )}
       </button>
 
-      {/* Top Header & Logo */}
+      {/* Top Header & Logo Placeholder */}
       <div>
-        <div className="py-2 px-3 flex flex-col items-center border-b border-[#133020]/10 dark:border-white/10 transition-colors">
-          {/* Dynamic Theme Logo */}
-          <div className="relative flex items-center justify-center w-full h-7">
-            {/* Light Mode Logo (Green Text) */}
+        <div className="py-5 px-3 flex flex-col items-center border-b border-[#133020]/10 dark:border-white/10 transition-colors">
+          <div className="relative flex items-center justify-center w-full h-6">
+            {/* Light Mode Logo */}
             <Image
-              src="/logo.png"
-              alt="Lifewood logo"
-              width={140}
-              height={28}
-              priority
+              src="/LifeScout Light Mode.png"
+              alt="LifeScout logo"
+              width={150}
+              height={20}
               className="object-contain dark:hidden"
             />
-
-            {/* Dark Mode Logo (White Text) */}
+            {/* Dark Mode Logo */}
             <Image
-              src="/Logo 2.png"
-              alt="Lifewood logo"
-              width={140}
-              height={28}
-              priority
+              src="/LifeScout Dark Mode.png"
+              alt="LifeScout logo"
+              width={150}
+              height={20}
               className="object-contain hidden dark:block"
             />
           </div>
-
-          {!collapsed && (
-            <div className="mt-2 text-center">
-              <p className="text-[9.5px] text-[#046241] dark:text-[#34D399] uppercase tracking-[0.18em] font-bold leading-none">
-                {locale === "en"
-                  ? "Exhibition Intelligence"
-                  : "全球展会智能平台"}
-              </p>
-            </div>
-          )}
         </div>
 
         {/* Navigation Items */}
@@ -198,60 +184,106 @@ export function Sidebar() {
         </nav>
       </div>
 
-      {/* Footer / User Profile & Role */}
-      <div className="p-3.5 border-t border-[#133020]/10 dark:border-white/10 bg-[#133020]/5 dark:bg-white/5">
+      {/* Powered By Lifewood PH */}
+      <div className="px-3.5 pb-3 pt-2 flex flex-col items-center gap-1.5">
         {!collapsed ? (
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5 overflow-hidden">
-              <div className="w-8 h-8 rounded-full bg-[#046241] flex items-center justify-center text-xs font-bold text-white shrink-0 shadow-sm border border-[#133020]/20 dark:border-white/20">
-                {userName.charAt(0).toUpperCase()}
-              </div>
+          <>
+            {/* User Profile & Role — now above the Lifewood logo, with card border */}
+            <div className="w-full mb-2 pb-3 border-b border-[#133020]/10 dark:border-white/10">
+              <div className="flex items-center justify-between px-1 py-1">
+                <div className="flex items-center gap-2.5 overflow-hidden">
+                  <div className="w-8 h-8 rounded-full bg-[#046241] flex items-center justify-center text-xs font-bold text-white shrink-0 shadow-sm border border-[#133020]/20 dark:border-white/20">
+                    {userName.charAt(0).toUpperCase()}
+                  </div>
 
-              <div className="truncate">
-                <p className="text-xs font-semibold text-[#133020] dark:text-white truncate">
-                  {userName}
-                </p>
+                  <div className="truncate">
+                    <p className="text-xs font-semibold text-[#133020] dark:text-white truncate">
+                      {userName}
+                    </p>
 
-                <span
-                  className={`inline-block px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wider mt-0.5 ${getRoleBadgeStyle(
-                    userRole,
-                  )}`}
+                    <span
+                      className={`inline-block px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wider mt-0.5 ${getRoleBadgeStyle(
+                        userRole,
+                      )}`}
+                    >
+                      {locale === "zh"
+                        ? userRole === "ADMIN"
+                          ? "管理员"
+                          : userRole === "SUPERVISOR"
+                            ? "主管"
+                            : "实习生"
+                        : userRole}
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => signOut({ callbackUrl: "/login" })}
+                  title={locale === "zh" ? "退出登录" : "Sign Out"}
+                  className="p-2 text-[#133020]/60 dark:text-white/60 hover:text-[#FFB347] hover:bg-[#133020]/5 dark:hover:bg-white/5 rounded-lg transition"
                 >
-                  {locale === "zh"
-                    ? userRole === "SUPERADMIN"
-                      ? "超级管理员"
-                      : userRole === "ADMIN"
-                        ? "管理员"
-                        : "普通用户"
-                    : userRole === "SUPERADMIN"
-                      ? "Superadmin"
-                      : userRole === "ADMIN"
-                        ? "Admin"
-                        : "User"}
-                </span>
+                  <LogOut className="w-4 h-4" />
+                </button>
               </div>
             </div>
 
-            <button
-              onClick={() => signOut({ callbackUrl: "/login" })}
-              title={locale === "zh" ? "退出登录" : "Sign Out"}
-              className="p-2 text-[#133020]/60 dark:text-white/60 hover:text-[#FFB347] hover:bg-[#133020]/5 dark:hover:bg-white/5 rounded-lg transition"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
+            <div className="relative flex items-center justify-center w-full h-6">
+              {/* Light Mode Logo */}
+              <Image
+                src="/logo.png"
+                alt="Lifewood logo"
+                width={100}
+                height={20}
+                className="object-contain dark:hidden"
+              />
+              {/* Dark Mode Logo */}
+              <Image
+                src="/Logo 2.png"
+                alt="Lifewood logo"
+                width={100}
+                height={20}
+                className="object-contain hidden dark:block"
+              />
+            </div>
+            <p className="text-[8.5px] text-[#133020]/50 dark:text-white/40 uppercase tracking-[0.15em] font-semibold">
+              Powered by Lifewood PH
+            </p>
+          </>
         ) : (
-          <button
-            onClick={() => signOut({ callbackUrl: "/login" })}
-            title={
-              locale === "zh"
-                ? `退出登录 (${userName})`
-                : `Sign Out (${userName})`
-            }
-            className="w-full flex justify-center p-2 text-[#133020]/60 dark:text-white/60 hover:text-[#FFB347] hover:bg-[#133020]/5 dark:hover:bg-white/5 rounded-lg transition"
-          >
-            <LogOut className="w-5 h-5" />
-          </button>
+          <>
+            <div className="w-full flex flex-col items-center gap-2 mb-2 pb-3 border-b border-[#133020]/10 dark:border-white/10">
+              <div className="w-8 h-8 rounded-full bg-[#046241] flex items-center justify-center text-xs font-bold text-white shrink-0 shadow-sm border border-[#133020]/20 dark:border-white/20">
+                {userName.charAt(0).toUpperCase()}
+              </div>
+              <button
+                onClick={() => signOut({ callbackUrl: "/login" })}
+                title={
+                  locale === "zh"
+                    ? `退出登录 (${userName})`
+                    : `Sign Out (${userName})`
+                }
+                className="p-2 text-[#133020]/60 dark:text-white/60 hover:text-[#FFB347] hover:bg-[#133020]/5 dark:hover:bg-white/5 rounded-lg transition"
+              >
+                <LogOut className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="relative flex items-center justify-center w-full h-6">
+              <Image
+                src="/logo.png"
+                alt="Lifewood logo"
+                width={40}
+                height={16}
+                className="object-contain dark:hidden"
+              />
+              <Image
+                src="/Logo 2.png"
+                alt="Lifewood logo"
+                width={40}
+                height={16}
+                className="object-contain hidden dark:block"
+              />
+            </div>
+          </>
         )}
       </div>
     </motion.aside>
